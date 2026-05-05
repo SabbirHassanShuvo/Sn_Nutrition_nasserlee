@@ -69,6 +69,7 @@ class User extends Authenticatable implements JWTSubject
         'name',
         'email',
         'role',
+        'google_id',
         'password',
     ];
 
@@ -102,5 +103,9 @@ class User extends Authenticatable implements JWTSubject
 
     public function profile(){
         return $this->hasOne(Profile::class);
+    }
+
+    public function partnerProfile(){
+        return $this->hasOne(PartnerProfile::class);
     }
 }
