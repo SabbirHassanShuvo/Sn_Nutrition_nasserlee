@@ -24,6 +24,12 @@ Route::group([ 'as'=>'backend.'], function () {
         Route::resource('faq', FaqController::class)->except(['show']);
     });
 
+    Route::post('product/status/{id}', [\App\Http\Controllers\Web\Backend\ProductController::class,'status'])->name('product.status');
+    Route::resource('product', \App\Http\Controllers\Web\Backend\ProductController::class)->except(['show']);
+
+    Route::post('category/status/{id}', [\App\Http\Controllers\Web\Backend\CategoryController::class,'status'])->name('category.status');
+    Route::resource('category', \App\Http\Controllers\Web\Backend\CategoryController::class)->except(['show']);
+
 
     Route::post('page/status/{id}', [PageController::class,'status'])->name('page.status');
     Route::resource('page', PageController::class)->except(['show']);

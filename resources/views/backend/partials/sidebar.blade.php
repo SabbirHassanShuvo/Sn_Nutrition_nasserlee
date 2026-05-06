@@ -50,6 +50,18 @@
                     </div>
                 </li>  --}}
                 <!-- end Dashboard Menu -->
+
+                <li class="nav-item">
+                    <a class="nav-link menu-link {{ request()->routeIs('backend.category.*') ? 'active' : '' }}" href="{{ route('backend.category.index') }}">
+                        <i class="ri-stack-line"></i> <span>Categories</span>
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link menu-link {{ request()->routeIs('backend.product.*') ? 'active' : '' }}" href="{{ route('backend.product.index') }}">
+                        <i class="ri-store-2-line"></i> <span>Products</span>
+                    </a>
+                </li>
                 <li class="nav-item">
                     <a class="nav-link menu-link {{getPageStatus('backend.feature.*', 'collapsed active')}}" href="#sidebarApps" data-bs-toggle="collapse" role="button" aria-expanded="false" aria-controls="sidebarApps">
                         <i class="ri-apps-2-line"></i> <span data-key="t-apps">Features</span>
