@@ -25,7 +25,7 @@ Route::group([ 'as'=>'backend.'], function () {
     });
 
     Route::post('product/status/{id}', [\App\Http\Controllers\Web\Backend\ProductController::class,'status'])->name('product.status');
-    Route::resource('product', \App\Http\Controllers\Web\Backend\ProductController::class)->except(['show']);
+    Route::resource('product', \App\Http\Controllers\Web\Backend\ProductController::class);
 
     Route::post('category/status/{id}', [\App\Http\Controllers\Web\Backend\CategoryController::class,'status'])->name('category.status');
     Route::resource('category', \App\Http\Controllers\Web\Backend\CategoryController::class)->except(['show']);
@@ -39,8 +39,15 @@ Route::group([ 'as'=>'backend.'], function () {
     
     Route::resource('system-user', SystemUserController::class)
     ->except(['show'])->middleware('permission:user_management');
+
+    Route::post('onboarding-option/status/{id}', [\App\Http\Controllers\Web\Backend\OnboardingOptionController::class,'status'])->name('onboarding-option.status');
+    Route::resource('onboarding-option', \App\Http\Controllers\Web\Backend\OnboardingOptionController::class)->except(['show']);
     
-    Route::resource('role', RoleController::class)->except(['show'])->middleware('permission:role_management');
+    Route::resource('role', RoleController::class)->middleware('permission:role_management');
+
+    Route::post('app-user/status/{id}', [\App\Http\Controllers\Web\Backend\AppUserController::class,'status'])->name('app-user.status');
+    Route::post('app-user/bulk-delete', [\App\Http\Controllers\Web\Backend\AppUserController::class,'bulkDelete'])->name('app-user.bulk-delete');
+    Route::resource('app-user', \App\Http\Controllers\Web\Backend\AppUserController::class);
 
     require_once __DIR__ .'/settings.php';
 });

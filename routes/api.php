@@ -12,15 +12,19 @@ Route::group([
 ], function ($router) {
     Route::post('/register', [AuthController::class, 'register']);
     Route::post('/login', [AuthController::class, 'login']);
-    Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth:api');
-    Route::post('/refresh', [AuthController::class, 'refresh'])->middleware('auth:api');
-    Route::post('/profile', [AuthController::class, 'profile'])->middleware('auth:api');
-
+    
+    Route::group(['middleware' => 'auth:api'], function () {
+        Route::post('/logout', [AuthController::class, 'logout']);
+        Route::post('/refresh', [AuthController::class, 'refresh']);
+        Route::get('/profile', [AuthController::class, 'profileRetrieval']);
+        Route::post('/profile/update', [AuthController::class, 'ProfileUpdate']);
+        Route::post('/password/change', [AuthController::class, 'ChangePassword']);
+    });
     
     Route::post('/password/forgot', [AuthController::class, 'forgotPassword']);
+    Route::post('/password/verify-otp', [AuthController::class, 'verifyOtp']);
     Route::post('/password/reset', [AuthController::class, 'resetPassword']);
     Route::post('/password/resend-otp', [AuthController::class, 'resendOtp']);
-    Route::post('/password/verify-otp', [AuthController::class, 'verifyOtp']);
 
     // Google Auth
     Route::post('/google', [GoogleAuthController::class, 'login']);
@@ -31,6 +35,8 @@ Route::group([
     'middleware' => 'api',
     'prefix' => 'partner/onboarding'
 ], function ($router) {
+    Route::get('/options/specialties', [PartnerOnboardingController::class, 'getSpecialties']);
+    Route::get('/options/certifications', [PartnerOnboardingController::class, 'getCertifications']);
     Route::post('/step-1', [PartnerOnboardingController::class, 'step1']);
     Route::post('/step-2', [PartnerOnboardingController::class, 'step2']);
     Route::post('/step-3', [PartnerOnboardingController::class, 'step3']);

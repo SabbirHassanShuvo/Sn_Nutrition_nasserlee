@@ -5,12 +5,46 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 
-class PartnerOnboardingController extends Controller
+use App\Models\OnboardingOption;
+
+use Illuminate\Routing\Controllers\HasMiddleware;
+use Illuminate\Routing\Controllers\Middleware;
+
+class PartnerOnboardingController extends Controller implements HasMiddleware
 {
-    public function __construct()
+    public static function middleware(): array
     {
-        // Only authenticated users can access onboarding
-        $this->middleware('auth:api');
+        return [
+            new Middleware('auth:api', except: ['getSpecialties', 'getCertifications']),
+        ];
+    }
+
+    /**
+     * Get onboarding specialties (Step 3).
+     */
+    public function getSpecialties()
+    {
+        $specialties = OnboardingOption::where('type', 'specialty')->where('status', true)->get();
+        
+        return response()->json([
+            'status' => true,
+            'message' => 'Specialties retrieved successfully',
+            'data' => $specialties
+        ]);
+    }
+
+    /**
+     * Get onboarding certifications (Step 4).
+     */
+    public function getCertifications()
+    {
+        $certifications = OnboardingOption::where('type', 'certification')->where('status', true)->get();
+        
+        return response()->json([
+            'status' => true,
+            'message' => 'Certifications retrieved successfully',
+            'data' => $certifications
+        ]);
     }
 
     /**

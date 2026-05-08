@@ -68,7 +68,7 @@
                 <!--end row-->
 
                 <!-- stat 1 -->
-                {{-- @include('backend.partials.stat-top') --}}
+                @include('backend.partials.stat-top')
                 <!-- end row-->
 
                 <!-- chart 2 : best & top sellers-->

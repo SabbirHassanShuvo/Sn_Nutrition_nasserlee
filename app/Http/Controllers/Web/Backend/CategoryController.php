@@ -25,7 +25,7 @@ class CategoryController extends Controller
                 })
                 ->addColumn('action', function ($category) {
                     return '
-                        <div class="d-flex gap-2">
+                        <div class="d-flex gap-2 justify-content-center">
                             <a href="'.route('backend.category.edit', $category->id).'" class="btn btn-soft-info btn-sm" data-bs-toggle="tooltip" title="Edit">
                                 <i class="mdi mdi-pencil fs-14"></i>
                             </a>

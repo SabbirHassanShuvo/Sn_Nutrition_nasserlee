@@ -46,7 +46,10 @@ class ProductController extends Controller
                 })
                 ->addColumn('action', function ($product) {
                     return '
-                        <div class="d-flex gap-2">
+                        <div class="d-flex gap-2 justify-content-center">
+                            <button type="button" onclick="viewProduct('.$product->id.')" class="btn btn-soft-primary btn-sm" data-bs-toggle="tooltip" title="View Details">
+                                <i class="mdi mdi-eye fs-14"></i>
+                            </button>
                             <a href="'.route('backend.product.edit', $product->id).'" class="btn btn-soft-info btn-sm" data-bs-toggle="tooltip" title="Edit">
                                 <i class="mdi mdi-pencil fs-14"></i>
                             </a>
@@ -60,6 +63,15 @@ class ProductController extends Controller
                 ->make(true);
         }
         return view("backend.layout.products.index");
+    }
+
+    public function show(Product $product)
+    {
+        $product->load(['category', 'features', 'ingredients', 'nutrition', 'usages']);
+        return response()->json([
+            'success' => true,
+            'data' => $product
+        ]);
     }
 
     public function create()

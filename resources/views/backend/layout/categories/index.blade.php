@@ -1,31 +1,34 @@
 @extends('backend.master')
-@section('title', 'All Categories')
+
+@section('title', 'Category Management')
+
 @section('content')
     <div class="row">
         <div class="col-lg-12">
-            <div class="card shadow-lg border-0" id="categoryList">
-                <div class="card-header border-0 bg-soft-primary py-3">
-                    <div class="d-flex align-items-center">
-                        <h5 class="card-title mb-0 flex-grow-1 fw-bold text-primary">Category Management</h5>
-                        <div class="flex-shrink-0">
-                            <a class="btn btn-primary add-btn shadow-sm" href="{{route('backend.category.create')}}">
-                                <i class="ri-add-line align-bottom me-1"></i> Add Category
-                            </a>
-                        </div>
+            <div class="card shadow-sm border-0" id="categoryList">
+                <div class="card-header border-0 bg-white py-3 d-flex align-items-center justify-content-between">
+                    <div>
+                        <h5 class="card-title mb-0 fw-bold text-primary">Categories</h5>
+                        <p class="text-muted mb-0 fs-12">Manage product classifications</p>
+                    </div>
+                    <div class="flex-shrink-0">
+                        <a class="btn btn-primary btn-sm add-btn shadow-sm d-flex align-items-center" href="{{route('backend.category.create')}}">
+                            <i class="ri-add-line align-bottom me-1"></i> Add New Category
+                        </a>
                     </div>
                 </div>
 
-                <div class="card-body">
-                    <div class="table-responsive table-card mb-4">
-                        <table class="table align-middle table-nowrap table-hover mb-0 data-table">
-                            <thead class="table-light text-muted">
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table align-middle table-nowrap table-hover mb-0 data-table custom-table">
+                            <thead class="table-light">
                                 <tr>
-                                    <th class="border-bottom-0">ID</th>
-                                    <th class="border-bottom-0">Image</th>
-                                    <th class="border-bottom-0 text-start">Name</th>
-                                    <th class="border-bottom-0">Slug</th>
-                                    <th class="border-bottom-0">Status</th>
-                                    <th class="border-bottom-0">Actions</th>
+                                    <th class="ps-3" style="width: 60px;">ID</th>
+                                    <th style="width: 80px;">Image</th>
+                                    <th class="text-start">Category Name</th>
+                                    <th>Slug</th>
+                                    <th class="text-center" style="width: 120px;">Status</th>
+                                    <th class="text-center" style="width: 150px;">Actions</th>
                                 </tr>
                             </thead>
                             <tbody class="list"></tbody>
@@ -39,22 +42,32 @@
 
 @push('styles-top')
     <style>
-        .dataTables_wrapper .dataTables_filter input {
-            border: 1px solid #ced4da;
-            padding: 0.375rem 0.75rem;
-            border-radius: 0.25rem;
-            outline: none;
-            transition: border-color .15s ease-in-out,box-shadow .15s ease-in-out;
+        .custom-table thead th {
+            font-size: 11px;
+            text-transform: uppercase;
+            font-weight: 700;
+            padding: 12px 15px;
+            letter-spacing: 0.5px;
         }
-        .dataTables_wrapper .dataTables_filter input:focus {
-            border-color: #86b7fe;
-            box-shadow: 0 0 0 0.25rem rgba(13,110,253,.25);
+        .custom-table tbody td {
+            padding: 10px 15px;
+            font-size: 13.5px;
+        }
+        .dataTables_wrapper .dataTables_filter input {
+            border: 1px solid #e9ebec;
+            padding: 0.4rem 0.8rem;
+            border-radius: 6px;
+            background-color: #f3f6f9;
         }
         .dataTables_wrapper .dataTables_length select {
-            border: 1px solid #ced4da;
-            padding: 0.375rem 1.75rem 0.375rem 0.75rem;
-            border-radius: 0.25rem;
+            border: 1px solid #e9ebec;
+            border-radius: 6px;
+            padding: 0.3rem 1.5rem 0.3rem 0.7rem;
         }
+        .btn-soft-info { background-color: rgba(41, 156, 219, 0.1); color: #299cdb; border: none; }
+        .btn-soft-danger { background-color: rgba(240, 101, 72, 0.1); color: #f06548; border: none; }
+        .btn-soft-info:hover { background-color: #299cdb; color: #fff; }
+        .btn-soft-danger:hover { background-color: #f06548; color: #fff; }
     </style>
 @endpush
 
@@ -66,15 +79,15 @@
                     processing: true,
                     serverSide: true,
                     responsive: { details: true },
-                    dom: '<"row mb-3"<"col-md-6"l><"col-md-6 d-flex justify-content-end"f>>rt<"row align-items-center mt-3"<"col-md-6"i><"col-md-6 d-flex justify-content-end"p>>',
+                    dom: '<"row mb-3 px-3 mt-3"<"col-md-6"l><"col-md-6 d-flex justify-content-end"f>>rt<"row align-items-center mt-3 px-3 pb-3"<"col-md-6"i><"col-md-6 d-flex justify-content-end"p>>',
                     ajax: "{{ route('backend.category.index') }}",
                     columns: [
-                        { data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable: false },
-                        { data: 'image', name: 'image', orderable: false, searchable: false },
+                        { data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable: false, className: 'ps-3 text-muted fw-medium' },
+                        { data: 'image', name: 'image', orderable: false, searchable: false, className: 'text-center' },
                         { data: 'name', name: 'name', className: 'text-start fw-medium' },
                         { data: 'slug', name: 'slug' },
-                        { data: 'status', name: 'status', orderable: false, searchable: false },
-                        { data: 'action', name: 'action', orderable: false, searchable: false }
+                        { data: 'status', name: 'status', orderable: false, searchable: false, className: 'text-center' },
+                        { data: 'action', name: 'action', orderable: false, searchable: false, className: 'text-center' }
                     ]
                 });
             });
@@ -85,10 +98,7 @@
             $.ajax({
                 type: "POST",
                 url: url.replace(':id', id),
-                data: {
-                    id: id,
-                    _token: "{{csrf_token()}}"
-                },
+                data: { id: id, _token: "{{csrf_token()}}" },
                 success: function (response) {
                     if (response.success) {
                         $('.data-table').DataTable().ajax.reload();

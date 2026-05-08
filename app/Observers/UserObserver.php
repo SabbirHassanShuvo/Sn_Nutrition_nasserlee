@@ -34,7 +34,11 @@ class UserObserver
         // Sync Spatie role with the users.role column
         if ($user->isDirty('role') || $user->wasRecentlyCreated) {
             if ($user->role) {
-                $user->syncRoles([$user->role]);
+                // Check if role exists before syncing to avoid RoleDoesNotExist exception
+                $roleExists = \Spatie\Permission\Models\Role::where('name', $user->role)->exists();
+                if ($roleExists) {
+                    $user->syncRoles([$user->role]);
+                }
             }
         }
     }

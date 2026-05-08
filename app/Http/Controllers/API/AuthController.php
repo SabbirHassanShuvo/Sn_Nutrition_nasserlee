@@ -10,6 +10,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 
+use Illuminate\Support\Str;
+use App\Mail\PasswordResetMail;
 use Illuminate\Support\Facades\Validator;
 use App\Http\Controllers\API\BaseController as BaseController;
 use App\Rules\PasswordRule;
@@ -29,9 +31,10 @@ class AuthController extends BaseController
 
         $validator = Validator::make($request->all(), [
             'name' => 'required',
-            'email' => 'required|email',
+            'email' => 'required|email|unique:users,email',
             'password' => 'required',
             'c_password' => 'required|same:password',
+            'role' => 'required|in:health_professional,user',
         ]);
      
         if($validator->fails()){
@@ -41,9 +44,12 @@ class AuthController extends BaseController
         $input = $request->all();
         $input['password'] = bcrypt($input['password']);
         $user = User::create($input);
+        
+        $token = auth('api')->login($user);
+        $success = $this->respondWithToken($token);
         $success['user'] =  $user;
    
-        return $this->sendResponse($success, 'User register successfully.');
+        return $this->sendResponse($success, 'User registered and logged in successfully.');
     }
   
   
@@ -107,33 +113,28 @@ class AuthController extends BaseController
             'email' => 'required|email',
         ]);
 
-        // Check if validation fails
         if ($validator->fails()) {
-            return jsonErrorResponse('Profile Update Validation failed', 422, $validator->errors()->toArray());
+            return jsonErrorResponse('Validation failed', 422, $validator->errors()->toArray());
         }
 
-        // Find user by email
         $user = User::where('email', $request->email)->first();
 
         if (!$user) {
             return jsonErrorResponse('No user found with this email address.', 404);
         }
 
-        // Generate a 6-digit reset token
+        // Generate a 6-digit OTP
         $otp = $this->otpService->generateOtp($request->email);
 
-        // Store the token and expiry time in the database
         $user->password_reset_otp = $otp;
         $user->password_reset_otp_is_verified = false;
-        $user->password_reset_otp_expiry = now()->addMinutes( $this->otpService->getTtl_min_time());  // Token expires after 5 minutes
+        $user->password_reset_otp_expiry = now()->addMinutes($this->otpService->getTtl_min_time()); 
         $user->save();
 
-        // Send token to the user's email (using Queue)
-        // Mail::to($user->email)->queue(new PasswordResetMail($token));
+        // Send OTP via email
         $this->otpService->sendOtpEmail($request->email, $otp);
 
-
-        return jsonResponse(true, 'Password reset OTP has been sent to your email.', 200, ['OTP' => $user->password_reset_token]);
+        return jsonResponse(true, 'Password reset OTP has been sent to your email.', 200, ['OTP' => $otp]);
     }
 
     public function verifyOtp(Request $request)
@@ -184,31 +185,29 @@ class AuthController extends BaseController
             'password' => ['required','string', 'confirmed', new PasswordRule],
         ]);
 
-        // Check if validation fails
         if ($validator->fails()) {
-            return jsonErrorResponse('Profile Update Validation failed', 422, $validator->errors()->toArray());
+            return jsonErrorResponse('Validation failed', 422, $validator->errors()->toArray());
         }
 
-        // Find the user by email
         $user = User::where('email', $request->email)->first();
 
         if (!$user) {
             return jsonErrorResponse('No user found with this email address.', 404);
         }
+
         if (!$user->password_reset_otp_is_verified) {
-            return jsonErrorResponse('Unauthorized attempt.', 401);
-        }
-        // Check if OTP verification is done
-        if ($user->password_reset_otp === null || $user->password_reset_otp_expiry < now()) {
-            $user->password_reset_otp_is_verified = false;
-            $user->save();
-            return jsonErrorResponse('OTP verification failed or expired. Please request a new OTP.', 400);
+            return jsonErrorResponse('Unauthorized attempt. Please verify OTP first.', 401);
         }
 
-        // If OTP is verified and not expired, proceed with password reset
-        $user->password = Hash::make($request->password); // Hash the new password
-        $user->password_reset_otp = null; // Clear the otp after password reset
-        $user->password_reset_otp_expiry = null; // Clear the expiry
+        if ($user->password_reset_otp_expiry < now()) {
+            $user->password_reset_otp_is_verified = false;
+            $user->save();
+            return jsonErrorResponse('OTP verification session has expired. Please request a new OTP.', 400);
+        }
+
+        $user->password = Hash::make($request->password);
+        $user->password_reset_otp = null;
+        $user->password_reset_otp_expiry = null;
         $user->password_reset_otp_is_verified = false;
         $user->save();
 
@@ -255,35 +254,25 @@ class AuthController extends BaseController
         try {
             $user = auth()->user();
 
-            // Latest assessment with both score and created_at
-            $latestAssessment = $user->assessments()->latest()->first();
-
-            $latestCreatedAt = $latestAssessment
-                ? Carbon::parse($latestAssessment->created_at)->format('d F Y, g:i A')
-                : null;
-
             return jsonResponse(
                 true,
                 'User profile retrieved successfully.',
                 200,
-                $user->only(['id', 'name', 'email', 'avatar', 'address', 'phone', 'role','is_premium']) + [
-                    'ossd_score'      => optional($latestAssessment)->score,
-                    'ossd_created_at' => $latestCreatedAt,
-                ]
+                $user->only(['id', 'name', 'email', 'avatar', 'address', 'phone', 'role', 'is_premium'])
             );
         } catch (Exception $e) {
-            return jsonErrorResponse('Failed to retrieve user profile.', 500);
+            return jsonErrorResponse('Failed to retrieve user profile.', 500, ['error' => $e->getMessage()]);
         }
     }
 
      public function ProfileUpdate(Request $request)
     {
-        $authenticatedUser = User::find(auth('api')->user()->id);
+        $user = User::with('profile')->find(auth('api')->user()->id);
+        $profile = $user->profile;
 
         // Validation
         $validator = Validator::make($request->all(), [
             'name' => 'sometimes|nullable|string|max:255',
-            'email' => 'sometimes|nullable|email|max:255|unique:users,email,' . $authenticatedUser->id,
             'avatar' => 'sometimes|nullable|image|mimes:jpg,jpeg,png,gif,svg,webp,ico,bmp,tiff|max:5120',
             'address' => 'sometimes|nullable|string|max:255'
         ]);
@@ -296,39 +285,41 @@ class AuthController extends BaseController
             );
         }
 
-        // Update only the fields that exist in request
+        // Update User name
         if ($request->filled('name')) {
-            $authenticatedUser->name = $request->name;
+            $user->name = $request->name;
+            $user->save();
         }
 
-        if ($request->filled('email')) {
-            $authenticatedUser->email = $request->email;
-        }
-
+        // Update Profile fields
         if ($request->filled('address')) {
-            $authenticatedUser->address = $request->address;
+            $profile->address = $request->address;
         }
 
         // Avatar handle
         if ($request->hasFile('avatar')) {
-            if ($authenticatedUser->avatar) {
-                fileDelete(public_path($authenticatedUser->avatar));
+            if ($profile->avatar) {
+                fileDelete($profile->avatar);
             }
 
             $avatar = $request->file('avatar');
-            $avatarName = $authenticatedUser->id . '_avatar';
-            $avatarPath = fileUpload($avatar, 'profile/avatar', $avatarName);
+            $avatarPath = fileUpload($avatar, 'profile/avatar');
 
-            $authenticatedUser->avatar = $avatarPath;
+            $profile->avatar = $avatarPath;
         }
 
-        $authenticatedUser->save();
+        $profile->save();
 
         return jsonResponse(
             true,
             'Profile updated successfully',
             200,
-            $authenticatedUser->only(['name', 'email', 'avatar', 'address'])
+            [
+                'name'    => $user->name,
+                'email'   => $user->email,
+                'avatar'  => $profile->avatar,
+                'address' => $profile->address
+            ]
         );
     }
 
@@ -362,6 +353,10 @@ class AuthController extends BaseController
         $user->password = Hash::make($request->password);
         $user->save();
 
-        return jsonResponse(true, 'Password changed successfully', 200, $user->only(['name', 'email', 'avatar']));
+        return jsonResponse(true, 'Password changed successfully', 200, [
+            'name'   => $user->name,
+            'email'  => $user->email,
+            'avatar' => optional($user->profile)->avatar,
+        ]);
     }
 }
