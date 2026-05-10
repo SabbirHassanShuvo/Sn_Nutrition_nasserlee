@@ -17,6 +17,8 @@ return Application::configure(basePath: dirname(__DIR__))
         then: function () {
             Route::middleware(['web', 'auth', 'role:super_admin|admin', 'session.validity.check' ])->prefix('admin')
                 ->group(base_path('routes/admin.php'));
+
+            Route::middleware('api')->prefix('api')->group(base_path('routes/sabbir.php'));
         }
     )
     ->withMiddleware(function (Middleware $middleware): void {

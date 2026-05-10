@@ -106,7 +106,12 @@
                                     </div>
                                     <div class="col-lg-6 mb-4">
                                         <label class="form-label fw-semibold">Brand</label>
-                                        <input type="text" name="brand" value="{{old('brand', @$product->brand)}}" class="form-control bg-light border-0 shadow-none" placeholder="Enter brand name">
+                                        <select name="brand_id" id="brand_id" class="form-control" data-choices data-choices-groups data-placeholder="Select Brand">
+                                            <option value="">Select Brand</option>
+                                            @foreach($brands as $brand)
+                                                <option value="{{ $brand->id }}" {{ old('brand_id', @$product->brand_id) == $brand->id ? 'selected' : '' }}>{{ $brand->name }}</option>
+                                            @endforeach
+                                        </select>
                                     </div>
                                     <div class="col-lg-6 mb-4">
                                         <label class="form-label fw-semibold">Category <span class="text-danger">*</span></label>
@@ -121,11 +126,15 @@
                                         <label class="form-label fw-semibold">Form (e.g. Capsule)</label>
                                         <input type="text" name="form" value="{{old('form', @$product->form)}}" class="form-control bg-light border-0 shadow-none" placeholder="e.g. Capsule, Powder">
                                     </div>
-                                    <div class="col-lg-6 mb-4">
-                                        <label class="form-label fw-semibold">Servings</label>
-                                        <input type="number" name="servings" value="{{old('servings', @$product->servings)}}" class="form-control bg-light border-0 shadow-none" placeholder="Number of servings">
-                                    </div>
-                                </div>
+                                     <div class="col-lg-6 mb-4">
+                                         <label class="form-label fw-semibold">Servings</label>
+                                         <input type="number" name="servings" value="{{old('servings', @$product->servings)}}" class="form-control bg-light border-0 shadow-none" placeholder="Number of servings">
+                                     </div>
+                                     <div class="col-lg-6 mb-4">
+                                         <label class="form-label fw-semibold">Quantity <span class="text-danger">*</span></label>
+                                         <input type="number" name="quantity" value="{{old('quantity', @$product->quantity ?? 0)}}" class="form-control bg-light border-0 shadow-none" placeholder="Total quantity in stock" required>
+                                     </div>
+                                 </div>
 
                                 <div class="mb-4">
                                     <label class="form-label fw-semibold">Short Description</label>
@@ -283,9 +292,13 @@
                             <input class="form-check-input" type="checkbox" role="switch" id="is_vegan" name="is_vegan" {{ old('is_vegan', @$product->is_vegan) ? 'checked' : '' }}>
                             <label class="form-check-label fw-medium ms-2" for="is_vegan">Is Vegan Product?</label>
                         </div>
-                        <div class="form-check form-switch form-switch-lg mb-0">
+                        <div class="form-check form-switch form-switch-lg mb-4">
                             <input class="form-check-input" type="checkbox" role="switch" id="in_stock" name="in_stock" {{ old('in_stock', @$product ? $product->in_stock : true) ? 'checked' : '' }}>
                             <label class="form-check-label fw-medium ms-2" for="in_stock">Currently In Stock?</label>
+                        </div>
+                        <div class="form-check form-switch form-switch-lg mb-0">
+                            <input class="form-check-input" type="checkbox" role="switch" id="is_popular" name="is_popular" {{ old('is_popular', @$product->is_popular) ? 'checked' : '' }}>
+                            <label class="form-check-label fw-medium ms-2" for="is_popular">Mark as Popular?</label>
                         </div>
                     </div>
                 </div>

@@ -13,11 +13,19 @@ class Product extends Model
         'is_vegan' => 'boolean',
         'in_stock' => 'boolean',
         'category_id' => 'integer',
+        'brand_id' => 'integer',
+        'quantity' => 'integer',
+        'is_popular' => 'boolean',
     ];
 
     public function category()
     {
         return $this->belongsTo(Category::class);
+    }
+
+    public function brandData()
+    {
+        return $this->belongsTo(Brand::class, 'brand_id');
     }
 
     public function features()

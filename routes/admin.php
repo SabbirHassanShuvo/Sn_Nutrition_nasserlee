@@ -30,6 +30,9 @@ Route::group([ 'as'=>'backend.'], function () {
     Route::post('category/status/{id}', [\App\Http\Controllers\Web\Backend\CategoryController::class,'status'])->name('category.status');
     Route::resource('category', \App\Http\Controllers\Web\Backend\CategoryController::class)->except(['show']);
 
+    Route::post('brand/status/{id}', [\App\Http\Controllers\Web\Backend\BrandController::class,'status'])->name('brand.status');
+    Route::resource('brand', \App\Http\Controllers\Web\Backend\BrandController::class)->except(['show']);
+
 
     Route::post('page/status/{id}', [PageController::class,'status'])->name('page.status');
     Route::resource('page', PageController::class)->except(['show']);

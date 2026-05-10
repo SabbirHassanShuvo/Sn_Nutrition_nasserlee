@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Web\Backend;
 
 use App\Models\Product;
 use App\Models\Category;
+use App\Models\Brand;
 use App\Models\ProductFeature;
 use App\Models\ProductIngredient;
 use App\Models\ProductUsage;
@@ -33,9 +34,14 @@ class ProductController extends Controller
                     return '<img src="' . $img . '" alt="' . $product->name . '" width="50" height="50" class="rounded">';
                 })
                 ->addColumn('name', function ($product) {
+                    $categoryName = $product->category ? $product->category->name : 'No Category';
+                    $brandName = 'No Brand';
+                    if ($product->brandData) {
+                        $brandName = $product->brandData->name . ' (<i class="ri-star-fill text-warning fs-11"></i> ' . $product->brandData->rating . ')';
+                    }
                     return '<div>
                         <h6 class="mb-0 fs-14">' . $product->name . '</h6>
-                        <p class="text-muted mb-0 fs-12">' . ($product->category ? $product->category->name : 'No Category') . '</p>
+                        <p class="text-muted mb-0 fs-12">' . $categoryName . ' | ' . $brandName . '</p>
                     </div>';
                 })
                 ->addColumn('price', function ($product) {
@@ -67,7 +73,7 @@ class ProductController extends Controller
 
     public function show(Product $product)
     {
-        $product->load(['category', 'features', 'ingredients', 'nutrition', 'usages']);
+        $product->load(['category', 'brandData', 'features', 'ingredients', 'nutrition', 'usages']);
         return response()->json([
             'success' => true,
             'data' => $product
@@ -77,7 +83,8 @@ class ProductController extends Controller
     public function create()
     {
         $categories = Category::where('status', 'active')->get();
-        return view("backend.layout.products.form", compact('categories'));
+        $brands = Brand::where('status', 'active')->get();
+        return view("backend.layout.products.form", compact('categories', 'brands'));
     }
 
     public function store(Request $request)
@@ -91,12 +98,13 @@ class ProductController extends Controller
         try {
             $data = $request->only([
                 'name', 'short_description', 'full_description', 'price', 'old_price',
-                'brand', 'category_id', 'form', 'servings'
+                'brand_id', 'category_id', 'form', 'servings', 'quantity'
             ]);
             
             $data['slug'] = makeSlug(Product::class, $request->name);
             $data['is_vegan'] = $request->has('is_vegan');
             $data['in_stock'] = $request->has('in_stock');
+            $data['is_popular'] = $request->has('is_popular');
             $data['status'] = 'active';
 
             if ($request->hasFile('main_image')) {
@@ -157,7 +165,8 @@ class ProductController extends Controller
     {
         $product->load(['features', 'ingredients', 'nutrition', 'usages']);
         $categories = Category::where('status', 'active')->get();
-        return view('backend.layout.products.form', compact('product', 'categories'));
+        $brands = Brand::where('status', 'active')->get();
+        return view('backend.layout.products.form', compact('product', 'categories', 'brands'));
     }
 
     public function update(Request $request, Product $product)
@@ -171,7 +180,7 @@ class ProductController extends Controller
         try {
             $data = $request->only([
                 'name', 'short_description', 'full_description', 'price', 'old_price',
-                'brand', 'category_id', 'form', 'servings'
+                'brand_id', 'category_id', 'form', 'servings', 'quantity'
             ]);
 
             if ($product->name != $request->name) {
@@ -180,6 +189,7 @@ class ProductController extends Controller
             
             $data['is_vegan'] = $request->has('is_vegan');
             $data['in_stock'] = $request->has('in_stock');
+            $data['is_popular'] = $request->has('is_popular');
 
             if ($request->hasFile('main_image')) {
                 $data['main_image'] = fileUpdate($request->file('main_image'), 'products', $product->main_image);
