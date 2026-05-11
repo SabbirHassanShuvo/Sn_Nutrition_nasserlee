@@ -2,10 +2,12 @@
 
 namespace App\Http\Controllers\Api\Frontend;
 
+use App\Http\Controllers\Api\BaseController;
+use App\Http\Controllers\Controller;
+use App\Models\Brand;
+use App\Models\Category;
 use App\Models\Product;
 use Illuminate\Http\Request;
-use App\Http\Controllers\Controller;
-use App\Http\Controllers\Api\BaseController;
 
 class HomeController extends BaseController
 {
@@ -18,28 +20,30 @@ class HomeController extends BaseController
             $products = Product::with(['category', 'brandData'])
                 ->where('status', 'active')
                 ->latest()
-                ->get()
-                ->map(function ($product) {
-                    return [
-                        'id' => $product->id,
-                        'name' => $product->name,
-                        'slug' => $product->slug,
-                        'short_description' => $product->short_description,
-                        'price' => (float) $product->price,
-                        'old_price' => $product->old_price ? (float) $product->old_price : null,
-                        'image' => $product->main_image ? asset($product->main_image) : null,
-                        'is_popular' => (bool) $product->is_popular,
-                        'in_stock' => (bool) $product->in_stock,
-                        'quantity' => (int) $product->quantity,
-                        'rating' => (float) $product->rating,
-                        'category' => $product->category ? $product->category->name : null,
-                        'brand' => $product->brandData ? [
-                            'name' => $product->brandData->name,
-                            'specialty' => $product->brandData->specialty,
-                            'rating' => (float) $product->brandData->rating,
-                        ] : null,
-                    ];
-                });
+                ->paginate(12);
+
+            $products->getCollection()->transform(function ($product) {
+                return [
+                    'id' => $product->id,
+                    'name' => $product->name,
+                    'slug' => $product->slug,
+                    'short_description' => $product->short_description,
+                    'price' => (float) $product->price,
+                    'old_price' => $product->old_price ? (float) $product->old_price : null,
+                    'image' => $product->main_image ? asset($product->main_image) : null,
+                    'is_popular' => (bool) $product->is_popular,
+                    'in_stock' => (bool) $product->in_stock,
+                    'quantity' => (int) $product->quantity,
+                    'rating' => (float) $product->rating,
+                    'category' => $product->category ? $product->category->name : null,
+                    'brand' => $product->brandData ? [
+                        'name' => $product->brandData->name,
+                        'specialty' => $product->brandData->specialty,
+                        'rating' => (float) $product->brandData->rating,
+                    ] : null,
+                ];
+            });
+
             return $this->sendResponse($products, 'Products fetched successfully.');
         } catch (\Exception $e) {
             return $this->sendError('Failed to fetch products.', $e->getMessage());
@@ -122,7 +126,9 @@ class HomeController extends BaseController
                     break;
             }
 
-            $products = $query->get()->map(function ($product) {
+            $products = $query->paginate(12);
+
+            $products->getCollection()->transform(function ($product) {
                 return [
                     'id' => $product->id,
                     'name' => $product->name,
@@ -156,8 +162,8 @@ class HomeController extends BaseController
     public function getFilters()
     {
         try {
-            $categories = \App\Models\Category::select('id', 'name')->where('status', 'active')->get();
-            $brands = \App\Models\Brand::select('id', 'name', 'specialty', 'rating')->where('status', 'active')->get();
+            $categories = Category::select('id', 'name')->where('status', 'active')->get();
+            $brands = Brand::select('id', 'name', 'specialty', 'rating')->where('status', 'active')->get();
 
             return $this->sendResponse([
                 'categories' => $categories,
@@ -169,6 +175,96 @@ class HomeController extends BaseController
             ], 'Filters fetched successfully.');
         } catch (\Exception $e) {
             return $this->sendError('Failed to fetch filters.', $e->getMessage());
+        }
+    }
+
+    /**
+     * Get detailed information for a single product by id.
+     */
+    public function getProductDetails($id)
+    {
+        try {
+            $product = Product::with([
+                'category', 
+                'brandData', 
+                'features', 
+                'ingredients', 
+                'usages', 
+                'nutrition'
+            ])
+            ->where('status', 'active')
+            ->where('id', $id)
+            ->first();
+
+            if (!$product) {
+                return $this->sendError('Product not found.', [], 404);
+            }
+
+            // Format gallery images
+            $galleryImages = [];
+            if (!empty($product->gallery_images) && is_array($product->gallery_images)) {
+                foreach ($product->gallery_images as $image) {
+                    $galleryImages[] = asset($image);
+                }
+            }
+
+            $productDetails = [
+                'id' => $product->id,
+                'name' => $product->name,
+                'slug' => $product->slug,
+                'short_description' => $product->short_description,
+                'full_description' => $product->full_description,
+                'price' => (float) $product->price,
+                'old_price' => $product->old_price ? (float) $product->old_price : null,
+                'image' => $product->main_image ? asset($product->main_image) : null,
+                'gallery_images' => $galleryImages,
+                'is_popular' => (bool) $product->is_popular,
+                'in_stock' => (bool) $product->in_stock,
+                'quantity' => (int) $product->quantity,
+                'rating' => (float) $product->rating,
+                'reviews_count' => (int) $product->reviews_count,
+                'form' => $product->form,
+                'servings' => $product->servings,
+                'is_vegan' => (bool) $product->is_vegan,
+                'category' => $product->category ? $product->category->name : null,
+                'brand' => $product->brandData ? [
+                    'name' => $product->brandData->name,
+                    'specialty' => $product->brandData->specialty,
+                    'rating' => (float) $product->brandData->rating,
+                ] : null,
+                'features' => $product->features->map(function ($feature) {
+                    return [
+                        'id' => $feature->id,
+                        'title' => $feature->title,
+                        'description' => $feature->description
+                    ];
+                }),
+                'ingredients' => $product->ingredients->map(function ($ingredient) {
+                    return [
+                        'id' => $ingredient->id,
+                        'title' => $ingredient->title,
+                        'description' => $ingredient->description
+                    ];
+                }),
+                'usages' => $product->usages->map(function ($usage) {
+                    return [
+                        'id' => $usage->id,
+                        'type' => $usage->type,
+                        'content' => $usage->content
+                    ];
+                }),
+                'nutrition' => $product->nutrition->map(function ($nutri) {
+                    return [
+                        'id' => $nutri->id,
+                        'name' => $nutri->name,
+                        'amount' => $nutri->amount
+                    ];
+                }),
+            ];
+
+            return $this->sendResponse($productDetails, 'Product details fetched successfully.');
+        } catch (\Exception $e) {
+            return $this->sendError('Failed to fetch product details.', $e->getMessage());
         }
     }
 }

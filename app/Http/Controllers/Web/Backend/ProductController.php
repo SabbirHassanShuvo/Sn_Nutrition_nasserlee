@@ -97,9 +97,15 @@ class ProductController extends Controller
         DB::beginTransaction();
         try {
             $data = $request->only([
-                'name', 'short_description', 'full_description', 'price', 'old_price',
+                'name', 'short_description', 'full_description', 'price', 'old_price', 'discount_percent',
                 'brand_id', 'category_id', 'form', 'servings', 'quantity'
             ]);
+
+            // Logic to calculate price based on discount_percent if provided
+            if ($request->filled('old_price') && $request->filled('discount_percent')) {
+                $data['price'] = $request->old_price - ($request->old_price * $request->discount_percent / 100);
+            }
+
             
             $data['slug'] = makeSlug(Product::class, $request->name);
             $data['is_vegan'] = $request->has('is_vegan');
@@ -179,9 +185,15 @@ class ProductController extends Controller
         DB::beginTransaction();
         try {
             $data = $request->only([
-                'name', 'short_description', 'full_description', 'price', 'old_price',
+                'name', 'short_description', 'full_description', 'price', 'old_price', 'discount_percent',
                 'brand_id', 'category_id', 'form', 'servings', 'quantity'
             ]);
+
+            // Logic to calculate price based on discount_percent if provided
+            if ($request->filled('old_price') && $request->filled('discount_percent')) {
+                $data['price'] = $request->old_price - ($request->old_price * $request->discount_percent / 100);
+            }
+
 
             if ($product->name != $request->name) {
                 $data['slug'] = makeSlug(Product::class, $request->name);

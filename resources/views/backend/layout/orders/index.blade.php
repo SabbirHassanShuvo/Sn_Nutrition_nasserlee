@@ -1,0 +1,289 @@
+@extends('backend.master')
+
+@section('title', 'Order Management')
+
+@section('content')
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="card shadow-sm border-0">
+                <div class="card-header border-0 bg-white py-3 d-flex align-items-center justify-content-between">
+                    <div>
+                        <h5 class="card-title mb-0 fw-bold text-primary">Order Management</h5>
+                        <p class="text-muted mb-0 fs-12">View and manage customer orders and payments</p>
+                    </div>
+                </div>
+
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table align-middle table-nowrap table-hover mb-0 data-table custom-table">
+                            <thead class="table-light">
+                                <tr>
+                                    <th class="ps-3" style="width: 60px;">ID</th>
+                                    <th>Order Number</th>
+                                    <th>Customer</th>
+                                    <th>Amount</th>
+                                    <th>Payment</th>
+                                    <th class="text-center">Status</th>
+                                    <th class="text-center" style="width: 150px;">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody class="list"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Order Details Modal -->
+    <div class="modal fade" id="orderViewModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content border-0 shadow-lg">
+                <div class="modal-header bg-primary py-3">
+                    <h5 class="modal-title text-white fw-bold">Order Details: <span id="modalOrderNumber"></span></h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <h6 class="text-muted text-uppercase fw-semibold mb-2 fs-11">Customer Information</h6>
+                            <p class="mb-1 fw-bold" id="modalCustomerName"></p>
+                            <p class="mb-1 text-muted" id="modalCustomerEmail"></p>
+                            <p class="mb-0 text-muted" id="modalCustomerPhone"></p>
+                        </div>
+                        <div class="col-md-6">
+                            <h6 class="text-muted text-uppercase fw-semibold mb-2 fs-11">Shipping Address</h6>
+                            <p class="mb-0 text-muted" id="modalShippingAddress"></p>
+                        </div>
+                    </div>
+
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <h6 class="text-muted text-uppercase fw-semibold mb-2 fs-11">Delivery Method</h6>
+                            <span class="badge bg-soft-primary text-primary fs-12" id="modalDeliveryMethod"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <h6 class="text-muted text-uppercase fw-semibold mb-2 fs-11">Preferred Delivery Date</h6>
+                            <p class="mb-0 fw-medium" id="modalPreferredDate"></p>
+                        </div>
+                    </div>
+
+                    <div class="row mb-4">
+                        <div class="col-md-4">
+                            <h6 class="text-muted text-uppercase fw-semibold mb-2 fs-11">Order Status</h6>
+                            <select class="form-select form-select-sm" id="orderStatusUpdate">
+                                <option value="pending">Pending</option>
+                                <option value="processing">Processing</option>
+                                <option value="shipping">Shipping</option>
+                                <option value="delivered">Delivered</option>
+                                <option value="cancelled">Cancelled</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <h6 class="text-muted text-uppercase fw-semibold mb-2 fs-11">Payment Method</h6>
+                            <span class="badge bg-soft-info text-info fs-12" id="modalPaymentMethod"></span>
+                        </div>
+                        <div class="col-md-4 text-end">
+                            <h6 class="text-muted text-uppercase fw-semibold mb-2 fs-11">Total Amount</h6>
+                            <h5 class="text-primary fw-bold" id="modalOrderTotal"></h5>
+                        </div>
+                    </div>
+
+                    <h6 class="text-muted text-uppercase fw-semibold mb-3 fs-11">Order Items</h6>
+                    <div class="table-responsive mb-4">
+                        <table class="table table-sm align-middle table-borderless">
+                            <thead class="table-light fs-11">
+                                <tr>
+                                    <th>Product</th>
+                                    <th class="text-center">Price</th>
+                                    <th class="text-center">Qty</th>
+                                    <th class="text-end">Total</th>
+                                </tr>
+                            </thead>
+                            <tbody id="modalOrderItems"></tbody>
+                        </table>
+                    </div>
+
+                    <div id="bankTransferSection" style="display: none;">
+                        <div class="border-top pt-4">
+                            <h6 class="text-muted text-uppercase fw-semibold mb-3 fs-11">Bank Transfer Receipt</h6>
+                            <div class="row align-items-center">
+                                <div class="col-md-4 text-center">
+                                    <a href="" id="modalReceiptLink" target="_blank">
+                                        <img id="modalReceiptImage" src="" class="img-fluid rounded border p-1" style="max-height: 150px;">
+                                    </a>
+                                </div>
+                                <div class="col-md-8">
+                                    <div class="bg-light p-3 rounded">
+                                        <p class="mb-1 fs-13"><strong>Sender:</strong> <span id="modalSenderName"></span></p>
+                                        <p class="mb-1 fs-13"><strong>Bank:</strong> <span id="modalSenderBank"></span></p>
+                                        <p class="mb-1 fs-13"><strong>Last 4 Digits:</strong> <span id="modalAccountDigits"></span></p>
+                                        <p class="mb-3 fs-13"><strong>Payment Status:</strong> <span id="modalTransferStatus" class="badge"></span></p>
+                                        
+                                        <div id="paymentActionBtns" class="d-flex gap-2">
+                                            <button type="button" onclick="verifyPayment('approved')" class="btn btn-success btn-sm">Approve Payment</button>
+                                            <button type="button" onclick="verifyPayment('rejected')" class="btn btn-danger btn-sm">Reject</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer bg-light border-0 py-2">
+                    <button type="button" class="btn btn-ghost-secondary btn-sm" data-bs-dismiss="modal">Close</button>
+                    <button type="button" onclick="updateOrderStatus()" class="btn btn-primary btn-sm px-3">Update Order</button>
+                </div>
+            </div>
+        </div>
+    </div>
+@endsection
+
+@push('styles-top')
+    <style>
+        .custom-table thead th { font-size: 11px; text-transform: uppercase; font-weight: 700; padding: 12px 15px; letter-spacing: 0.5px; }
+        .custom-table tbody td { padding: 10px 15px; font-size: 13.5px; }
+        .btn-soft-primary { background-color: rgba(64, 81, 137, 0.1); color: #405189; border: none; }
+        .btn-soft-danger { background-color: rgba(240, 101, 72, 0.1); color: #f06548; border: none; }
+        .btn-soft-primary:hover { background-color: #405189; color: #fff; }
+        .btn-soft-danger:hover { background-color: #f06548; color: #fff; }
+    </style>
+@endpush
+
+@push('scripts-bottom')
+    <script>
+        var currentOrderId = null;
+
+        (function ($) {
+            $(function () {
+                $('.data-table').DataTable({
+                    processing: true,
+                    serverSide: true,
+                    ajax: "{{ route('backend.order.index') }}",
+                    columns: [
+                        { data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable: false },
+                        { data: 'order_number', name: 'order_number' },
+                        { data: 'customer', name: 'customer' },
+                        { data: 'amount', name: 'amount' },
+                        { data: 'payment', name: 'payment' },
+                        { data: 'status', name: 'status', className: 'text-center' },
+                        { data: 'action', name: 'action', orderable: false, searchable: false, className: 'text-center' }
+                    ]
+                });
+            });
+        })(jQuery);
+
+        function viewOrder(id) {
+            currentOrderId = id;
+            let url = "{{ route('backend.order.show', ':id') }}";
+            $.ajax({
+                type: "GET",
+                url: url.replace(':id', id),
+                success: function (response) {
+                    if (response.success) {
+                        let order = response.data;
+                        $('#modalOrderNumber').text(order.order_number);
+                        $('#modalCustomerName').text(order.full_name || (order.user ? order.user.name : 'Guest'));
+                        $('#modalCustomerEmail').text(order.email);
+                        $('#modalCustomerPhone').text(order.phone || '-');
+                        $('#modalShippingAddress').html(`${order.address}<br>${order.city}, ${order.postal_code}<br>${order.country}`);
+                        $('#modalDeliveryMethod').text(order.delivery_method ? order.delivery_method.toUpperCase() : 'STANDARD');
+                        $('#modalPreferredDate').text(order.preferred_delivery_date || 'None');
+                        $('#modalOrderTotal').text(parseFloat(order.total).toFixed(2) + ' MAD');
+                        $('#orderStatusUpdate').val(order.status);
+                        
+                        let methodText = order.payment_method.toUpperCase().replace('_', ' ');
+                        $('#modalPaymentMethod').text(methodText);
+
+                        // Items
+                        let itemsHtml = '';
+                        order.items.forEach(item => {
+                            itemsHtml += `<tr>
+                                <td>${item.product ? item.product.name : 'Unknown Product'}</td>
+                                <td class="text-center">${parseFloat(item.price).toFixed(2)}</td>
+                                <td class="text-center">${item.quantity}</td>
+                                <td class="text-end fw-bold">${(item.price * item.quantity).toFixed(2)}</td>
+                            </tr>`;
+                        });
+                        $('#modalOrderItems').html(itemsHtml);
+
+                        // Bank Transfer
+                        if (order.payment_method === 'bank_transfer' && order.bank_transfer) {
+                            let bt = order.bank_transfer;
+                            $('#bankTransferSection').show();
+                            $('#modalSenderName').text(bt.sender_full_name);
+                            $('#modalSenderBank').text(bt.sender_bank);
+                            $('#modalAccountDigits').text(bt.account_last_4);
+                            
+                            let receiptUrl = "{{ asset('') }}" + bt.receipt_image;
+                            $('#modalReceiptImage').attr('src', receiptUrl);
+                            $('#modalReceiptLink').attr('href', receiptUrl);
+
+                            let statusClass = bt.status === 'approved' ? 'bg-success' : (bt.status === 'rejected' ? 'bg-danger' : 'bg-warning');
+                            $('#modalTransferStatus').text(bt.status.toUpperCase()).attr('class', 'badge ' + statusClass);
+                            
+                            if (bt.status === 'pending') {
+                                $('#paymentActionBtns').show();
+                            } else {
+                                $('#paymentActionBtns').hide();
+                            }
+                        } else {
+                            $('#bankTransferSection').hide();
+                        }
+
+                        $('#orderViewModal').modal('show');
+                    }
+                }
+            });
+        }
+
+        function updateOrderStatus() {
+            let status = $('#orderStatusUpdate').val();
+            let url = "{{ route('backend.order.status', ':id') }}";
+            $.ajax({
+                type: "POST",
+                url: url.replace(':id', currentOrderId),
+                data: { _token: "{{ csrf_token() }}", status: status },
+                success: function (response) {
+                    if (response.success) {
+                        $('#orderViewModal').modal('hide');
+                        $('.data-table').DataTable().ajax.reload();
+                        toastr.success(response.message);
+                    }
+                }
+            });
+        }
+
+        function verifyPayment(status) {
+            let url = "{{ route('backend.order.verify-payment', ':id') }}";
+            $.ajax({
+                type: "POST",
+                url: url.replace(':id', currentOrderId),
+                data: { _token: "{{ csrf_token() }}", status: status },
+                success: function (response) {
+                    if (response.success) {
+                        toastr.success(response.message);
+                        viewOrder(currentOrderId); // Refresh modal
+                        $('.data-table').DataTable().ajax.reload();
+                    }
+                }
+            });
+        }
+
+        function deleteData(url) {
+            if (confirm('Are you sure you want to delete this order?')) {
+                $.ajax({
+                    url: url,
+                    type: 'DELETE',
+                    data: { _token: "{{ csrf_token() }}" },
+                    success: function (response) {
+                        if (response.success) {
+                            $('.data-table').DataTable().ajax.reload();
+                            toastr.success(response.message);
+                        }
+                    }
+                });
+            }
+        }
+    </script>
+@endpush

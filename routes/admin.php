@@ -52,5 +52,16 @@ Route::group([ 'as'=>'backend.'], function () {
     Route::post('app-user/bulk-delete', [\App\Http\Controllers\Web\Backend\AppUserController::class,'bulkDelete'])->name('app-user.bulk-delete');
     Route::resource('app-user', \App\Http\Controllers\Web\Backend\AppUserController::class);
 
+    // Orders
+    Route::post('order/status/{id}', [\App\Http\Controllers\Web\Backend\OrderController::class,'updateStatus'])->name('order.status');
+    Route::post('order/verify-payment/{id}', [\App\Http\Controllers\Web\Backend\OrderController::class,'verifyPayment'])->name('order.verify-payment');
+    Route::resource('order', \App\Http\Controllers\Web\Backend\OrderController::class);
+
+    // Promo Codes
+    Route::post('promo-code/status/{id}', [\App\Http\Controllers\Web\Backend\PromoCodeController::class,'status'])->name('promo-code.status');
+    Route::resource('promo-code', \App\Http\Controllers\Web\Backend\PromoCodeController::class);
+
+
+
     require_once __DIR__ .'/settings.php';
 });

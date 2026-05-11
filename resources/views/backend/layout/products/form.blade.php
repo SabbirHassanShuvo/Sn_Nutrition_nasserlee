@@ -90,18 +90,25 @@
                                     <input type="text" name="name" value="{{old('name', @$product->name)}}" class="form-control form-control-lg bg-light border-0 shadow-none" placeholder="Enter product name" required>
                                 </div>
                                 <div class="row">
-                                    <div class="col-lg-6 mb-4">
-                                        <label class="form-label fw-semibold">Price (MAD) <span class="text-danger">*</span></label>
-                                        <div class="input-group">
-                                            <span class="input-group-text border-0 bg-light">MAD</span>
-                                            <input type="number" step="0.01" name="price" value="{{old('price', @$product->price)}}" class="form-control bg-light border-0 shadow-none" placeholder="0.00" required>
-                                        </div>
-                                    </div>
-                                    <div class="col-lg-6 mb-4">
+                                    <div class="col-lg-4 mb-4">
                                         <label class="form-label fw-semibold">Old Price (MAD)</label>
                                         <div class="input-group">
                                             <span class="input-group-text border-0 bg-light">MAD</span>
-                                            <input type="number" step="0.01" name="old_price" value="{{old('old_price', @$product->old_price)}}" class="form-control bg-light border-0 shadow-none" placeholder="0.00">
+                                            <input type="number" step="0.01" id="old_price" name="old_price" value="{{old('old_price', @$product->old_price)}}" class="form-control bg-light border-0 shadow-none" placeholder="0.00">
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-4 mb-4">
+                                        <label class="form-label fw-semibold">Discount (%)</label>
+                                        <div class="input-group">
+                                            <span class="input-group-text border-0 bg-light">%</span>
+                                            <input type="number" step="0.01" id="discount_percent" name="discount_percent" value="{{old('discount_percent', @$product->discount_percent)}}" class="form-control bg-light border-0 shadow-none" placeholder="0" min="0" max="100">
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-4 mb-4">
+                                        <label class="form-label fw-semibold">Selling Price (MAD) <span class="text-danger">*</span></label>
+                                        <div class="input-group">
+                                            <span class="input-group-text border-0 bg-light">MAD</span>
+                                            <input type="number" step="0.01" id="price" name="price" value="{{old('price', @$product->price)}}" class="form-control bg-light border-0 shadow-none" placeholder="0.00" required>
                                         </div>
                                     </div>
                                     <div class="col-lg-6 mb-4">
@@ -341,6 +348,17 @@
                     $(this).closest('.row').remove();
                 } else {
                     toastr.warning("At least one row is required.");
+                }
+            });
+
+            // Auto-calculate price
+            $('#old_price, #discount_percent').on('input', function() {
+                let oldPrice = parseFloat($('#old_price').val()) || 0;
+                let discount = parseFloat($('#discount_percent').val()) || 0;
+                
+                if (oldPrice > 0 && discount >= 0) {
+                    let sellingPrice = oldPrice - (oldPrice * discount / 100);
+                    $('#price').val(sellingPrice.toFixed(2));
                 }
             });
         });

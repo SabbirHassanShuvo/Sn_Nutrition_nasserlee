@@ -111,6 +111,20 @@
                 </li>
 
                 <li class="nav-item">
+                    <a class="nav-link menu-link {{ request()->routeIs('backend.order.*') ? 'active' : '' }}"
+                        href="{{ route('backend.order.index') }}">
+                        <i class="ri-shopping-cart-2-line"></i> <span>Orders</span>
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link menu-link {{ request()->routeIs('backend.promo-code.*') ? 'active' : '' }}"
+                        href="{{ route('backend.promo-code.index') }}">
+                        <i class="ri-ticket-line"></i> <span>Promo Codes</span>
+                    </a>
+                </li>
+
+                <li class="nav-item">
                     <a class="nav-link menu-link {{ request()->routeIs('backend.onboarding-option.*') ? 'active' : '' }}"
                         href="{{ route('backend.onboarding-option.index') }}">
                         <i class="ri-user-settings-line"></i> <span>Onboarding Options</span>

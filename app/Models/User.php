@@ -108,4 +108,9 @@ class User extends Authenticatable implements JWTSubject
     public function partnerProfile(){
         return $this->hasOne(PartnerProfile::class);
     }
+
+    public function wishlists()
+    {
+        return $this->hasMany(Wishlist::class);
+    }
 }
