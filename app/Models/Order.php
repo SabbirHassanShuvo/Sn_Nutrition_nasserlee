@@ -20,6 +20,6 @@ class Order extends Model
 
     public function bankTransfer()
     {
-        return $this->hasOne(BankTransfer::class);
+        return $this->belongsTo(BankTransfer::class, 'bank_transfer_id');
     }
 }

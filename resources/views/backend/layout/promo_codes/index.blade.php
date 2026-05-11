@@ -28,6 +28,7 @@
                                     <th>Discount (%)</th>
                                     <th>Expiry</th>
                                     <th>Limit/Used</th>
+                                    <th>Per User Limit</th>
                                     <th class="text-center">Status</th>
                                     <th class="text-center" style="width: 150px;">Actions</th>
                                 </tr>
@@ -61,12 +62,16 @@
                             <input type="number" class="form-control" id="discount_percent" name="discount_percent" placeholder="e.g. 15" required step="0.01" min="0" max="100">
                         </div>
                         <div class="mb-3">
-                            <label for="expiry_date" class="form-label">Expiry Date</label>
-                            <input type="date" class="form-control" id="expiry_date" name="expiry_date">
+                            <label for="expiry_date" class="form-label">Expiry Date & Time</label>
+                            <input type="datetime-local" class="form-control" id="expiry_date" name="expiry_date">
                         </div>
                         <div class="mb-3">
-                            <label for="usage_limit" class="form-label">Usage Limit</label>
+                            <label for="usage_limit" class="form-label">Total Usage Limit</label>
                             <input type="number" class="form-control" id="usage_limit" name="usage_limit" placeholder="Empty for unlimited">
+                        </div>
+                        <div class="mb-3">
+                            <label for="per_user_limit" class="form-label">Per User Usage Limit</label>
+                            <input type="number" class="form-control" id="per_user_limit" name="per_user_limit" placeholder="Empty for unlimited">
                         </div>
                     </div>
                     <div class="modal-footer bg-light border-0 py-2">
@@ -98,10 +103,17 @@
                         { data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable: false },
                         { data: 'code', name: 'code', className: 'fw-bold text-primary' },
                         { data: 'discount_percent', name: 'discount_percent', render: function(data) { return data + '%'; } },
-                        { data: 'expiry_date', name: 'expiry_date', render: function(data) { return data ? data : '<span class="text-muted">No Expiry</span>'; } },
+                        { data: 'expiry_date', name: 'expiry_date', render: function(data) { 
+                            if (!data) return '<span class="text-muted">No Expiry</span>';
+                            let date = new Date(data);
+                            return date.toLocaleString();
+                        } },
                         { data: 'usage_limit', name: 'usage_limit', render: function(data, type, row) { 
                             let limit = data ? data : '∞';
                             return row.used_count + ' / ' + limit;
+                        } },
+                        { data: 'per_user_limit', name: 'per_user_limit', render: function(data) { 
+                            return data ? data : '∞';
                         } },
                         { data: 'status', name: 'status', orderable: false, searchable: false, className: 'text-center' },
                         { data: 'action', name: 'action', orderable: false, searchable: false, className: 'text-center' }
@@ -151,8 +163,18 @@
                     $('#promo_id').val(data.id);
                     $('#code').val(data.code);
                     $('#discount_percent').val(data.discount_percent);
-                    $('#expiry_date').val(data.expiry_date);
+                    if (data.expiry_date) {
+                        let expiryDate = new Date(data.expiry_date);
+                        // Format to YYYY-MM-DDTHH:MM
+                        let formattedDate = expiryDate.getFullYear() + '-' + 
+                            String(expiryDate.getMonth() + 1).padStart(2, '0') + '-' + 
+                            String(expiryDate.getDate()).padStart(2, '0') + 'T' + 
+                            String(expiryDate.getHours()).padStart(2, '0') + ':' + 
+                            String(expiryDate.getMinutes()).padStart(2, '0');
+                        $('#expiry_date').val(formattedDate);
+                    }
                     $('#usage_limit').val(data.usage_limit);
+                    $('#per_user_limit').val(data.per_user_limit);
                     $('#modalTitle').text('Edit Promo Code');
                     $('#promoCodeModal').modal('show');
                 }

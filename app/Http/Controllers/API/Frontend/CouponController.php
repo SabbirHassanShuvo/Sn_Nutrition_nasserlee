@@ -20,13 +20,14 @@ class CouponController extends BaseController
         ]);
 
         try {
+            $user = Auth::user();
             $promo = PromoCode::where('code', $request->code)->first();
 
-            if (!$promo || !$promo->isValid()) {
-                return $this->sendError('Invalid or expired promo code.', [], 422);
+            if (!$promo || !$promo->isValid($user->id)) {
+                return $this->sendError('Invalid or expired promo code, or you have reached the usage limit.', [], 422);
             }
 
-            $user = Auth::user();
+            $user->update(['applied_promo_code' => $promo->code]);
             $cartItems = Cart::with('product')->where('user_id', $user->id)->get();
 
             if ($cartItems->isEmpty()) {
@@ -43,12 +44,26 @@ class CouponController extends BaseController
             $total = ($subtotal - $discountAmount) + $delivery;
 
             return $this->sendResponse([
-                'promo_code' => $promo->code,
-                'discount_percent' => (float)$promo->discount_percent,
-                'discount_amount' => (float)$discountAmount,
-                'subtotal' => (float)$subtotal,
-                'delivery' => (float)$delivery,
-                'total' => (float)$total
+                'items' => $cartItems->map(function ($item) {
+                    $product = $item->product;
+                    return [
+                        'cart_id' => $item->id,
+                        'product_id' => $product->id,
+                        'name' => $product->name,
+                        'price' => (float) $product->price,
+                        'quantity' => (int) $item->quantity,
+                        'total_price' => (float) ($product->price * $item->quantity),
+                        'image' => $product->main_image ? asset($product->main_image) : null,
+                    ];
+                }),
+                'summary' => [
+                    'subtotal' => (float) $subtotal,
+                    'delivery' => (float) $delivery,
+                    'discount' => (float) $discountAmount,
+                    'total' => (float) $total,
+                    'promo_code' => $promo->code,
+                    'discount_percent' => (float) $promo->discount_percent,
+                ]
             ], 'Promo code applied successfully.');
         } catch (\Exception $e) {
             return $this->sendError('Failed to apply promo code.', $e->getMessage());

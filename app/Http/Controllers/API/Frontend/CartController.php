@@ -11,46 +11,72 @@ use Illuminate\Support\Facades\Auth;
 class CartController extends BaseController
 {
     /**
-     * Get the current user's cart items.
+     * Get the current user's cart items and summary.
      */
     public function index()
     {
         try {
-            $user = Auth::user();
-            $cartItems = Cart::with(['product.category', 'product.brandData'])
-                ->where('user_id', $user->id)
-                ->get()
-                ->map(function ($item) {
-                    $product = $item->product;
-                    return [
-                        'cart_id' => $item->id,
-                        'product_id' => $product->id,
-                        'name' => $product->name,
-                        'short_description' => $product->short_description,
-                        'price' => (float) $product->price,
-                        'image' => $product->main_image ? asset($product->main_image) : null,
-                        'quantity' => (int) $item->quantity,
-                        'total_price' => (float) ($product->price * $item->quantity),
-                    ];
-                });
-
-            $subtotal = $cartItems->sum('total_price');
-            $delivery = 0.0; 
-            $discount = 0.0; 
-            $total = $subtotal + $delivery - $discount;
-
-            return $this->sendResponse([
-                'items' => $cartItems,
-                'summary' => [
-                    'subtotal' => (float) $subtotal,
-                    'delivery' => (float) $delivery,
-                    'discount' => (float) $discount,
-                    'total' => (float) $total,
-                ]
-            ], 'Cart fetched successfully.');
+            return $this->getCartResponse('Cart fetched successfully.');
         } catch (\Exception $e) {
             return $this->sendError('Failed to fetch cart.', $e->getMessage());
         }
+    }
+
+    /**
+     * Helper method to get the consistent cart response.
+     */
+    private function getCartResponse($message)
+    {
+        $user = Auth::user();
+        $cartItems = Cart::with(['product.category', 'product.brandData'])
+            ->where('user_id', $user->id)
+            ->get();
+
+        $formattedItems = $cartItems->map(function ($item) {
+            $product = $item->product;
+            return [
+                'cart_id' => $item->id,
+                'product_id' => $product->id,
+                'name' => $product->name,
+                'short_description' => $product->short_description,
+                'price' => (float) $product->price,
+                'image' => $product->main_image ? asset($product->main_image) : null,
+                'quantity' => (int) $item->quantity,
+                'total_price' => (float) ($product->price * $item->quantity),
+            ];
+        });
+
+        $subtotal = $formattedItems->sum('total_price');
+        $delivery = 50.0; // Consistent with CouponController
+        $discount = 0.0; 
+        $promoCode = null;
+        $discountPercent = 0;
+
+        if ($user->applied_promo_code) {
+            $promo = \App\Models\PromoCode::where('code', $user->applied_promo_code)->first();
+            if ($promo && $promo->isValid($user->id)) {
+                $discount = ($subtotal * $promo->discount_percent) / 100;
+                $promoCode = $promo->code;
+                $discountPercent = (float)$promo->discount_percent;
+            } else {
+                // If not valid anymore, clear it
+                $user->update(['applied_promo_code' => null]);
+            }
+        }
+        
+        $total = ($subtotal - $discount) + $delivery;
+
+        return $this->sendResponse([
+            'items' => $formattedItems,
+            'summary' => [
+                'subtotal' => (float) $subtotal,
+                'delivery' => (float) $delivery,
+                'discount' => (float) $discount,
+                'total' => (float) $total,
+                'promo_code' => $promoCode,
+                'discount_percent' => $discountPercent,
+            ]
+        ], $message);
     }
 
     /**
@@ -74,15 +100,16 @@ class CartController extends BaseController
 
             if ($cartItem) {
                 $cartItem->increment('quantity', $quantity);
+                $cartItem->refresh(); // Refresh to get the updated quantity
             } else {
-                Cart::create([
+                $cartItem = Cart::create([
                     'user_id' => $user->id,
                     'product_id' => $productId,
                     'quantity' => $quantity,
                 ]);
             }
 
-            return $this->sendResponse(null, 'Product added to cart successfully.');
+            return $this->getCartResponse('Product added to cart successfully.');
         } catch (\Exception $e) {
             return $this->sendError('Failed to add to cart.', $e->getMessage());
         }
@@ -94,7 +121,8 @@ class CartController extends BaseController
     public function update(Request $request, $id)
     {
         $request->validate([
-            'action' => 'required|in:increment,decrement',
+            'action' => 'nullable|in:increment,decrement',
+            'quantity' => 'nullable|integer|min:0',
         ]);
 
         try {
@@ -105,18 +133,25 @@ class CartController extends BaseController
                 return $this->sendError('Cart item not found.', [], 404);
             }
 
-            if ($request->action === 'increment') {
+            if ($request->has('quantity')) {
+                $quantity = (int)$request->quantity;
+                if ($quantity <= 0) {
+                    $cartItem->delete();
+                    return $this->getCartResponse('Product removed from cart.');
+                }
+                $cartItem->update(['quantity' => $quantity]);
+            } elseif ($request->action === 'increment') {
                 $cartItem->increment('quantity');
-            } else {
+            } elseif ($request->action === 'decrement') {
                 if ($cartItem->quantity > 1) {
                     $cartItem->decrement('quantity');
                 } else {
                     $cartItem->delete();
-                    return $this->sendResponse(null, 'Product removed from cart.');
+                    return $this->getCartResponse('Product removed from cart.');
                 }
             }
 
-            return $this->sendResponse(null, 'Cart updated successfully.');
+            return $this->getCartResponse('Cart updated successfully.');
         } catch (\Exception $e) {
             return $this->sendError('Failed to update cart.', $e->getMessage());
         }
@@ -136,7 +171,7 @@ class CartController extends BaseController
             }
 
             $cartItem->delete();
-            return $this->sendResponse(null, 'Product removed from cart.');
+            return $this->getCartResponse('Product removed from cart.');
         } catch (\Exception $e) {
             return $this->sendError('Failed to remove from cart.', $e->getMessage());
         }
@@ -145,14 +180,14 @@ class CartController extends BaseController
     /**
      * Clear the cart.
      */
-    public function clear()
-    {
-        try {
-            $user = Auth::user();
-            Cart::where('user_id', $user->id)->delete();
-            return $this->sendResponse(null, 'Cart cleared successfully.');
-        } catch (\Exception $e) {
-            return $this->sendError('Failed to clear cart.', $e->getMessage());
-        }
-    }
+    // public function clear()
+    // {
+    //     try {
+    //         $user = Auth::user();
+    //         Cart::where('user_id', $user->id)->delete();
+    //         return $this->getCartResponse('Cart cleared successfully.');
+    //     } catch (\Exception $e) {
+    //         return $this->sendError('Failed to clear cart.', $e->getMessage());
+    //     }
+    // }
 }

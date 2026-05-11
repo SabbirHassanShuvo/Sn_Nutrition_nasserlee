@@ -45,6 +45,7 @@ class PromoCodeController extends Controller
             'discount_percent' => 'required|numeric|min:0|max:100',
             'expiry_date' => 'nullable|date',
             'usage_limit' => 'nullable|integer|min:1',
+            'per_user_limit' => 'nullable|integer|min:1',
         ]);
 
         try {
@@ -68,6 +69,7 @@ class PromoCodeController extends Controller
             'discount_percent' => 'required|numeric|min:0|max:100',
             'expiry_date' => 'nullable|date',
             'usage_limit' => 'nullable|integer|min:1',
+            'per_user_limit' => 'nullable|integer|min:1',
         ]);
 
         try {

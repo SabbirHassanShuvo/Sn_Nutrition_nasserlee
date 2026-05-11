@@ -104,29 +104,32 @@
                         </table>
                     </div>
 
-                    <div id="bankTransferSection" style="display: none;">
-                        <div class="border-top pt-4">
-                            <h6 class="text-muted text-uppercase fw-semibold mb-3 fs-11">Bank Transfer Receipt</h6>
+                    <div id="bankTransferSection" style="display: none;" class="mt-4 border-top pt-3">
+                        <h6 class="text-primary text-uppercase fw-bold mb-3 fs-11">Bank Transfer Information</h6>
+                        <div id="bankTransferData">
                             <div class="row align-items-center">
                                 <div class="col-md-4 text-center">
                                     <a href="" id="modalReceiptLink" target="_blank">
-                                        <img id="modalReceiptImage" src="" class="img-fluid rounded border p-1" style="max-height: 150px;">
+                                        <img id="modalReceiptImage" src="" class="img-fluid rounded border p-1" style="max-height: 180px; width: 100%; object-fit: contain;">
                                     </a>
                                 </div>
                                 <div class="col-md-8">
-                                    <div class="bg-light p-3 rounded">
-                                        <p class="mb-1 fs-13"><strong>Sender:</strong> <span id="modalSenderName"></span></p>
-                                        <p class="mb-1 fs-13"><strong>Bank:</strong> <span id="modalSenderBank"></span></p>
-                                        <p class="mb-1 fs-13"><strong>Last 4 Digits:</strong> <span id="modalAccountDigits"></span></p>
-                                        <p class="mb-3 fs-13"><strong>Payment Status:</strong> <span id="modalTransferStatus" class="badge"></span></p>
+                                    <div class="bg-light p-3 rounded shadow-sm">
+                                        <div class="mb-2 fs-13"><strong>Sender Name:</strong> <span id="modalSenderName" class="text-muted"></span></div>
+                                        <div class="mb-2 fs-13"><strong>Bank Name:</strong> <span id="modalSenderBank" class="text-muted"></span></div>
+                                        <div class="mb-2 fs-13"><strong>Last 4 Digits:</strong> <span id="modalAccountDigits" class="text-muted"></span></div>
+                                        <div class="mb-3 fs-13"><strong>Payment Status:</strong> <span id="modalTransferStatus" class="badge"></span></div>
                                         
                                         <div id="paymentActionBtns" class="d-flex gap-2">
-                                            <button type="button" onclick="verifyPayment('approved')" class="btn btn-success btn-sm">Approve Payment</button>
-                                            <button type="button" onclick="verifyPayment('rejected')" class="btn btn-danger btn-sm">Reject</button>
+                                            <button type="button" onclick="verifyPayment('approved')" class="btn btn-success btn-sm w-100">Approve Payment & Confirm Order</button>
+                                            <button type="button" onclick="verifyPayment('rejected')" class="btn btn-danger btn-sm w-100">Reject</button>
                                         </div>
                                     </div>
                                 </div>
                             </div>
+                        </div>
+                        <div id="noReceiptMessage" style="display: none;" class="alert alert-warning py-2">
+                            <i class="ri-error-warning-line me-2"></i> No bank transfer receipt found for this order.
                         </div>
                     </div>
                 </div>
@@ -207,25 +210,33 @@
                         });
                         $('#modalOrderItems').html(itemsHtml);
 
-                        // Bank Transfer
-                        if (order.payment_method === 'bank_transfer' && order.bank_transfer) {
-                            let bt = order.bank_transfer;
+                        // Bank Transfer Section Handling
+                        if (order.payment_method === 'bank_transfer') {
                             $('#bankTransferSection').show();
-                            $('#modalSenderName').text(bt.sender_full_name);
-                            $('#modalSenderBank').text(bt.sender_bank);
-                            $('#modalAccountDigits').text(bt.account_last_4);
+                            let bt = order.bank_transfer || order.bankTransfer;
                             
-                            let receiptUrl = "{{ asset('') }}" + bt.receipt_image;
-                            $('#modalReceiptImage').attr('src', receiptUrl);
-                            $('#modalReceiptLink').attr('href', receiptUrl);
+                            if (bt) {
+                                $('#bankTransferData').show();
+                                $('#noReceiptMessage').hide();
+                                $('#modalSenderName').text(bt.sender_full_name);
+                                $('#modalSenderBank').text(bt.sender_bank);
+                                $('#modalAccountDigits').text(bt.account_last_4);
+                                
+                                let receiptUrl = bt.receipt_image ? ("{{ asset('') }}" + bt.receipt_image) : '';
+                                $('#modalReceiptImage').attr('src', receiptUrl);
+                                $('#modalReceiptLink').attr('href', receiptUrl);
 
-                            let statusClass = bt.status === 'approved' ? 'bg-success' : (bt.status === 'rejected' ? 'bg-danger' : 'bg-warning');
-                            $('#modalTransferStatus').text(bt.status.toUpperCase()).attr('class', 'badge ' + statusClass);
-                            
-                            if (bt.status === 'pending') {
-                                $('#paymentActionBtns').show();
+                                let statusClass = bt.status === 'approved' ? 'bg-success' : (bt.status === 'rejected' ? 'bg-danger' : 'bg-warning');
+                                $('#modalTransferStatus').text(bt.status.toUpperCase()).attr('class', 'badge ' + statusClass);
+                                
+                                if (bt.status === 'pending') {
+                                    $('#paymentActionBtns').show();
+                                } else {
+                                    $('#paymentActionBtns').hide();
+                                }
                             } else {
-                                $('#paymentActionBtns').hide();
+                                $('#bankTransferData').hide();
+                                $('#noReceiptMessage').show();
                             }
                         } else {
                             $('#bankTransferSection').hide();
@@ -255,6 +266,13 @@
         }
 
         function verifyPayment(status) {
+            let message = status === 'approved' ? 'approve this payment and confirm the order?' : 'reject this payment?';
+            if (!confirm('Are you sure you want to ' + message)) return;
+
+            let btn = event.target;
+            let originalHtml = $(btn).html();
+            $(btn).prop('disabled', true).html('<i class="ri-loader-4-line spinner-border spinner-border-sm me-1"></i> Processing...');
+
             let url = "{{ route('backend.order.verify-payment', ':id') }}";
             $.ajax({
                 type: "POST",
@@ -263,9 +281,13 @@
                 success: function (response) {
                     if (response.success) {
                         toastr.success(response.message);
-                        viewOrder(currentOrderId); // Refresh modal
+                        viewOrder(currentOrderId); // Refresh modal to hide buttons
                         $('.data-table').DataTable().ajax.reload();
                     }
+                },
+                error: function() {
+                    toastr.error('Something went wrong. Please try again.');
+                    $(btn).prop('disabled', false).html(originalHtml);
                 }
             });
         }

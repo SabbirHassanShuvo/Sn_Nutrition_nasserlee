@@ -31,7 +31,14 @@ class OrderController extends Controller
                 ->addColumn('payment', function ($order) {
                     $method = strtoupper(str_replace('_', ' ', $order->payment_method));
                     $badge = $order->payment_method == 'cod' ? 'bg-info' : 'bg-warning';
-                    return '<span class="badge ' . $badge . '">' . $method . '</span>';
+                    $html = '<span class="badge ' . $badge . '">' . $method . '</span>';
+                    
+                    if ($order->payment_method == 'bank_transfer' && $order->bankTransfer) {
+                        $pStatus = $order->bankTransfer->status;
+                        $pBadge = $pStatus == 'approved' ? 'bg-success' : ($pStatus == 'rejected' ? 'bg-danger' : 'bg-warning');
+                        $html .= '<br><span class="badge ' . $pBadge . ' mt-1" style="font-size: 10px;">Payment: ' . ucfirst($pStatus) . '</span>';
+                    }
+                    return $html;
                 })
                 ->addColumn('status', function ($order) {
                     $colors = [

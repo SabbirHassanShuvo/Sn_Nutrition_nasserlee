@@ -1,10 +1,11 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\Api\Frontend\HomeController;
-use App\Http\Controllers\Api\Frontend\WishlistController;
 use App\Http\Controllers\Api\Frontend\CartController;
 use App\Http\Controllers\Api\Frontend\CheckoutController;
+use App\Http\Controllers\Api\Frontend\CouponController;
+use App\Http\Controllers\Api\Frontend\HomeController;
+use App\Http\Controllers\Api\Frontend\WishlistController;
+use Illuminate\Support\Facades\Route;
 
 /*
 |--------------------------------------------------------------------------
@@ -33,13 +34,13 @@ Route::middleware('auth:api')->group(function () {
 
     // Cart
     Route::get('/cart', [CartController::class, 'index']);
-    Route::post('/cart', [CartController::class, 'store']);
-    Route::post('/cart/{id}', [CartController::class, 'update']);
-    Route::post('/cart/{id}', [CartController::class, 'destroy']);
-    Route::post('/cart/clear', [CartController::class, 'clear']);
+    Route::post('/cart/add', [CartController::class, 'store']);
+    Route::post('/cart/update/{id}', [CartController::class, 'update']);
+    Route::post('/cart/delete/{id}', [CartController::class, 'destroy']);
+    // Route::post('/cart/clear', [CartController::class, 'clear']);
 
     // Coupon
-    Route::post('/coupon/apply', [\App\Http\Controllers\Api\Frontend\CouponController::class, 'applyCoupon']);
+    Route::post('/coupon/apply', [CouponController::class, 'applyCoupon']);
 
     // Checkout
     Route::get('/checkout/summary', [CheckoutController::class, 'getCheckoutDetails']);
