@@ -5,6 +5,7 @@ use App\Http\Controllers\Api\Frontend\CheckoutController;
 use App\Http\Controllers\Api\Frontend\CouponController;
 use App\Http\Controllers\Api\Frontend\HomeController;
 use App\Http\Controllers\Api\Frontend\WishlistController;
+use App\Http\Controllers\Api\Frontend\ComparisonController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -46,4 +47,10 @@ Route::middleware('auth:api')->group(function () {
     Route::get('/checkout/summary', [CheckoutController::class, 'getCheckoutDetails']);
     Route::post('/checkout/place-order', [CheckoutController::class, 'placeOrder']);
     Route::post('/checkout/bank-transfer', [CheckoutController::class, 'submitBankTransfer']);
+
+    // Comparison
+    Route::get('/compare', [ComparisonController::class, 'index']);
+    Route::post('/compare/add', [ComparisonController::class, 'store']);
+    Route::post('/compare/remove/{id}', [ComparisonController::class, 'destroy']);
+    Route::post('/compare/clear', [ComparisonController::class, 'clear']);
 });

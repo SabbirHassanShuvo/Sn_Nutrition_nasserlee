@@ -27,19 +27,26 @@ class CouponController extends BaseController
                 return $this->sendError('Invalid or expired promo code, or you have reached the usage limit.', [], 422);
             }
 
-            $user->update(['applied_promo_code' => $promo->code]);
             $cartItems = Cart::with('product')->where('user_id', $user->id)->get();
 
             if ($cartItems->isEmpty()) {
                 return $this->sendError('Your cart is empty.', [], 400);
             }
 
-            $subtotal = 0;
-            foreach ($cartItems as $item) {
-                $subtotal += $item->product->price * $item->quantity;
-            }
+            $message = $promo->getApplicabilityMessage($cartItems);
 
-            $discountAmount = ($subtotal * $promo->discount_percent) / 100;
+            if ($message) {
+                return $this->sendError($message, [], 422);
+            }
+            
+            $discountAmount = $promo->calculateDiscount($cartItems);
+
+            $user->update(['applied_promo_code' => $promo->code]);
+
+            $subtotal = $cartItems->sum(function($item) {
+                return $item->product->price * $item->quantity;
+            });
+            
             $delivery = 50; // Fixed delivery for now
             $total = ($subtotal - $discountAmount) + $delivery;
 

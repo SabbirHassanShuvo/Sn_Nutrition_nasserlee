@@ -8,6 +8,7 @@ use App\Models\Cart;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\PromoCode;
+use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -49,7 +50,7 @@ class CheckoutController extends BaseController
             if ($request->promo_code) {
                 $promo = \App\Models\PromoCode::where('code', $request->promo_code)->first();
                 if ($promo && $promo->isValid()) {
-                    $discount = ($subtotal * $promo->discount_percent) / 100;
+                    $discount = $promo->calculateDiscount($cartItems);
                 }
             }
 
@@ -64,7 +65,7 @@ class CheckoutController extends BaseController
                     'total' => (float) $total
                 ]
             ], 'Checkout details fetched.');
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             return $this->sendError('Failed to fetch checkout details.', $e->getMessage());
         }
     }
@@ -162,10 +163,12 @@ class CheckoutController extends BaseController
                 $discount = 0.0;
                 $appliedPromoCode = null;
 
-                if ($request->promo_code) {
-                    $promo = PromoCode::where('code', $request->promo_code)->first();
+                $promoCodeStr = $request->promo_code ?? $user->applied_promo_code;
+                
+                if ($promoCodeStr) {
+                    $promo = PromoCode::where('code', $promoCodeStr)->first();
                     if ($promo && $promo->isValid($user->id)) {
-                        $discount = ($subtotal * $promo->discount_percent) / 100;
+                        $discount = $promo->calculateDiscount($cartItems);
                         $appliedPromoCode = $promo->code;
                         $promo->increment('used_count');
                     }

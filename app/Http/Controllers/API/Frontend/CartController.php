@@ -55,9 +55,34 @@ class CartController extends BaseController
         if ($user->applied_promo_code) {
             $promo = \App\Models\PromoCode::where('code', $user->applied_promo_code)->first();
             if ($promo && $promo->isValid($user->id)) {
-                $discount = ($subtotal * $promo->discount_percent) / 100;
                 $promoCode = $promo->code;
                 $discountPercent = (float)$promo->discount_percent;
+
+                // Calculate targeted discount
+                foreach ($cartItems as $item) {
+                    $product = $item->product;
+                    $isApplicable = false;
+
+                    switch ($promo->type) {
+                        case 'global':
+                            $isApplicable = true;
+                            break;
+                        case 'category':
+                            $isApplicable = $product->category_id == $promo->category_id;
+                            break;
+                        case 'product':
+                            $isApplicable = $product->id == $promo->product_id;
+                            break;
+                        case 'health_professional':
+                            $isApplicable = true; // Global for now
+                            break;
+                    }
+
+                    if ($isApplicable) {
+                        $itemTotal = $product->price * $item->quantity;
+                        $discount += ($itemTotal * $promo->discount_percent) / 100;
+                    }
+                }
             } else {
                 // If not valid anymore, clear it
                 $user->update(['applied_promo_code' => null]);

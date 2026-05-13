@@ -12,9 +12,24 @@ class PromoCodeController extends Controller
     public function index(Request $request)
     {
         if ($request->ajax()) {
-            $promoCodes = PromoCode::latest();
+            $promoCodes = PromoCode::with(['category', 'product', 'healthProfessional'])->latest();
             return DataTables::of($promoCodes)
                 ->addIndexColumn()
+                ->addColumn('type', function ($promoCode) {
+                    return ucfirst($promoCode->type);
+                })
+                ->addColumn('target', function ($promoCode) {
+                    if ($promoCode->type == 'category') {
+                        return 'Category: ' . ($promoCode->category->name ?? 'N/A');
+                    } elseif ($promoCode->type == 'product') {
+                        return 'Product: ' . ($promoCode->product->name ?? 'N/A');
+                    } elseif ($promoCode->type == 'brand') {
+                        return 'Brand: ' . ($promoCode->brand->name ?? 'N/A');
+                    } elseif ($promoCode->type == 'health_professional') {
+                        return 'Professional: ' . ($promoCode->healthProfessional->name ?? 'N/A');
+                    }
+                    return 'Global';
+                })
                 ->addColumn('status', function ($promoCode) {
                     return '<div class="form-check form-switch text-center">
                                 <input class="form-check-input" type="checkbox" role="switch" onchange="changeStatus('.$promoCode->id.')" '.($promoCode->status ? 'checked' : '').'>
@@ -35,13 +50,22 @@ class PromoCodeController extends Controller
                 ->rawColumns(['status', 'action'])
                 ->make(true);
         }
-        return view("backend.layout.promo_codes.index");
+        $categories = \App\Models\Category::all();
+        $products = \App\Models\Product::all();
+        $brands = \App\Models\Brand::all();
+        $professionals = \App\Models\User::where('role', 'health_professional')->get();
+        return view("backend.layout.promo_codes.index", compact('categories', 'products', 'brands', 'professionals'));
     }
 
     public function store(Request $request)
     {
         $request->validate([
             'code' => 'required|string|unique:promo_codes,code',
+            'type' => 'required|in:global,category,product,health_professional,brand',
+            'category_id' => 'required_if:type,category|nullable|exists:categories,id',
+            'product_id' => 'required_if:type,product|nullable|exists:products,id',
+            'brand_id' => 'required_if:type,brand|nullable|exists:brands,id',
+            'health_professional_id' => 'required_if:type,health_professional|nullable|exists:users,id',
             'discount_percent' => 'required|numeric|min:0|max:100',
             'expiry_date' => 'nullable|date',
             'usage_limit' => 'nullable|integer|min:1',
@@ -66,6 +90,11 @@ class PromoCodeController extends Controller
     {
         $request->validate([
             'code' => 'required|string|unique:promo_codes,code,' . $id,
+            'type' => 'required|in:global,category,product,health_professional,brand',
+            'category_id' => 'required_if:type,category|nullable|exists:categories,id',
+            'product_id' => 'required_if:type,product|nullable|exists:products,id',
+            'brand_id' => 'required_if:type,brand|nullable|exists:brands,id',
+            'health_professional_id' => 'required_if:type,health_professional|nullable|exists:users,id',
             'discount_percent' => 'required|numeric|min:0|max:100',
             'expiry_date' => 'nullable|date',
             'usage_limit' => 'nullable|integer|min:1',
