@@ -20,6 +20,10 @@ class PartnerProfile extends Model
         'specialties',
         'certifications',
         'onboarding_step',
+        'lifetime_earnings',
+        'pending_payout',
+        'last_paid_amount',
+        'current_tier',
     ];
 
     protected $casts = [

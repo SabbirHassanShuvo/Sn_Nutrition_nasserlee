@@ -114,4 +114,14 @@ class User extends Authenticatable implements JWTSubject
     {
         return $this->hasMany(Wishlist::class);
     }
+
+    public function affiliateLinks()
+    {
+        return $this->hasMany(AffiliateLink::class);
+    }
+
+    public function payoutHistory()
+    {
+        return $this->hasMany(PayoutHistory::class);
+    }
 }

@@ -22,4 +22,9 @@ class Order extends Model
     {
         return $this->belongsTo(BankTransfer::class, 'bank_transfer_id');
     }
+
+    public function affiliateLink()
+    {
+        return $this->belongsTo(AffiliateLink::class);
+    }
 }

@@ -13,7 +13,7 @@ class OrderController extends Controller
     public function index(Request $request)
     {
         if ($request->ajax()) {
-            $orders = Order::with('user')->latest();
+            $orders = Order::with(['user', 'affiliateLink.user'])->latest();
             return DataTables::of($orders)
                 ->addIndexColumn()
                 ->addColumn('order_number', function ($order) {
@@ -24,6 +24,15 @@ class OrderController extends Controller
                         <h6 class="mb-0 fs-14">' . ($order->full_name ?? ($order->user ? $order->user->name : 'Guest')) . '</h6>
                         <p class="text-muted mb-0 fs-12">' . $order->email . '</p>
                     </div>';
+                })
+                ->addColumn('referred_by', function ($order) {
+                    if ($order->affiliateLink && $order->affiliateLink->user) {
+                        return '<div>
+                            <h6 class="mb-0 fs-13 text-success">' . $order->affiliateLink->user->name . '</h6>
+                            <p class="text-muted mb-0 fs-11">Comm: ' . number_format($order->commission_amount, 2) . ' MAD</p>
+                        </div>';
+                    }
+                    return '<span class="text-muted">Direct</span>';
                 })
                 ->addColumn('amount', function ($order) {
                     return '<span class="fw-bold">' . number_format($order->total, 2) . ' MAD</span>';
@@ -63,7 +72,7 @@ class OrderController extends Controller
                         </div>
                     ';
                 })
-                ->rawColumns(['order_number', 'customer', 'amount', 'payment', 'status', 'action'])
+                ->rawColumns(['order_number', 'customer', 'referred_by', 'amount', 'payment', 'status', 'action'])
                 ->make(true);
         }
         return view("backend.layout.orders.index");

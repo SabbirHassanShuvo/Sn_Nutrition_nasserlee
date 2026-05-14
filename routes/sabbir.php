@@ -6,6 +6,7 @@ use App\Http\Controllers\Api\Frontend\CouponController;
 use App\Http\Controllers\Api\Frontend\HomeController;
 use App\Http\Controllers\Api\Frontend\WishlistController;
 use App\Http\Controllers\Api\Frontend\ComparisonController;
+use App\Http\Controllers\Api\Frontend\AffiliateController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -19,7 +20,7 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::prefix('home')->group(function () {
+Route::prefix('home')->middleware('affiliate.track')->group(function () {
     Route::get('/products', [HomeController::class, 'getAllProducts']);
     Route::get('/products/filter', [HomeController::class, 'filterProducts']);
     Route::get('/products/{id}', [HomeController::class, 'getProductDetails']);
@@ -53,4 +54,15 @@ Route::middleware('auth:api')->group(function () {
     Route::post('/compare/add', [ComparisonController::class, 'store']);
     Route::post('/compare/remove/{id}', [ComparisonController::class, 'destroy']);
     Route::post('/compare/clear', [ComparisonController::class, 'clear']);
+
+    // Affiliate System
+    Route::prefix('affiliate')->group(function () {
+        Route::post('/generate-link', [AffiliateController::class, 'generateLink']);
+        Route::get('/stats', [AffiliateController::class, 'getDashboardStats']);
+        Route::get('/links', [AffiliateController::class, 'getLinks']);
+        Route::get('/orders', [AffiliateController::class, 'getOrders']);
+        Route::get('/payout-history', [AffiliateController::class, 'getPayoutHistory']);
+        Route::get('/tiers', [AffiliateController::class, 'getTiersInfo']);
+        Route::get('/earnings-chart', [AffiliateController::class, 'getEarningsChart']);
+    });
 });

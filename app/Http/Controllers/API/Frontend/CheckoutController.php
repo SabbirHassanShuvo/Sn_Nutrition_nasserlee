@@ -176,6 +176,48 @@ class CheckoutController extends BaseController
 
                 $total = $subtotal + $deliveryFee - $discount;
 
+                // Handle Affiliate Commission
+                $affiliateLinkId = null;
+                $totalCommission = 0;
+                $referralCode = $request->cookie('referral_code');
+
+                if ($referralCode) {
+                    $affLink = \App\Models\AffiliateLink::where('tracking_code', $referralCode)
+                        ->where('status', 'active')
+                        ->first();
+
+                    if ($affLink) {
+                        $affiliateLinkId = $affLink->id;
+                        $partner = $affLink->user;
+                        $partnerProfile = $partner->partnerProfile;
+
+                        // Calculate Tier Bonus
+                        $tierBonus = 0;
+                        if ($partnerProfile) {
+                            $tier = $partnerProfile->current_tier;
+                            if ($tier == 'silver') $tierBonus = 2;
+                            elseif ($tier == 'gold') $tierBonus = 5;
+                            elseif ($tier == 'platinum') $tierBonus = 8;
+                        }
+
+                        foreach ($cartItems as $item) {
+                            $baseCommPercent = $item->product->commission_percent ?: 0;
+                            $totalCommPercent = $baseCommPercent + $tierBonus;
+                            $itemCommission = ($item->product->price * $item->quantity) * ($totalCommPercent / 100);
+                            $totalCommission += $itemCommission;
+                        }
+
+                        // Increment conversions
+                        $affLink->increment('conversions_count');
+
+                        // Update Partner Profile earnings
+                        if ($partnerProfile) {
+                            $partnerProfile->increment('pending_payout', $totalCommission);
+                            $partnerProfile->increment('lifetime_earnings', $totalCommission);
+                        }
+                    }
+                }
+
                 $order = Order::create([
                     'user_id' => $user->id,
                     'order_number' => 'SN-' . strtoupper(Str::random(6)),
@@ -184,6 +226,8 @@ class CheckoutController extends BaseController
                     'applied_promo_code' => $appliedPromoCode,
                     'discount' => $discount,
                     'total' => $total,
+                    'affiliate_link_id' => $affiliateLinkId,
+                    'commission_amount' => $totalCommission,
                     'status' => 'pending',
                     'bank_transfer_id' => $request->bank_transfer_id,
                     

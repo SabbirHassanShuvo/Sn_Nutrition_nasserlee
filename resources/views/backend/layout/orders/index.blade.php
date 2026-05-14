@@ -21,6 +21,7 @@
                                     <th class="ps-3" style="width: 60px;">ID</th>
                                     <th>Order Number</th>
                                     <th>Customer</th>
+                                    <th>Referred By</th>
                                     <th>Amount</th>
                                     <th>Payment</th>
                                     <th class="text-center">Status</th>
@@ -167,6 +168,7 @@
                         { data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable: false },
                         { data: 'order_number', name: 'order_number' },
                         { data: 'customer', name: 'customer' },
+                        { data: 'referred_by', name: 'referred_by' },
                         { data: 'amount', name: 'amount' },
                         { data: 'payment', name: 'payment' },
                         { data: 'status', name: 'status', className: 'text-center' },

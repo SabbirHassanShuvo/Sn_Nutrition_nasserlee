@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\AffiliateLink;
 use Illuminate\Database\Eloquent\Model;
 
 class Product extends Model
@@ -51,5 +52,10 @@ class Product extends Model
     public function wishlists()
     {
         return $this->hasMany(Wishlist::class);
+    }
+
+    public function affiliateLinks()
+    {
+        return $this->hasMany(AffiliateLink::class);
     }
 }
