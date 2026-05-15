@@ -80,7 +80,7 @@ class OrderController extends Controller
 
     public function show($id)
     {
-        $order = Order::with(['items.product', 'user', 'bankTransfer'])->find($id);
+        $order = Order::with(['items.product', 'user', 'bankTransfer', 'affiliateLink.user'])->find($id);
         if (!$order) {
             return response()->json(['success' => false, 'message' => 'Order not found']);
         }

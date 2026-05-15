@@ -90,6 +90,19 @@
                         </div>
                     </div>
 
+                    <div id="referralSection" style="display: none;" class="bg-soft-success p-3 rounded mb-4 border border-success border-opacity-10">
+                        <h6 class="text-success text-uppercase fw-bold mb-2 fs-11">Referral Information</h6>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <p class="mb-1 fs-13"><strong>Partner:</strong> <span id="modalReferrerName" class="text-dark"></span></p>
+                                <p class="mb-0 fs-12 text-muted" id="modalReferrerEmail"></p>
+                            </div>
+                            <div class="text-end">
+                                <p class="mb-0 fs-13"><strong>Commission:</strong> <span id="modalCommissionAmount" class="badge bg-success"></span></p>
+                            </div>
+                        </div>
+                    </div>
+
                     <h6 class="text-muted text-uppercase fw-semibold mb-3 fs-11">Order Items</h6>
                     <div class="table-responsive mb-4">
                         <table class="table table-sm align-middle table-borderless">
@@ -202,15 +215,31 @@
 
                         // Items
                         let itemsHtml = '';
-                        order.items.forEach(item => {
-                            itemsHtml += `<tr>
-                                <td>${item.product ? item.product.name : 'Unknown Product'}</td>
-                                <td class="text-center">${parseFloat(item.price).toFixed(2)}</td>
-                                <td class="text-center">${item.quantity}</td>
-                                <td class="text-end fw-bold">${(item.price * item.quantity).toFixed(2)}</td>
-                            </tr>`;
-                        });
+                        if (order.items && order.items.length > 0) {
+                            order.items.forEach(item => {
+                                itemsHtml += `<tr>
+                                    <td>
+                                        <div class="fw-medium">${item.product ? item.product.name : 'Unknown Product'}</div>
+                                    </td>
+                                    <td class="text-center">${parseFloat(item.price).toFixed(2)}</td>
+                                    <td class="text-center">${item.quantity}</td>
+                                    <td class="text-end fw-bold">${(item.price * item.quantity).toFixed(2)}</td>
+                                </tr>`;
+                            });
+                        } else {
+                            itemsHtml = '<tr><td colspan="4" class="text-center text-muted">No items found</td></tr>';
+                        }
                         $('#modalOrderItems').html(itemsHtml);
+
+                        // Referral Data
+                        if (order.affiliate_link && order.affiliate_link.user) {
+                            $('#referralSection').show();
+                            $('#modalReferrerName').text(order.affiliate_link.user.name);
+                            $('#modalReferrerEmail').text(order.affiliate_link.user.email);
+                            $('#modalCommissionAmount').text(parseFloat(order.commission_amount).toFixed(2) + ' MAD');
+                        } else {
+                            $('#referralSection').hide();
+                        }
 
                         // Bank Transfer Section Handling
                         if (order.payment_method === 'bank_transfer') {
@@ -268,46 +297,69 @@
         }
 
         function verifyPayment(status) {
-            let message = status === 'approved' ? 'approve this payment and confirm the order?' : 'reject this payment?';
-            if (!confirm('Are you sure you want to ' + message)) return;
+            let title = status === 'approved' ? 'Approve Payment?' : 'Reject Payment?';
+            let text = status === 'approved' ? 'This will approve the payment and mark order as processing.' : 'Are you sure you want to reject this payment?';
+            let confirmButtonText = status === 'approved' ? 'Yes, Approve' : 'Yes, Reject';
+            let confirmButtonColor = status === 'approved' ? '#28a745' : '#dc3545';
 
-            let btn = event.target;
-            let originalHtml = $(btn).html();
-            $(btn).prop('disabled', true).html('<i class="ri-loader-4-line spinner-border spinner-border-sm me-1"></i> Processing...');
-
-            let url = "{{ route('backend.order.verify-payment', ':id') }}";
-            $.ajax({
-                type: "POST",
-                url: url.replace(':id', currentOrderId),
-                data: { _token: "{{ csrf_token() }}", status: status },
-                success: function (response) {
-                    if (response.success) {
-                        toastr.success(response.message);
-                        viewOrder(currentOrderId); // Refresh modal to hide buttons
-                        $('.data-table').DataTable().ajax.reload();
-                    }
-                },
-                error: function() {
-                    toastr.error('Something went wrong. Please try again.');
-                    $(btn).prop('disabled', false).html(originalHtml);
+            Swal.fire({
+                title: title,
+                text: text,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: confirmButtonColor,
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: confirmButtonText
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    let url = "{{ route('backend.order.verify-payment', ':id') }}";
+                    $.ajax({
+                        type: "POST",
+                        url: url.replace(':id', currentOrderId),
+                        data: { _token: "{{ csrf_token() }}", status: status },
+                        success: function (response) {
+                            if (response.success) {
+                                toastr.success(response.message);
+                                viewOrder(currentOrderId);
+                                $('.data-table').DataTable().ajax.reload();
+                            }
+                        },
+                        error: function() {
+                            toastr.error('Something went wrong. Please try again.');
+                        }
+                    });
                 }
             });
         }
 
         function deleteData(url) {
-            if (confirm('Are you sure you want to delete this order?')) {
-                $.ajax({
-                    url: url,
-                    type: 'DELETE',
-                    data: { _token: "{{ csrf_token() }}" },
-                    success: function (response) {
-                        if (response.success) {
-                            $('.data-table').DataTable().ajax.reload();
-                            toastr.success(response.message);
+            Swal.fire({
+                title: 'Are you sure?',
+                text: "You won't be able to revert this!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#ef4444',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: 'Yes, delete it!'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.ajax({
+                        url: url,
+                        type: 'DELETE',
+                        data: { _token: "{{ csrf_token() }}" },
+                        success: function (response) {
+                            if (response.success) {
+                                $('.data-table').DataTable().ajax.reload();
+                                Swal.fire(
+                                    'Deleted!',
+                                    'Order has been deleted.',
+                                    'success'
+                                );
+                            }
                         }
-                    }
-                });
-            }
+                    });
+                }
+            });
         }
     </script>
 @endpush
