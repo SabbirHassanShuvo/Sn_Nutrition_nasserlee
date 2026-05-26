@@ -21,4 +21,6 @@ Route::get('session-key', function(){
 Route::get('session-forget', function(){
     return session()->flush();
 });
+
+
 require_once __DIR__ .'/auth.php';
