@@ -12,9 +12,9 @@
                         <p class="text-muted mb-0 fs-12">Manage product classifications</p>
                     </div>
                     <div class="flex-shrink-0">
-                        <a class="btn btn-primary btn-sm add-btn shadow-sm d-flex align-items-center" href="{{route('backend.category.create')}}">
+                        <button type="button" class="btn btn-primary btn-sm add-btn shadow-sm d-flex align-items-center" onclick="openCreateModal()">
                             <i class="ri-add-line align-bottom me-1"></i> Add New Category
-                        </a>
+                        </button>
                     </div>
                 </div>
 
@@ -35,6 +35,45 @@
                         </table>
                     </div>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Category Modal -->
+    <div class="modal fade text-start" id="categoryModal" tabindex="-1" aria-labelledby="categoryModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <form id="categoryForm" method="POST" enctype="multipart/form-data">
+                    @csrf
+                    <input type="hidden" name="_method" id="formMethod" value="POST">
+                    <input type="hidden" name="category_id" id="category_id" value="{{ old('category_id') }}">
+                    <div class="modal-header">
+                        <h5 class="modal-title text-white" id="categoryModalLabel">Create Category</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="mb-4">
+                            <label class="form-label fw-semibold" for="category_name">Category Name <span class="text-danger">*</span></label>
+                            <input type="text" name="name" id="category_name" class="form-control @error('name') is-invalid @enderror" placeholder="Enter category name" required>
+                            @error('name')
+                                <div class="invalid-feedback d-block">{{ $message }}</div>
+                            @enderror
+                        </div>
+                        <div class="mb-0">
+                            <label class="form-label fw-semibold">Category Thumbnail</label>
+                            <div id="dropify-wrapper-container">
+                                <input type="file" name="image" id="category_image" class="dropify" data-height="200" accept="image/*" />
+                            </div>
+                            @error('image')
+                                <small class="text-danger mt-1 d-block">{{ $message }}</small>
+                            @enderror
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-light" data-bs-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-primary" id="saveBtn">Create Category</button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
@@ -135,5 +174,84 @@
                 }
             })
         }
+
+        function resetDropify(defaultUrl = '') {
+            $('#dropify-wrapper-container').html('<input type="file" name="image" id="category_image" class="dropify" data-height="200" accept="image/*" />');
+            if (defaultUrl) {
+                $('#category_image').attr('data-default-file', defaultUrl);
+            }
+            $('.dropify').dropify();
+        }
+
+        function openCreateModal() {
+            $('#categoryForm').trigger("reset");
+            $('#categoryForm').attr('action', "{{ route('backend.category.store') }}");
+            $('#formMethod').val('POST');
+            $('#category_id').val('');
+            $('#categoryModalLabel').text('Create Category');
+            $('#saveBtn').text('Create Category');
+            resetDropify();
+            $('#categoryModal').modal('show');
+        }
+
+        // Intercept Edit Button
+        $(document).on('click', '.data-table .btn-soft-info', function(e) {
+            e.preventDefault();
+            let editUrl = $(this).attr('href');
+            
+            $.ajax({
+                type: "GET",
+                url: editUrl,
+                success: function(response) {
+                    if (response.success) {
+                        let category = response.data;
+                        let updateUrl = "{{ route('backend.category.update', ':id') }}".replace(':id', category.id);
+                        
+                        $('#categoryForm').attr('action', updateUrl);
+                        $('#formMethod').val('PATCH');
+                        $('#category_id').val(category.id);
+                        $('#category_name').val(category.name);
+                        $('#categoryModalLabel').text('Edit Category');
+                        $('#saveBtn').text('Update Category');
+                        
+                        let imgUrl = category.image ? "{{ asset('') }}" + category.image : '';
+                        resetDropify(imgUrl);
+                        
+                        $('#categoryModal').modal('show');
+                    } else {
+                        toastr.error("Failed to load category data.");
+                    }
+                },
+                error: function() {
+                    toastr.error("An error occurred while fetching category details.");
+                }
+            });
+        });
+
+        // Auto-reopen modal if validation errors exist (Laravel Redirect Back)
+        @if ($errors->any())
+            $(document).ready(function() {
+                $('#category_name').val("{{ old('name') }}");
+                
+                let oldMethod = "{{ old('_method') }}";
+                let oldId = "{{ old('category_id') }}";
+                if (oldMethod === 'PATCH' && oldId) {
+                    let updateUrl = "{{ route('backend.category.update', ':id') }}".replace(':id', oldId);
+                    $('#categoryForm').attr('action', updateUrl);
+                    $('#formMethod').val('PATCH');
+                    $('#category_id').val(oldId);
+                    $('#categoryModalLabel').text('Edit Category');
+                    $('#saveBtn').text('Update Category');
+                } else {
+                    $('#categoryForm').attr('action', "{{ route('backend.category.store') }}");
+                    $('#formMethod').val('POST');
+                    $('#category_id').val('');
+                    $('#categoryModalLabel').text('Create Category');
+                    $('#saveBtn').text('Create Category');
+                }
+                
+                $('#categoryModal').modal('show');
+            });
+        @endif
     </script>
 @endpush

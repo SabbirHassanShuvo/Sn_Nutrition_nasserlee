@@ -12,9 +12,9 @@
                         <p class="text-muted mb-0 fs-12">Manage product brands</p>
                     </div>
                     <div class="flex-shrink-0">
-                        <a class="btn btn-primary btn-sm add-btn shadow-sm d-flex align-items-center" href="{{route('backend.brand.create')}}">
+                        <button type="button" class="btn btn-primary btn-sm add-btn shadow-sm d-flex align-items-center" onclick="openCreateModal()">
                             <i class="ri-add-line align-bottom me-1"></i> Add New Brand
-                        </a>
+                        </button>
                     </div>
                 </div>
 
@@ -35,6 +35,55 @@
                         </table>
                     </div>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Brand Modal -->
+    <div class="modal fade text-start" id="brandModal" tabindex="-1" aria-labelledby="brandModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <form id="brandForm" method="POST" enctype="multipart/form-data">
+                    @csrf
+                    <input type="hidden" name="_method" id="formMethod" value="POST">
+                    <input type="hidden" name="brand_id" id="brand_id" value="{{ old('brand_id') }}">
+                    <div class="modal-header">
+                        <h5 class="modal-title text-white" id="brandModalLabel">Create Brand</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold" for="brand_name">Brand Name <span class="text-danger">*</span></label>
+                            <input type="text" name="name" id="brand_name" class="form-control @error('name') is-invalid @enderror" placeholder="Enter brand name" required>
+                            @error('name')
+                                <div class="invalid-feedback d-block">{{ $message }}</div>
+                            @enderror
+                        </div>
+                        <div class="row">
+                            <div class="col-lg-6 mb-3">
+                                <label class="form-label fw-semibold" for="brand_specialty">Specialty / Tagline</label>
+                                <input type="text" name="specialty" id="brand_specialty" class="form-control" placeholder="e.g. Performance">
+                            </div>
+                            <div class="col-lg-6 mb-3">
+                                <label class="form-label fw-semibold" for="brand_rating">Rating (0-5)</label>
+                                <input type="number" step="0.1" min="0" max="5" name="rating" id="brand_rating" class="form-control" placeholder="e.g. 4.5">
+                            </div>
+                        </div>
+                        <div class="mb-0">
+                            <label class="form-label fw-semibold">Brand Logo</label>
+                            <div id="dropify-wrapper-container">
+                                <input type="file" name="image" id="brand_image" class="dropify" data-height="200" accept="image/*" />
+                            </div>
+                            @error('image')
+                                <small class="text-danger mt-1 d-block">{{ $message }}</small>
+                            @enderror
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-light" data-bs-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-primary" id="saveBtn">Create Brand</button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
@@ -135,5 +184,88 @@
                 }
             })
         }
+
+        function resetDropify(defaultUrl = '') {
+            $('#dropify-wrapper-container').html('<input type="file" name="image" id="brand_image" class="dropify" data-height="200" accept="image/*" />');
+            if (defaultUrl) {
+                $('#brand_image').attr('data-default-file', defaultUrl);
+            }
+            $('.dropify').dropify();
+        }
+
+        function openCreateModal() {
+            $('#brandForm').trigger("reset");
+            $('#brandForm').attr('action', "{{ route('backend.brand.store') }}");
+            $('#formMethod').val('POST');
+            $('#brand_id').val('');
+            $('#brandModalLabel').text('Create Brand');
+            $('#saveBtn').text('Create Brand');
+            resetDropify();
+            $('#brandModal').modal('show');
+        }
+
+        // Intercept Edit Button
+        $(document).on('click', '.data-table .btn-soft-info', function(e) {
+            e.preventDefault();
+            let editUrl = $(this).attr('href');
+            
+            $.ajax({
+                type: "GET",
+                url: editUrl,
+                success: function(response) {
+                    if (response.success) {
+                        let brand = response.data;
+                        let updateUrl = "{{ route('backend.brand.update', ':id') }}".replace(':id', brand.id);
+                        
+                        $('#brandForm').attr('action', updateUrl);
+                        $('#formMethod').val('PATCH');
+                        $('#brand_id').val(brand.id);
+                        $('#brand_name').val(brand.name);
+                        $('#brand_specialty').val(brand.specialty);
+                        $('#brand_rating').val(brand.rating);
+                        $('#brandModalLabel').text('Edit Brand');
+                        $('#saveBtn').text('Update Brand');
+                        
+                        let imgUrl = brand.image ? "{{ asset('') }}" + brand.image : '';
+                        resetDropify(imgUrl);
+                        
+                        $('#brandModal').modal('show');
+                    } else {
+                        toastr.error("Failed to load brand data.");
+                    }
+                },
+                error: function() {
+                    toastr.error("An error occurred while fetching brand details.");
+                }
+            });
+        });
+
+        // Auto-reopen modal if validation errors exist (Laravel Redirect Back)
+        @if ($errors->any())
+            $(document).ready(function() {
+                $('#brand_name').val("{{ old('name') }}");
+                $('#brand_specialty').val("{{ old('specialty') }}");
+                $('#brand_rating').val("{{ old('rating') }}");
+                
+                let oldMethod = "{{ old('_method') }}";
+                let oldId = "{{ old('brand_id') }}";
+                if (oldMethod === 'PATCH' && oldId) {
+                    let updateUrl = "{{ route('backend.brand.update', ':id') }}".replace(':id', oldId);
+                    $('#brandForm').attr('action', updateUrl);
+                    $('#formMethod').val('PATCH');
+                    $('#brand_id').val(oldId);
+                    $('#brandModalLabel').text('Edit Brand');
+                    $('#saveBtn').text('Update Brand');
+                } else {
+                    $('#brandForm').attr('action', "{{ route('backend.brand.store') }}");
+                    $('#formMethod').val('POST');
+                    $('#brand_id').val('');
+                    $('#brandModalLabel').text('Create Brand');
+                    $('#saveBtn').text('Create Brand');
+                }
+                
+                $('#brandModal').modal('show');
+            });
+        @endif
     </script>
 @endpush

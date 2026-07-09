@@ -68,6 +68,12 @@ class CategoryController extends Controller
 
     public function edit(Category $category)
     {
+        if (request()->ajax()) {
+            return response()->json([
+                'success' => true,
+                'data' => $category
+            ]);
+        }
         return view('backend.layout.categories.form', compact('category'));
     }
 

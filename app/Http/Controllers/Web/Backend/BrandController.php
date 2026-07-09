@@ -76,6 +76,12 @@ class BrandController extends Controller
 
     public function edit(Brand $brand)
     {
+        if (request()->ajax()) {
+            return response()->json([
+                'success' => true,
+                'data' => $brand
+            ]);
+        }
         return view('backend.layout.brands.form', compact('brand'));
     }
 
