@@ -21,6 +21,15 @@ Route::get('session-key', function(){
 Route::get('session-forget', function(){
     return session()->flush();
 });
+Route::get('test-html', function() {
+    return view('backend.layout.settings.system')->render();
+});
+
+
+
+
+
+
 
 
 require_once __DIR__ .'/auth.php';

@@ -108,15 +108,18 @@ function isLinkedStorage(){
             $tempPath = sys_get_temp_dir() . '/' . $fileName;
 
             // Resize / process via Intervention
-            $img = Image::make($file)
-                ->resize(200, null, function ($constraint) {
+            $img = Image::make($file);
+
+            if ($option === 'thumb') {
+                $img->resize(150, 150);
+            } else {
+                $width = is_numeric($option) ? (int)$option : 1200;
+                $img->resize($width, null, function ($constraint) {
                     $constraint->aspectRatio();
                     $constraint->upsize();
                 });
-
-            if ($option === 'thumb') {
-                $img->resize(100, 100);
             }
+            
             $img->save($tempPath, 90);
 
             // ✅ Re-wrap into UploadedFile so we can use ->store()

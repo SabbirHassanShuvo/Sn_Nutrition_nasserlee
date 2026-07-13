@@ -176,17 +176,18 @@
                         let user = response.data;
                         $('#userName').text(user.name);
                         $('#userEmail').text(user.email);
-                        $('#userRole').text(user.role.replace('_', ' '));
+                        $('#userRole').text(user.role ? user.role.replace('_', ' ') : 'user');
                         $('#userJoined').text(new Date(user.created_at).toLocaleDateString());
                         
                         let avatar = (user.profile && user.profile.avatar) ? "{{ asset('') }}" + user.profile.avatar : 'https://ui-avatars.com/api/?name=' + encodeURIComponent(user.name);
                         $('#userAvatar').attr('src', avatar);
 
-                        if (user.role === 'health_professional' && user.partner_profile) {
+                        let partnerProfile = user.partner_profile || user.partnerProfile;
+                        if (user.role === 'health_professional' && partnerProfile) {
                             $('#partnerSection').removeClass('d-none');
-                            $('#userBio').text(user.partner_profile.bio || 'No bio provided');
-                            let specialties = user.partner_profile.specialties ? 
-                                (Array.isArray(user.partner_profile.specialties) ? user.partner_profile.specialties.join(', ') : user.partner_profile.specialties) : 
+                            $('#userBio').text(partnerProfile.bio || 'No bio provided');
+                            let specialties = partnerProfile.specialties ? 
+                                (Array.isArray(partnerProfile.specialties) ? partnerProfile.specialties.join(', ') : partnerProfile.specialties) : 
                                 'None';
                             $('#userSpecialties').text(specialties);
                         } else {

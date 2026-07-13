@@ -42,7 +42,7 @@
                                         <div class="col-md-4">
                                             <label class="form-label">Logo</label>
                                             <input type="file" name="logo"
-                                                class="dropify @error('logo') is-invalid @enderror" data-height="100"
+                                                class="dropify @error('logo') is-invalid @enderror" data-height="130"
                                                 @if(!empty($settings->logo))
                                                 data-default-file="{{ asset($settings->logo) }}" @endif>
                                             @error('logo')
@@ -54,7 +54,7 @@
                                         <div class="col-md-4">
                                             <label class="form-label">Mini Logo</label>
                                             <input type="file" name="mini_logo"
-                                                class="dropify @error('mini_logo') is-invalid @enderror" data-height="100"
+                                                class="dropify @error('mini_logo') is-invalid @enderror" data-height="130"
                                                 @if(!empty($settings->mini_logo))
                                                 data-default-file="{{ asset($settings->mini_logo) }}" @endif>
                                             @error('mini_logo')
@@ -66,7 +66,7 @@
                                         <div class="col-md-4">
                                             <label class="form-label">Favicon / Icon</label>
                                             <input type="file" name="icon"
-                                                class="dropify @error('icon') is-invalid @enderror" data-height="100"
+                                                class="dropify @error('icon') is-invalid @enderror" data-height="130"
                                                 @if(!empty($settings->icon))
                                                 data-default-file="{{ asset($settings->icon) }}" @endif>
                                             @error('icon')
@@ -180,13 +180,31 @@
 
 @push('style-bottom')
     <style>
+        .dropify-wrapper {
+            background-color: #1a1d26 !important; /* Dark background to make white logos visible */
+            border: 1px dashed #3a3f50 !important;
+            color: #fff !important;
+        }
+        .dropify-wrapper:hover {
+            background-image: linear-gradient(-45deg, #242936 25%, transparent 25%, transparent 50%, #242936 50%, #242936 75%, transparent 75%, transparent) !important;
+        }
+        .dropify-wrapper .dropify-preview {
+            background-color: #1a1d26 !important;
+        }
+        .dropify-wrapper .dropify-message span.file-icon {
+            color: #a6b0cf !important;
+        }
         .dropify-wrapper .dropify-message p {
             line-height: 2;
-            /* increase spacing */
             font-size: 16px;
-            /* adjust font size if needed */
-            color: #555;
-            /* custom text color */
+            color: #a6b0cf !important;
+        }
+        .dropify-wrapper .dropify-clear {
+            color: #fff !important;
+            border: 1px solid rgba(255, 255, 255, 0.2) !important;
+        }
+        .dropify-wrapper .dropify-clear:hover {
+            background: rgba(255, 255, 255, 0.1) !important;
         }
     </style>
 @endpush
@@ -207,3 +225,5 @@
     });
 </script>
 @endpush
+
+

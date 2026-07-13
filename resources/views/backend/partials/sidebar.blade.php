@@ -43,7 +43,7 @@
                     </a>
                 </li>
 
-                @canany(['role_management', 'user_management'])
+                @role('super_admin')
                     <li class="nav-item">
                         <a class="nav-link menu-link {{ getPageStatus(['backend.role.*', 'backend.system-user.*'], 'collapsed active') }}"
                             href="#sidebarLanding" data-bs-toggle="collapse" role="button" aria-expanded="false"
@@ -66,14 +66,16 @@
                             </ul>
                         </div>
                     </li>
-                @endcanany
+                @endrole
 
+                @can('user_management')
                 <li class="nav-item">
                     <a class="nav-link menu-link {{ request()->routeIs('backend.app-user.*') ? 'active' : '' }}"
                         href="{{ route('backend.app-user.index') }}">
                         <i class="ri-group-line"></i> <span>User Management</span>
                     </a>
                 </li>
+                @endcan
 
                 {{-- <li class="nav-item">
                     <a class="nav-link menu-link  {{getPageStatus('backend.dashboard.*', 'collapsed active')}}" href="#sidebarDashboards" data-bs-toggle="collapse" role="button" aria-expanded="false" aria-controls="sidebarDashboards">
@@ -89,51 +91,61 @@
                 </li>  --}}
                 <!-- end Dashboard Menu -->
 
+                @canany(['categories_manage', 'category_manage'])
                 <li class="nav-item">
                     <a class="nav-link menu-link {{ request()->routeIs('backend.category.*') ? 'active' : '' }}"
                         href="{{ route('backend.category.index') }}">
                         <i class="ri-stack-line"></i> <span>Categories</span>
                     </a>
                 </li>
+                @endcanany
 
+                @canany(['brands_manage', 'brand_manage'])
                 <li class="nav-item">
                     <a class="nav-link menu-link {{ request()->routeIs('backend.brand.*') ? 'active' : '' }}"
                         href="{{ route('backend.brand.index') }}">
                         <i class="ri-medal-line"></i> <span>Brands</span>
                     </a>
                 </li>
+                @endcanany
 
+                @canany(['products_manage', 'product_manage'])
                 <li class="nav-item">
                     <a class="nav-link menu-link {{ request()->routeIs('backend.product.*') ? 'active' : '' }}"
                         href="{{ route('backend.product.index') }}">
                         <i class="ri-store-2-line"></i> <span>Products</span>
                     </a>
                 </li>
+                @endcanany
 
+                @canany(['orders_manage', 'order_manage'])
                 <li class="nav-item">
                     <a class="nav-link menu-link {{ request()->routeIs('backend.order.*') ? 'active' : '' }}"
                         href="{{ route('backend.order.index') }}">
                         <i class="ri-shopping-cart-2-line"></i> <span>Orders</span>
                     </a>
                 </li>
+                @endcanany
 
+                @canany(['promo_codes_manage', 'promo_code_manage'])
                 <li class="nav-item">
                     <a class="nav-link menu-link {{ request()->routeIs('backend.promo-code.*') ? 'active' : '' }}"
                         href="{{ route('backend.promo-code.index') }}">
                         <i class="ri-ticket-line"></i> <span>Promo Codes</span>
                     </a>
                 </li>
+                @endcanany
 
+                @canany(['onboarding_options_manage', 'onboarding_manage'])
                 <li class="nav-item">
                     <a class="nav-link menu-link {{ request()->routeIs('backend.onboarding-option.*') ? 'active' : '' }}"
                         href="{{ route('backend.onboarding-option.index') }}">
                         <i class="ri-user-settings-line"></i> <span>Onboarding Options</span>
                     </a>
                 </li>
+                @endcanany
 
-
-
-
+                @canany(['setting_profile', 'setting_system', 'setting_mail'])
                 <li class="nav-item">
                     <a class="nav-link menu-link {{ getPageStatus('backend.settings.*') }}" href="#sidebarMultilevel"
                         data-bs-toggle="collapse" role="button" aria-expanded="false"
@@ -143,24 +155,31 @@
                     <div class="collapse menu-dropdown {{ getPageStatus('backend.settings.*', 'show') }}"
                         id="sidebarMultilevel">
                         <ul class="nav nav-sm flex-column">
+                            @can('setting_profile')
                             <li class="nav-item">
                                 <a href="{{ route('backend.settings.profile.index') }}"
                                     class="nav-link {{ getPageStatus('backend.settings.profile.*') }}"
                                     data-key="t-level-1.1"> Profile Settings </a>
                             </li>
+                            @endcan
+                            @can('setting_system')
                             <li class="nav-item">
                                 <a href="{{ route('backend.settings.system.index') }}"
                                     class="nav-link {{ getPageStatus('backend.settings.system.*') }}"
                                     data-key="t-level-1.1"> System Settings </a>
                             </li>
+                            @endcan
+                            @can('setting_mail')
                             <li class="nav-item">
                                 <a href="{{ route('backend.settings.mail.index') }}"
                                     class="nav-link {{ getPageStatus('backend.settings.mail.*') }}"
                                     data-key="t-level-1.1"> Mail Settings</a>
                             </li>
+                            @endcan
                         </ul>
                     </div>
                 </li>
+                @endcanany
 
             </ul>
         </div>

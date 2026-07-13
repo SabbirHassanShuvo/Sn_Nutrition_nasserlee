@@ -61,11 +61,38 @@
         });
 
         drEvent.on('dropify.beforeClear', function(event, element){
-            return confirm("Do you really want to delete \"" + element.file.name + "\" ?");
-        });
+            if (element.input.data('confirmed') === true) {
+                element.input.data('confirmed', false);
+                return true;
+            }
 
-        drEvent.on('dropify.afterClear', function(event, element){
-            alert('File deleted');
+            Swal.fire({
+                title: 'Are you sure?',
+                text: "Do you really want to delete \"" + element.file.name + "\"?",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#ef4444',
+                cancelButtonColor: '#6b7280',
+                confirmButtonText: 'Yes, delete it!',
+                cancelButtonText: 'Cancel'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    element.input.data('confirmed', true);
+                    element.clearElement();
+                    
+                    Swal.fire({
+                        toast: true,
+                        position: 'top-end',
+                        icon: 'success',
+                        title: 'File deleted successfully',
+                        showConfirmButton: false,
+                        timer: 3000,
+                        timerProgressBar: true
+                    });
+                }
+            });
+
+            return false;
         });
     });
 </script>

@@ -60,9 +60,9 @@ class AppUserController extends Controller
         return view("backend.layout.users.app_users.index");
     }
 
-    public function show(User $user)
+    public function show($id)
     {
-        $user->load(['profile', 'partnerProfile']);
+        $user = User::with(['profile', 'partnerProfile'])->findOrFail($id);
         return response()->json([
             'success' => true,
             'data' => $user
@@ -108,9 +108,10 @@ class AppUserController extends Controller
         }
     }
 
-    public function destroy(User $user)
+    public function destroy($id)
     {
         try {
+            $user = User::findOrFail($id);
             $user->delete();
             return response()->json(['success' => true, 'message' => 'User deleted successfully.']);
         } catch (\Exception $e) {
@@ -118,3 +119,4 @@ class AppUserController extends Controller
         }
     }
 }
+ 

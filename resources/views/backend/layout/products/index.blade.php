@@ -28,12 +28,13 @@
                                             <input class="form-check-input fs-14" type="checkbox" id="checkAll">
                                         </div>
                                     </th>
-                                    <th class="ps-3" style="width: 60px;">ID</th>
-                                    <th style="width: 80px;">Image</th>
+                                    <th style="width: 80px;" class="ps-3">Image</th>
                                     <th class="text-start">Product Details</th>
-                                    <th class="text-center" style="width: 150px;">Price</th>
-                                    <th class="text-center" style="width: 120px;">Status</th>
-                                    <th class="text-center" style="width: 150px;">Actions</th>
+                                    <th class="text-start" style="width: 120px;">Category</th>
+                                    <th class="text-center" style="width: 120px;">Price</th>
+                                    <th class="text-center" style="width: 120px;">Stock</th>
+                                    <th class="text-center" style="width: 100px;">Status</th>
+                                    <th class="text-center" style="width: 120px;">Actions</th>
                                 </tr>
                             </thead>
                             <tbody class="list"></tbody>
@@ -185,10 +186,11 @@
                     ajax: "{{ route('backend.product.index') }}",
                     columns: [
                         { data: 'checkbox', name: 'checkbox', orderable: false, searchable: false, className: 'text-center' },
-                        { data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable: false, className: 'ps-3 text-muted fw-medium' },
-                        { data: 'image', name: 'image', orderable: false, searchable: false, className: 'text-center' },
+                        { data: 'image', name: 'image', orderable: false, searchable: false, className: 'ps-3 text-center' },
                         { data: 'name', name: 'name', className: 'text-start fw-medium' },
+                        { data: 'category', name: 'category', className: 'text-start' },
                         { data: 'price', name: 'price', className: 'text-center' },
+                        { data: 'stock', name: 'stock', className: 'text-center', orderable: false, searchable: false },
                         { data: 'status', name: 'status', orderable: false, searchable: false, className: 'text-center' },
                         { data: 'action', name: 'action', orderable: false, searchable: false, className: 'text-center' }
                     ]
@@ -211,7 +213,7 @@
                         $('#modalProductName').text(product.name);
                         $('#modalProductTitle').text(product.name);
                         $('#modalProductCategory').text(product.category ? product.category.name : 'Uncategorized');
-                        $('#modalProductBrand').text(product.brand || 'No Brand');
+                        $('#modalProductBrand').text(product.brand_data ? product.brand_data.name : 'No Brand');
                         $('#modalProductPrice').text(product.price + ' MAD');
                         $('#modalProductOldPrice').text(product.old_price ? product.old_price + ' MAD' : '');
                         $('#modalProductServings').text(product.servings || '-');
@@ -256,7 +258,7 @@
                         let nutritionHtml = '';
                         if (product.nutrition && product.nutrition.length > 0) {
                             product.nutrition.forEach(n => {
-                                nutritionHtml += `<tr><td class="fw-medium">${n.name}</td><td class="text-end text-primary fw-bold">${n.value}</td></tr>`;
+                                nutritionHtml += `<tr><td class="fw-medium">${n.name}</td><td class="text-end text-primary fw-bold">${n.amount}</td></tr>`;
                             });
                         } else {
                             nutritionHtml = '<tr><td colspan="2" class="text-center text-muted">No nutrition data</td></tr>';

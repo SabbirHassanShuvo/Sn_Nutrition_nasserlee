@@ -15,8 +15,7 @@ class SystemController extends Controller
     }
 
     public function update(SystemRequest $request){
-        $settings = Setting::first();
-
+        $settings = Setting::first() ?? new Setting();
 
         if($request->file('logo')){
             $settings->logo = fileUpdate($request->logo, 'settings/logo', $settings->logo, 'public');
@@ -28,12 +27,10 @@ class SystemController extends Controller
             $settings->icon = fileUpdate($request->icon, 'settings/icon', $settings->icon);
         }
 
+        $data = $request->safe()->except(['logo', 'mini_logo', 'icon']);
+        $settings->fill($data);
         $settings->save();
 
-        $data = $request->safe()->except(['logo', 'mini_logo', 'icon']);
-        $settings->update($data);
-
         return redirect()->route('backend.settings.system.index')->with('success','Updated System Settings');
-
     }
 }

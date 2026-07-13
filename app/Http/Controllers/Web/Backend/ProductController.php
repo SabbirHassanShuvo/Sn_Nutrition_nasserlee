@@ -34,18 +34,27 @@ class ProductController extends Controller
                     return '<img src="' . $img . '" alt="' . $product->name . '" width="50" height="50" class="rounded">';
                 })
                 ->addColumn('name', function ($product) {
-                    $categoryName = $product->category ? $product->category->name : 'No Category';
                     $brandName = 'No Brand';
                     if ($product->brandData) {
                         $brandName = $product->brandData->name . ' (<i class="ri-star-fill text-warning fs-11"></i> ' . $product->brandData->rating . ')';
                     }
                     return '<div>
                         <h6 class="mb-0 fs-14">' . $product->name . '</h6>
-                        <p class="text-muted mb-0 fs-12">' . $categoryName . ' | ' . $brandName . '</p>
+                        <p class="text-muted mb-0 fs-12">' . $brandName . '</p>
                     </div>';
+                })
+                ->addColumn('category', function ($product) {
+                    return $product->category ? '<span class="badge bg-soft-success text-success fs-12">' . $product->category->name . '</span>' : '<span class="badge bg-soft-secondary text-secondary fs-12">No Category</span>';
                 })
                 ->addColumn('price', function ($product) {
                     return '<span class="fw-bold text-primary">' . $product->price . ' MAD</span>' . ($product->old_price ? ' <del class="text-muted fs-12">' . $product->old_price . '</del>' : '');
+                })
+                ->addColumn('stock', function ($product) {
+                    if ($product->in_stock) {
+                        return '<span class="badge bg-soft-info text-info fs-12">' . ($product->quantity ?? 0) . ' In Stock</span>';
+                    } else {
+                        return '<span class="badge bg-soft-danger text-danger fs-12">Out of Stock</span>';
+                    }
                 })
                 ->addColumn('status', function ($product) {
                     return getStatusHTML($product, '#198754', $product->status == 'active' ? '26px' : '2px');
@@ -65,7 +74,7 @@ class ProductController extends Controller
                         </div>
                     ';
                 })
-                ->rawColumns(['checkbox', 'image', 'name', 'price', 'status', 'action'])
+                ->rawColumns(['checkbox', 'image', 'name', 'category', 'price', 'stock', 'status', 'action'])
                 ->make(true);
         }
         return view("backend.layout.products.index");
