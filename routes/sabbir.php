@@ -7,6 +7,8 @@ use App\Http\Controllers\Api\Frontend\HomeController;
 use App\Http\Controllers\Api\Frontend\WishlistController;
 use App\Http\Controllers\Api\Frontend\ComparisonController;
 use App\Http\Controllers\Api\Frontend\AffiliateController;
+use App\Http\Controllers\Api\PartnerOnboardingController;
+use App\Http\Controllers\API\CategoryController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -65,4 +67,19 @@ Route::middleware('auth:api')->group(function () {
         Route::get('/tiers', [AffiliateController::class, 'getTiersInfo']);
         Route::get('/earnings-chart', [AffiliateController::class, 'getEarningsChart']);
     });
+});
+
+// Public Data Routes
+Route::get('/categories', [CategoryController::class, 'index']);
+
+// Partner Onboarding Flow
+Route::group([
+    'prefix' => 'partner/onboarding'
+], function ($router) {
+    Route::get('/options/specialties', [PartnerOnboardingController::class, 'getSpecialties']);
+    Route::get('/options/certifications', [PartnerOnboardingController::class, 'getCertifications']);
+    Route::post('/step-1', [PartnerOnboardingController::class, 'step1']);
+    Route::post('/step-2', [PartnerOnboardingController::class, 'step2']);
+    Route::post('/step-3', [PartnerOnboardingController::class, 'step3']);
+    Route::post('/step-4', [PartnerOnboardingController::class, 'step4']);
 });
