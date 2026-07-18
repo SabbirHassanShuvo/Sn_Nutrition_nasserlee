@@ -47,7 +47,7 @@ class CartController extends BaseController
         });
 
         $subtotal = $formattedItems->sum('total_price');
-        $delivery = 50.0; // Consistent with CouponController
+        $delivery = (float) (\App\Models\Setting::first()->delivery_charge ?? 50.0);
         $discount = 0.0; 
         $promoCode = null;
         $discountPercent = 0;
@@ -180,6 +180,7 @@ class CartController extends BaseController
         } catch (\Exception $e) {
             return $this->sendError('Failed to update cart.', $e->getMessage());
         }
+
     }
 
     /**

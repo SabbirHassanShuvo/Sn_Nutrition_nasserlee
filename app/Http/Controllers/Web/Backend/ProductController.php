@@ -24,9 +24,7 @@ class ProductController extends Controller
             $products = Product::latest();
             return DataTables::of($products)
                 ->addColumn('checkbox', function ($product) {
-                    return '<div class="form-check text-center">
-                                <input class="form-check-input fs-15" type="checkbox" name="checkAll" value="'.$product->id.'">
-                            </div>';
+                    return '<input type="checkbox" class="form-check-input row-checkbox" value="' . $product->id . '">';
                 })
                 ->addIndexColumn()
                 ->addColumn('image', function ($product) {
@@ -303,5 +301,31 @@ class ProductController extends Controller
             'success' => true,
             'message' => 'Status updated',
         ]);
+    }
+
+    public function bulkDestroy(Request $request)
+    {
+        $ids = $request->ids;
+        if (!$ids || !is_array($ids)) {
+            return response()->json(['success' => false, 'message' => 'No items selected.']);
+        }
+
+        try {
+            $products = Product::whereIn('id', $ids)->get();
+            foreach ($products as $product) {
+                if ($product->main_image) {
+                    fileDelete($product->main_image);
+                }
+                if ($product->gallery_images) {
+                    foreach ($product->gallery_images as $img) {
+                        fileDelete($img);
+                    }
+                }
+                $product->delete();
+            }
+            return response()->json(['success' => true, 'message' => 'Selected items deleted successfully.']);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => 'Failed to delete selected items.']);
+        }
     }
 }

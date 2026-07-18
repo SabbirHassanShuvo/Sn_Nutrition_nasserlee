@@ -6,13 +6,13 @@
                 <div class="card-header border-0">
                     <div class="d-flex align-items-center">
                         <h5 class="card-title mb-0 flex-grow-1">All FAQs</h5>
-                        <div class="flex-shrink-0">
+                        <div class="flex-shrink-0 d-flex gap-2">
+                            <button type="button" class="btn btn-danger d-none align-items-center" id="bulkDeleteBtn">
+                                <i class="ri-delete-bin-line align-bottom me-1"></i> Bulk Delete
+                            </button>
                             <a class="btn btn-danger add-btn" href="{{route('backend.feature.faq.create')}}">
                                 <i class="ri-add-line align-bottom me-1"></i> Create FAQ
                             </a>
-
-                            {{-- <button class="btn btn-soft-danger" onClick="deleteMultiple()"><i
-                                    class="ri-delete-bin-2-line"></i></button> --}}
                         </div>
                     </div>
                 </div>
@@ -27,6 +27,7 @@
                             <table class="table align-middle table-nowrap table-striped mb-0 data-table">
                                 <thead class="table-light text-muted">
                                     <tr>
+                                        <th style="width: 40px; text-align: center;"><input type="checkbox" class="form-check-input" id="checkAll"></th>
                                         <th class="wd-10p border-bottom-0">ID</th>
                                         <th class="wd-30p border-bottom-0">Question</th>
                                         <th class="wd-30p border-bottom-0">Answer</th>
@@ -65,7 +66,8 @@
 
                     ajax: "{{ route('backend.feature.faq.index') }}",
                     columns: [
-                         { data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable: false },
+                        { data: 'checkbox', name: 'checkbox', orderable: false, searchable: false, className: 'text-center' },
+                        { data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable: false },
                         { data: 'question', name: 'question' },
                         { data: 'answer', name: 'answer' },
                         { data: 'priority', name: 'priority' },
@@ -73,6 +75,8 @@
                         { data: 'action', name: 'action', orderable: false, searchable: false }
                     ]
                 });
+                
+                initBulkDelete("{{ route('backend.feature.faq.bulk-destroy') }}");
             });
         })(jQuery);
         $(document).on('shown.bs.collapse shown.bs.tab', function () {
@@ -131,38 +135,48 @@
         }
 
         function deleteData(url) {
-            if (confirm("Are you sure you want to delete this FAQ?")) {
-                $.ajax({
-                    url: url,
-                    type: 'DELETE',
-                    data: { _token: "{{ csrf_token() }}" },
-                    success: function (response) {
-                        if (response.success) {
-                            $('.data-table').DataTable().ajax.reload();
-                            Swal.fire({
-                                toast: true,
-                                position: "top-end",   // top-end, top-start, bottom-end, bottom-start
-                                icon: "success",
-                                title: response.message || "Faq Deleted successfully",
-                                showConfirmButton: false,
-                                timer: 3000,
-                                timerProgressBar: true
-                            });
+            Swal.fire({
+                title: 'Are you sure?',
+                text: "You want to delete this FAQ?",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Yes, delete it!'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.ajax({
+                        url: url,
+                        type: 'DELETE',
+                        data: { _token: "{{ csrf_token() }}" },
+                        success: function (response) {
+                            if (response.success) {
+                                $('.data-table').DataTable().ajax.reload();
+                                Swal.fire({
+                                    toast: true,
+                                    position: "top-end",   // top-end, top-start, bottom-end, bottom-start
+                                    icon: "success",
+                                    title: response.message || "Faq Deleted successfully",
+                                    showConfirmButton: false,
+                                    timer: 3000,
+                                    timerProgressBar: true
+                                });
+                            }
+                            else {
+                                Swal.fire({
+                                    toast: true,
+                                    position: "top-end",
+                                    icon: "error",
+                                    title: response.message || "Something went wrong",
+                                    showConfirmButton: false,
+                                    timer: 3000,
+                                    timerProgressBar: true
+                                });
+                            }
                         }
-                        else {
-                            Swal.fire({
-                                toast: true,
-                                position: "top-end",
-                                icon: "error",
-                                title: response.message || "Something went wrong",
-                                showConfirmButton: false,
-                                timer: 3000,
-                                timerProgressBar: true
-                            });
-                        }
-                    }
-                });
-            }
+                    });
+                }
+            });
         }
     </script>
 @endpush

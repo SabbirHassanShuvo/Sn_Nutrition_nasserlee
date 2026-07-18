@@ -16,12 +16,16 @@ class CategoryController extends BaseController
     {
         $categories = Category::where('status', 'active')->latest()->get();
         
-        // Append full image url if image exists
-        $categories->map(function ($category) {
-            $category->image_url = $category->image ? asset($category->image) : 'https://ui-avatars.com/api/?name=' . urlencode($category->name);
-            return $category;
+        $formattedCategories = $categories->map(function ($category) {
+            return [
+                'id' => $category->id,
+                'title' => $category->name,
+                'query' => $category->slug,
+                'image' => $category->image ? asset($category->image) : 'https://ui-avatars.com/api/?name=' . urlencode($category->name),
+                'color' => $category->color ?? '#FF8000',
+            ];
         });
 
-        return $this->sendResponse($categories, 'Categories retrieved successfully.');
+        return $this->sendResponse($formattedCategories, 'Categories retrieved successfully.');
     }
 }

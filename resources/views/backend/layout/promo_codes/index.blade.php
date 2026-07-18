@@ -277,19 +277,29 @@
         }
 
         function deleteData(url) {
-            if (confirm('Are you sure you want to delete this promo code?')) {
-                $.ajax({
-                    url: url,
-                    type: 'DELETE',
-                    data: { _token: "{{ csrf_token() }}" },
-                    success: function(response) {
-                        if (response.success) {
-                            $('.data-table').DataTable().ajax.reload();
-                            toastr.success(response.message);
+            Swal.fire({
+                title: 'Are you sure?',
+                text: "You want to delete this promo code?",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Yes, delete it!'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.ajax({
+                        url: url,
+                        type: 'DELETE',
+                        data: { _token: "{{ csrf_token() }}" },
+                        success: function(response) {
+                            if (response.success) {
+                                $('.data-table').DataTable().ajax.reload();
+                                toastr.success(response.message);
+                            }
                         }
-                    }
-                });
-            }
+                    });
+                }
+            });
         }
 
         function generateCode() {

@@ -33,6 +33,7 @@ class SystemRequest extends FormRequest
             'contact'     => 'nullable|string|max:20',
             'email'       => 'nullable|email|max:255',
             'about'       => 'nullable|string',
+            'delivery_charge' => 'nullable|numeric|min:0',
         ];
     }
 }

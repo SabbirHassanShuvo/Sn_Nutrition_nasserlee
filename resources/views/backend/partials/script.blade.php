@@ -119,3 +119,93 @@
     });
 
 </script>
+
+<script>
+    function initBulkDelete(url, tableSelector = '.data-table') {
+        // Handle "Select All" checkbox
+        $(document).on('change', '#checkAll', function() {
+            let isChecked = $(this).prop('checked');
+            $(tableSelector + ' tbody .row-checkbox').prop('checked', isChecked);
+            toggleBulkDeleteBtn();
+        });
+
+        // Handle individual row checkbox
+        $(document).on('change', tableSelector + ' tbody .row-checkbox', function() {
+            let allChecked = $(tableSelector + ' tbody .row-checkbox').length === $(tableSelector + ' tbody .row-checkbox:checked').length;
+            $('#checkAll').prop('checked', allChecked);
+            toggleBulkDeleteBtn();
+        });
+
+        // Toggle Bulk Delete Button visibility
+        function toggleBulkDeleteBtn() {
+            if ($('.row-checkbox:checked').length > 0) {
+                $('#bulkDeleteBtn').removeClass('d-none');
+            } else {
+                $('#bulkDeleteBtn').addClass('d-none');
+            }
+        }
+
+        // Handle Bulk Delete Button click
+        $(document).off('click', '#bulkDeleteBtn').on('click', '#bulkDeleteBtn', function() {
+            let selectedIds = [];
+            $('.row-checkbox:checked').each(function() {
+                selectedIds.push($(this).val());
+            });
+
+            if (selectedIds.length === 0) return;
+
+            Swal.fire({
+                title: 'Are you sure?',
+                text: "You want to delete the selected items?",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Yes, delete them!'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.ajax({
+                        url: url,
+                        type: 'DELETE',
+                        data: { 
+                            ids: selectedIds, 
+                            _token: "{{ csrf_token() }}" 
+                        },
+                        success: function (response) {
+                            if (response.success) {
+                                $(tableSelector).DataTable().ajax.reload(null, false);
+                                $('#checkAll').prop('checked', false);
+                                toggleBulkDeleteBtn();
+                                Swal.fire({
+                                    toast: true,
+                                    position: "top-end",
+                                    icon: "success",
+                                    title: response.message || "Items deleted successfully",
+                                    showConfirmButton: false,
+                                    timer: 3000,
+                                    timerProgressBar: true
+                                });
+                            } else {
+                                Swal.fire({
+                                    toast: true,
+                                    position: "top-end",
+                                    icon: "error",
+                                    title: response.message || "Something went wrong",
+                                    showConfirmButton: false,
+                                    timer: 3000,
+                                    timerProgressBar: true
+                                });
+                            }
+                        }
+                    });
+                }
+            });
+        });
+        
+        // Reset state when datatable is redrawn
+        $(tableSelector).on('draw.dt', function () {
+            $('#checkAll').prop('checked', false);
+            toggleBulkDeleteBtn();
+        });
+    }
+</script>

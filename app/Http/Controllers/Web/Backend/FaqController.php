@@ -17,6 +17,9 @@ class FaqController extends Controller
         if($request->ajax()){
             $faq = Faq::latest('priority')->get();
             return DataTables::of($faq)
+            ->addColumn('checkbox', function ($faq) {
+                return '<input type="checkbox" class="form-check-input row-checkbox" value="' . $faq->id . '">';
+            })
             ->addIndexColumn()
             
             ->addColumn('question', function($faq){
@@ -48,7 +51,8 @@ class FaqController extends Controller
                     return $data->id;
                 }
             ])
-            ->rawColumns(['question','status','action'])
+            ])
+            ->rawColumns(['checkbox', 'question','status','action'])
             ->make(true);
             ;
         }
@@ -115,5 +119,20 @@ class FaqController extends Controller
             'success'=> true,
             'message'=> 'status updated',
             ]);
+    }
+
+    public function bulkDestroy(Request $request)
+    {
+        $ids = $request->ids;
+        if (!$ids || !is_array($ids)) {
+            return response()->json(['success' => false, 'message' => 'No items selected.']);
+        }
+
+        try {
+            Faq::whereIn('id', $ids)->delete();
+            return response()->json(['success' => true, 'message' => 'Selected items deleted successfully.']);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => 'Failed to delete selected items.']);
+        }
     }
 }

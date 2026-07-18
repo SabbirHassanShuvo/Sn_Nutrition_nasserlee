@@ -47,7 +47,7 @@ class CouponController extends BaseController
                 return $item->product->price * $item->quantity;
             });
             
-            $delivery = 50; // Fixed delivery for now
+            $delivery = (float) (\App\Models\Setting::first()->delivery_charge ?? 50.0);
             $total = ($subtotal - $discountAmount) + $delivery;
 
             return $this->sendResponse([

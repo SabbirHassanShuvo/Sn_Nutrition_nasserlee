@@ -11,7 +11,10 @@
                         <h5 class="card-title mb-0 fw-bold text-primary">Brands</h5>
                         <p class="text-muted mb-0 fs-12">Manage product brands</p>
                     </div>
-                    <div class="flex-shrink-0">
+                    <div class="flex-shrink-0 d-flex gap-2">
+                        <button type="button" class="btn btn-danger btn-sm shadow-sm d-none align-items-center" id="bulkDeleteBtn">
+                            <i class="ri-delete-bin-line align-bottom me-1"></i> Bulk Delete
+                        </button>
                         <button type="button" class="btn btn-primary btn-sm add-btn shadow-sm d-flex align-items-center" onclick="openCreateModal()">
                             <i class="ri-add-line align-bottom me-1"></i> Add New Brand
                         </button>
@@ -23,6 +26,7 @@
                         <table class="table align-middle table-nowrap table-hover mb-0 data-table custom-table">
                             <thead class="table-light">
                                 <tr>
+                                    <th style="width: 40px; text-align: center;"><input type="checkbox" class="form-check-input" id="checkAll"></th>
                                     <th class="ps-3" style="width: 60px;">ID</th>
                                     <th style="width: 80px;">Logo</th>
                                     <th class="text-start">Brand Name</th>
@@ -131,6 +135,7 @@
                     dom: '<"row mb-3 px-3 mt-3"<"col-md-6"l><"col-md-6 d-flex justify-content-end"f>>rt<"row align-items-center mt-3 px-3 pb-3"<"col-md-6"i><"col-md-6 d-flex justify-content-end"p>>',
                     ajax: "{{ route('backend.brand.index') }}",
                     columns: [
+                        { data: 'checkbox', name: 'checkbox', orderable: false, searchable: false, className: 'text-center' },
                         { data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable: false, className: 'ps-3 text-muted fw-medium' },
                         { data: 'image', name: 'image', orderable: false, searchable: false, className: 'text-center' },
                         { data: 'name', name: 'name', className: 'text-start fw-medium' },
@@ -139,6 +144,8 @@
                         { data: 'action', name: 'action', orderable: false, searchable: false, className: 'text-center' }
                     ]
                 });
+
+                initBulkDelete("{{ route('backend.brand.bulk-destroy') }}");
             });
         })(jQuery);
 

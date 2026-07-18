@@ -14,6 +14,9 @@ class PromoCodeController extends Controller
         if ($request->ajax()) {
             $promoCodes = PromoCode::with(['category', 'product', 'healthProfessional'])->latest();
             return DataTables::of($promoCodes)
+                ->addColumn('checkbox', function ($promoCode) {
+                    return '<input type="checkbox" class="form-check-input row-checkbox" value="' . $promoCode->id . '">';
+                })
                 ->addIndexColumn()
                 ->addColumn('type', function ($promoCode) {
                     return ucfirst($promoCode->type);
@@ -47,7 +50,7 @@ class PromoCodeController extends Controller
                         </div>
                     ';
                 })
-                ->rawColumns(['status', 'action'])
+                ->rawColumns(['checkbox', 'status', 'action'])
                 ->make(true);
         }
         $categories = \App\Models\Category::all();
@@ -130,6 +133,21 @@ class PromoCodeController extends Controller
             return response()->json(['success' => true, 'message' => 'Status updated successfully']);
         } catch (\Exception $e) {
             return response()->json(['success' => false, 'message' => 'Failed to update status']);
+        }
+    }
+
+    public function bulkDestroy(Request $request)
+    {
+        $ids = $request->ids;
+        if (!$ids || !is_array($ids)) {
+            return response()->json(['success' => false, 'message' => 'No items selected.']);
+        }
+
+        try {
+            PromoCode::whereIn('id', $ids)->delete();
+            return response()->json(['success' => true, 'message' => 'Selected items deleted successfully.']);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => 'Failed to delete selected items.']);
         }
     }
 }

@@ -14,6 +14,9 @@ class OnboardingOptionController extends Controller
         if ($request->ajax()) {
             $options = OnboardingOption::latest();
             return DataTables::of($options)
+                ->addColumn('checkbox', function ($option) {
+                    return '<input type="checkbox" class="form-check-input row-checkbox" value="' . $option->id . '">';
+                })
                 ->addIndexColumn()
                 ->addColumn('type', function ($option) {
                     return ucfirst($option->type);
@@ -33,7 +36,7 @@ class OnboardingOptionController extends Controller
                         </div>
                     ';
                 })
-                ->rawColumns(['status', 'action'])
+                ->rawColumns(['checkbox', 'status', 'action'])
                 ->make(true);
         }
         return view("backend.layout.onboarding_options.index");
@@ -105,5 +108,20 @@ class OnboardingOptionController extends Controller
             'success' => true,
             'message' => 'Status updated',
         ]);
+    }
+
+    public function bulkDestroy(Request $request)
+    {
+        $ids = $request->ids;
+        if (!$ids || !is_array($ids)) {
+            return response()->json(['success' => false, 'message' => 'No items selected.']);
+        }
+
+        try {
+            OnboardingOption::whereIn('id', $ids)->delete();
+            return response()->json(['success' => true, 'message' => 'Selected items deleted successfully.']);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => 'Failed to delete selected items.']);
+        }
     }
 }

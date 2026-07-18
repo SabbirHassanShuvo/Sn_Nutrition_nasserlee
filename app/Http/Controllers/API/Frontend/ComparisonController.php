@@ -80,13 +80,6 @@ class ComparisonController extends BaseController
                 return $this->sendError('You can only compare up to 4 products at a time.', [], 422);
             }
 
-            // Same Category Validation
-            if ($existingComparisons->isNotEmpty()) {
-                $firstProduct = $existingComparisons->first()->product;
-                if ($firstProduct->category_id != $newProduct->category_id) {
-                    return $this->sendError('You can only compare products from the same category.', [], 422);
-                }
-            }
 
             Comparison::create([
                 'user_id' => $user->id,

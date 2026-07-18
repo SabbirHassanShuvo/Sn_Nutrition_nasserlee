@@ -15,6 +15,9 @@ class OrderController extends Controller
         if ($request->ajax()) {
             $orders = Order::with(['user', 'affiliateLink.user'])->latest();
             return DataTables::of($orders)
+                ->addColumn('checkbox', function ($order) {
+                    return '<input type="checkbox" class="form-check-input row-checkbox" value="' . $order->id . '">';
+                })
                 ->addIndexColumn()
                 ->addColumn('order_number', function ($order) {
                     return '<span class="fw-bold">' . $order->order_number . '</span>';
@@ -72,7 +75,7 @@ class OrderController extends Controller
                         </div>
                     ';
                 })
-                ->rawColumns(['order_number', 'customer', 'referred_by', 'amount', 'payment', 'status', 'action'])
+                ->rawColumns(['checkbox', 'order_number', 'customer', 'referred_by', 'amount', 'payment', 'status', 'action'])
                 ->make(true);
         }
         return view("backend.layout.orders.index");
@@ -137,5 +140,20 @@ class OrderController extends Controller
             'success' => true,
             'message' => 'Order deleted successfully'
         ]);
+    }
+
+    public function bulkDestroy(Request $request)
+    {
+        $ids = $request->ids;
+        if (!$ids || !is_array($ids)) {
+            return response()->json(['success' => false, 'message' => 'No items selected.']);
+        }
+
+        try {
+            Order::whereIn('id', $ids)->delete();
+            return response()->json(['success' => true, 'message' => 'Selected items deleted successfully.']);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => 'Failed to delete selected items.']);
+        }
     }
 }

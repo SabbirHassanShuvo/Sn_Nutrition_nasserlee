@@ -110,6 +110,21 @@
                                             @enderror
                                         </div>
 
+                                        <!-- Delivery Charge -->
+                                        <div class="col-md-6">
+                                            <label class="form-label">Delivery Charge</label>
+                                            <div class="input-group">
+                                                <span class="input-group-text">$</span>
+                                                <input type="number" step="0.01" name="delivery_charge"
+                                                    class="form-control @error('delivery_charge') is-invalid @enderror"
+                                                    placeholder="50.00"
+                                                    value="{{ old('delivery_charge', $settings->delivery_charge ?? '50.00') }}">
+                                            </div>
+                                            @error('delivery_charge')
+                                                <span class="invalid-feedback d-block">{{ $message }}</span>
+                                            @enderror
+                                        </div>
+
                                         <!-- Footer Settings -->
                                         <div class="col-md-12">
                                             <h5 class="mt-4">Footer Settings</h5>

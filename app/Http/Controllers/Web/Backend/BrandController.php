@@ -15,6 +15,9 @@ class BrandController extends Controller
         if ($request->ajax()) {
             $brands = Brand::latest();
             return DataTables::of($brands)
+                ->addColumn('checkbox', function ($brand) {
+                    return '<input type="checkbox" class="form-check-input row-checkbox" value="' . $brand->id . '">';
+                })
                 ->addIndexColumn()
                 ->addColumn('image', function ($brand) {
                     $img = $brand->image ? asset($brand->image) : 'https://ui-avatars.com/api/?name=' . urlencode($brand->name);
@@ -41,7 +44,7 @@ class BrandController extends Controller
                         </div>
                     ';
                 })
-                ->rawColumns(['image', 'name', 'status', 'action'])
+                ->rawColumns(['checkbox', 'image', 'name', 'status', 'action'])
                 ->make(true);
         }
         return view("backend.layout.brands.index");
@@ -136,5 +139,26 @@ class BrandController extends Controller
             'success' => true,
             'message' => 'Status updated',
         ]);
+    }
+
+    public function bulkDestroy(Request $request)
+    {
+        $ids = $request->ids;
+        if (!$ids || !is_array($ids)) {
+            return response()->json(['success' => false, 'message' => 'No items selected.']);
+        }
+
+        try {
+            $brands = Brand::whereIn('id', $ids)->get();
+            foreach ($brands as $brand) {
+                if ($brand->image) {
+                    fileDelete($brand->image);
+                }
+                $brand->delete();
+            }
+            return response()->json(['success' => true, 'message' => 'Selected items deleted successfully.']);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => 'Failed to delete selected items.']);
+        }
     }
 }

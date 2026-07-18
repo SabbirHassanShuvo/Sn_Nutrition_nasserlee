@@ -41,7 +41,6 @@ Route::middleware('auth:api')->group(function () {
     Route::post('/cart/add', [CartController::class, 'store']);
     Route::post('/cart/update/{id}', [CartController::class, 'update']);
     Route::post('/cart/delete/{id}', [CartController::class, 'destroy']);
-    // Route::post('/cart/clear', [CartController::class, 'clear']);
 
     // Coupon
     Route::post('/coupon/apply', [CouponController::class, 'applyCoupon']);

@@ -21,24 +21,28 @@ Route::group([ 'as'=>'backend.'], function () {
 
     // FAQ Management (CMS)
     Route::group(['middleware' => 'permission:cms_faq|faq_manage|faq_management', 'as'=>'feature.'], function(){
+        Route::delete('faq/bulk-destroy', [FaqController::class,'bulkDestroy'])->name('faq.bulk-destroy');
         Route::post('faq/status/{id}', [FaqController::class,'status'])->name('faq.status');
         Route::resource('faq', FaqController::class)->except(['show']);
     });
 
     // Product Management
     Route::group(['middleware' => 'permission:products_manage|product_manage'], function () {
+        Route::delete('product/bulk-destroy', [\App\Http\Controllers\Web\Backend\ProductController::class,'bulkDestroy'])->name('product.bulk-destroy');
         Route::post('product/status/{id}', [\App\Http\Controllers\Web\Backend\ProductController::class,'status'])->name('product.status');
         Route::resource('product', \App\Http\Controllers\Web\Backend\ProductController::class);
     });
 
     // Category Management
     Route::group(['middleware' => 'permission:categories_manage|category_manage'], function () {
+        Route::delete('category/bulk-destroy', [\App\Http\Controllers\Web\Backend\CategoryController::class,'bulkDestroy'])->name('category.bulk-destroy');
         Route::post('category/status/{id}', [\App\Http\Controllers\Web\Backend\CategoryController::class,'status'])->name('category.status');
         Route::resource('category', \App\Http\Controllers\Web\Backend\CategoryController::class)->except(['show']);
     });
 
     // Brand Management
     Route::group(['middleware' => 'permission:brands_manage|brand_manage'], function () {
+        Route::delete('brand/bulk-destroy', [\App\Http\Controllers\Web\Backend\BrandController::class,'bulkDestroy'])->name('brand.bulk-destroy');
         Route::post('brand/status/{id}', [\App\Http\Controllers\Web\Backend\BrandController::class,'status'])->name('brand.status');
         Route::resource('brand', \App\Http\Controllers\Web\Backend\BrandController::class)->except(['show']);
     });
@@ -50,6 +54,8 @@ Route::group([ 'as'=>'backend.'], function () {
     });
     
     // System Users
+    Route::delete('system-user/bulk-destroy', [SystemUserController::class,'bulkDestroy'])
+        ->name('system-user.bulk-destroy')->middleware('role:super_admin');
     Route::post('system-user/status/{id}', [SystemUserController::class,'status'])
         ->name('system-user.status')->middleware('role:super_admin');
     Route::get('system-user/{id}/permissions', [SystemUserController::class, 'getUserPermissions'])
@@ -61,6 +67,7 @@ Route::group([ 'as'=>'backend.'], function () {
 
     // Onboarding Options
     Route::group(['middleware' => 'permission:onboarding_options_manage|onboarding_manage'], function () {
+        Route::delete('onboarding-option/bulk-destroy', [\App\Http\Controllers\Web\Backend\OnboardingOptionController::class,'bulkDestroy'])->name('onboarding-option.bulk-destroy');
         Route::post('onboarding-option/status/{id}', [\App\Http\Controllers\Web\Backend\OnboardingOptionController::class,'status'])->name('onboarding-option.status');
         Route::resource('onboarding-option', \App\Http\Controllers\Web\Backend\OnboardingOptionController::class)->except(['show']);
     });
@@ -75,6 +82,8 @@ Route::group([ 'as'=>'backend.'], function () {
     Route::put('permission/{id}', [RoleController::class, 'permissionUpdate'])->name('permission.update')->middleware('role:super_admin');
     Route::delete('permission/{id}', [RoleController::class, 'permissionDestroy'])->name('permission.destroy')->middleware('role:super_admin');
 
+
+
     // App User Management
     Route::group(['middleware' => 'permission:user_management'], function () {
         Route::post('app-user/status/{id}', [\App\Http\Controllers\Web\Backend\AppUserController::class,'status'])->name('app-user.status');
@@ -84,6 +93,7 @@ Route::group([ 'as'=>'backend.'], function () {
 
     // Orders Management
     Route::group(['middleware' => 'permission:orders_manage|order_manage'], function () {
+        Route::delete('order/bulk-destroy', [\App\Http\Controllers\Web\Backend\OrderController::class,'bulkDestroy'])->name('order.bulk-destroy');
         Route::post('order/status/{id}', [\App\Http\Controllers\Web\Backend\OrderController::class,'updateStatus'])->name('order.status');
         Route::post('order/verify-payment/{id}', [\App\Http\Controllers\Web\Backend\OrderController::class,'verifyPayment'])->name('order.verify-payment');
         Route::resource('order', \App\Http\Controllers\Web\Backend\OrderController::class);
@@ -91,6 +101,7 @@ Route::group([ 'as'=>'backend.'], function () {
 
     // Promo Codes Management
     Route::group(['middleware' => 'permission:promo_codes_manage|promo_code_manage'], function () {
+        Route::delete('promo-code/bulk-destroy', [\App\Http\Controllers\Web\Backend\PromoCodeController::class,'bulkDestroy'])->name('promo-code.bulk-destroy');
         Route::post('promo-code/status/{id}', [\App\Http\Controllers\Web\Backend\PromoCodeController::class,'status'])->name('promo-code.status');
         Route::resource('promo-code', \App\Http\Controllers\Web\Backend\PromoCodeController::class);
     });

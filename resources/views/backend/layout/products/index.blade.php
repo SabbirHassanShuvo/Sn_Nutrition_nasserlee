@@ -11,7 +11,10 @@
                         <h5 class="card-title mb-0 fw-bold text-primary">Product Inventory</h5>
                         <p class="text-muted mb-0 fs-12">Manage your catalog, stock and pricing</p>
                     </div>
-                    <div class="flex-shrink-0">
+                    <div class="flex-shrink-0 d-flex gap-2">
+                        <button type="button" class="btn btn-danger btn-sm shadow-sm d-none align-items-center" id="bulkDeleteBtn">
+                            <i class="ri-delete-bin-line align-bottom me-1"></i> Bulk Delete
+                        </button>
                         <a class="btn btn-primary btn-sm add-btn shadow-sm d-flex align-items-center" href="{{route('backend.product.create')}}">
                             <i class="ri-add-line align-bottom me-1"></i> Add New Product
                         </a>
@@ -23,11 +26,7 @@
                         <table class="table align-middle table-nowrap table-hover mb-0 data-table custom-table">
                             <thead class="table-light">
                                 <tr>
-                                    <th scope="col" style="width: 40px;" class="text-center">
-                                        <div class="form-check">
-                                            <input class="form-check-input fs-14" type="checkbox" id="checkAll">
-                                        </div>
-                                    </th>
+                                    <th style="width: 40px; text-align: center;"><input type="checkbox" class="form-check-input" id="checkAll"></th>
                                     <th style="width: 80px;" class="ps-3">Image</th>
                                     <th class="text-start">Product Details</th>
                                     <th class="text-start" style="width: 120px;">Category</th>
@@ -195,10 +194,8 @@
                         { data: 'action', name: 'action', orderable: false, searchable: false, className: 'text-center' }
                     ]
                 });
-
-                $('#checkAll').on('change', function() {
-                    $('.form-check-input[name="checkAll"]').prop('checked', $(this).prop('checked'));
-                });
+                
+                initBulkDelete("{{ route('backend.product.bulk-destroy') }}");
             });
         })(jQuery);
 

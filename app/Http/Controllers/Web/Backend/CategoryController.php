@@ -15,10 +15,17 @@ class CategoryController extends Controller
         if ($request->ajax()) {
             $categories = Category::latest();
             return DataTables::of($categories)
+                ->addColumn('checkbox', function ($category) {
+                    return '<input type="checkbox" class="form-check-input row-checkbox" value="' . $category->id . '">';
+                })
                 ->addIndexColumn()
                 ->addColumn('image', function ($category) {
                     $img = $category->image ? asset($category->image) : 'https://ui-avatars.com/api/?name=' . urlencode($category->name);
                     return '<img src="' . $img . '" alt="' . $category->name . '" width="50" height="50" class="rounded shadow-sm border">';
+                })
+                ->addColumn('color', function ($category) {
+                    $color = $category->color ?? '#FF8000';
+                    return '<div style="width: 25px; height: 25px; border-radius: 50%; background-color: ' . $color . '; margin: 0 auto; border: 1px solid #ddd;" title="' . $color . '"></div>';
                 })
                 ->addColumn('status', function ($category) {
                     return getStatusHTML($category, '#198754', $category->status == 'active' ? '26px' : '2px');
@@ -35,7 +42,7 @@ class CategoryController extends Controller
                         </div>
                     ';
                 })
-                ->rawColumns(['image', 'status', 'action'])
+                ->rawColumns(['checkbox', 'image', 'color', 'status', 'action'])
                 ->make(true);
         }
         return view("backend.layout.categories.index");
@@ -50,10 +57,11 @@ class CategoryController extends Controller
     {
         $request->validate([
             'name' => 'required|string|max:255',
+            'color' => 'nullable|string|max:20',
             'image' => 'nullable|image|max:2048',
         ]);
 
-        $data = $request->only(['name']);
+        $data = $request->only(['name', 'color']);
         $data['slug'] = makeSlug(Category::class, $request->name);
         $data['status'] = 'active';
 
@@ -81,10 +89,11 @@ class CategoryController extends Controller
     {
         $request->validate([
             'name' => 'required|string|max:255',
+            'color' => 'nullable|string|max:20',
             'image' => 'nullable|image|max:2048',
         ]);
 
-        $data = $request->only(['name']);
+        $data = $request->only(['name', 'color']);
         if ($category->name != $request->name) {
             $data['slug'] = makeSlug(Category::class, $request->name);
         }
@@ -126,5 +135,26 @@ class CategoryController extends Controller
             'success' => true,
             'message' => 'Status updated',
         ]);
+    }
+
+    public function bulkDestroy(Request $request)
+    {
+        $ids = $request->ids;
+        if (!$ids || !is_array($ids)) {
+            return response()->json(['success' => false, 'message' => 'No items selected.']);
+        }
+
+        try {
+            $categories = Category::whereIn('id', $ids)->get();
+            foreach ($categories as $category) {
+                if ($category->image) {
+                    fileDelete($category->image);
+                }
+                $category->delete();
+            }
+            return response()->json(['success' => true, 'message' => 'Selected items deleted successfully.']);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => 'Failed to delete selected items.']);
+        }
     }
 }

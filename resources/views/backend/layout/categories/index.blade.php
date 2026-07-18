@@ -11,7 +11,10 @@
                         <h5 class="card-title mb-0 fw-bold text-primary">Categories</h5>
                         <p class="text-muted mb-0 fs-12">Manage product classifications</p>
                     </div>
-                    <div class="flex-shrink-0">
+                    <div class="flex-shrink-0 d-flex gap-2">
+                        <button type="button" class="btn btn-danger btn-sm shadow-sm d-none align-items-center" id="bulkDeleteBtn">
+                            <i class="ri-delete-bin-line align-bottom me-1"></i> Bulk Delete
+                        </button>
                         <button type="button" class="btn btn-primary btn-sm add-btn shadow-sm d-flex align-items-center" onclick="openCreateModal()">
                             <i class="ri-add-line align-bottom me-1"></i> Add New Category
                         </button>
@@ -23,8 +26,10 @@
                         <table class="table align-middle table-nowrap table-hover mb-0 data-table custom-table">
                             <thead class="table-light">
                                 <tr>
+                                    <th style="width: 40px; text-align: center;"><input type="checkbox" class="form-check-input" id="checkAll"></th>
                                     <th class="ps-3" style="width: 60px;">ID</th>
                                     <th style="width: 80px;">Image</th>
+                                    <th style="width: 60px;">Color</th>
                                     <th class="text-start">Category Name</th>
                                     <th>Slug</th>
                                     <th class="text-center" style="width: 120px;">Status</th>
@@ -56,6 +61,14 @@
                             <label class="form-label fw-semibold" for="category_name">Category Name <span class="text-danger">*</span></label>
                             <input type="text" name="name" id="category_name" class="form-control @error('name') is-invalid @enderror" placeholder="Enter category name" required>
                             @error('name')
+                                <div class="invalid-feedback d-block">{{ $message }}</div>
+                            @enderror
+                        </div>
+                        <div class="mb-4">
+                            <label class="form-label fw-semibold" for="category_color">Background Color</label>
+                            <input type="color" name="color" id="category_color" class="form-control form-control-color w-100 @error('color') is-invalid @enderror" value="#FF8000">
+                            <small class="text-muted">Select a background color for the frontend card</small>
+                            @error('color')
                                 <div class="invalid-feedback d-block">{{ $message }}</div>
                             @enderror
                         </div>
@@ -121,14 +134,18 @@
                     dom: '<"row mb-3 px-3 mt-3"<"col-md-6"l><"col-md-6 d-flex justify-content-end"f>>rt<"row align-items-center mt-3 px-3 pb-3"<"col-md-6"i><"col-md-6 d-flex justify-content-end"p>>',
                     ajax: "{{ route('backend.category.index') }}",
                     columns: [
+                        { data: 'checkbox', name: 'checkbox', orderable: false, searchable: false, className: 'text-center' },
                         { data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable: false, className: 'ps-3 text-muted fw-medium' },
                         { data: 'image', name: 'image', orderable: false, searchable: false, className: 'text-center' },
+                        { data: 'color', name: 'color', orderable: false, searchable: false, className: 'text-center' },
                         { data: 'name', name: 'name', className: 'text-start fw-medium' },
                         { data: 'slug', name: 'slug' },
                         { data: 'status', name: 'status', orderable: false, searchable: false, className: 'text-center' },
                         { data: 'action', name: 'action', orderable: false, searchable: false, className: 'text-center' }
                     ]
                 });
+
+                initBulkDelete("{{ route('backend.category.bulk-destroy') }}");
             });
         })(jQuery);
 
@@ -188,6 +205,7 @@
             $('#categoryForm').attr('action', "{{ route('backend.category.store') }}");
             $('#formMethod').val('POST');
             $('#category_id').val('');
+            $('#category_color').val('#FF8000');
             $('#categoryModalLabel').text('Create Category');
             $('#saveBtn').text('Create Category');
             resetDropify();
@@ -211,6 +229,7 @@
                         $('#formMethod').val('PATCH');
                         $('#category_id').val(category.id);
                         $('#category_name').val(category.name);
+                        $('#category_color').val(category.color || '#FF8000');
                         $('#categoryModalLabel').text('Edit Category');
                         $('#saveBtn').text('Update Category');
                         
@@ -232,6 +251,7 @@
         @if ($errors->any())
             $(document).ready(function() {
                 $('#category_name').val("{{ old('name') }}");
+                $('#category_color').val("{{ old('color', '#FF8000') }}");
                 
                 let oldMethod = "{{ old('_method') }}";
                 let oldId = "{{ old('category_id') }}";

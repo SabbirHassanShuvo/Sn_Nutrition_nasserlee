@@ -18,6 +18,9 @@ class SystemUserController extends Controller
         if ($request->ajax()) {
             $users = User::where('is_admin_user', 1)->orderBy('id', 'desc')->get();
             return DataTables::of($users)
+                ->addColumn('checkbox', function ($user) {
+                    return '<input type="checkbox" class="form-check-input row-checkbox" value="' . $user->id . '">';
+                })
                 ->addIndexColumn()
                 ->addColumn('name', function ($user) {
                     return $user->name;
@@ -54,7 +57,7 @@ class SystemUserController extends Controller
                     
                     return '<div class="d-flex gap-2 justify-content-center">' . $accessBtn . $editBtn . $deleteBtn . '</div>';
                 })
-                ->rawColumns(['roles', 'status', 'action'])
+                ->rawColumns(['checkbox', 'roles', 'status', 'action'])
                 ->make(true);
         }
         $roles = Role::all()->pluck('name')->toArray();
@@ -150,6 +153,32 @@ class SystemUserController extends Controller
             return response()->json(['status' => 'success', 'message' => 'User deleted successfully']);
         } catch (\Exception $e) {
             return response()->json(['status' => 'error', 'message' => 'User delete Failed: ' . $e->getMessage()]);
+        }
+    }
+
+    public function bulkDestroy(Request $request)
+    {
+        $ids = $request->ids;
+        if (!$ids || !is_array($ids)) {
+            return response()->json(['success' => false, 'message' => 'No items selected.']);
+        }
+
+        try {
+            // Filter out super_admin and currently authenticated user
+            $users = User::whereIn('id', $ids)->get();
+            $deleteIds = [];
+            foreach ($users as $user) {
+                if (!$user->hasRole('super_admin') && $user->id != Auth::user()->id) {
+                    $deleteIds[] = $user->id;
+                }
+            }
+            if (!empty($deleteIds)) {
+                User::whereIn('id', $deleteIds)->delete();
+                return response()->json(['success' => true, 'message' => 'Selected items deleted successfully.']);
+            }
+            return response()->json(['success' => false, 'message' => 'Cannot delete selected users.']);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => 'Failed to delete selected items.']);
         }
     }
 

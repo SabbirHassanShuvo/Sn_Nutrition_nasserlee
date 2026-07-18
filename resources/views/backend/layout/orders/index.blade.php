@@ -6,10 +6,16 @@
     <div class="row">
         <div class="col-lg-12">
             <div class="card shadow-sm border-0">
+                </div>
                 <div class="card-header border-0 bg-white py-3 d-flex align-items-center justify-content-between">
                     <div>
                         <h5 class="card-title mb-0 fw-bold text-primary">Order Management</h5>
                         <p class="text-muted mb-0 fs-12">View and manage customer orders and payments</p>
+                    </div>
+                    <div class="flex-shrink-0 d-flex gap-2">
+                        <button type="button" class="btn btn-danger btn-sm shadow-sm d-none align-items-center" id="bulkDeleteBtn">
+                            <i class="ri-delete-bin-line align-bottom me-1"></i> Bulk Delete
+                        </button>
                     </div>
                 </div>
 
@@ -18,6 +24,7 @@
                         <table class="table align-middle table-nowrap table-hover mb-0 data-table custom-table">
                             <thead class="table-light">
                                 <tr>
+                                    <th style="width: 40px; text-align: center;"><input type="checkbox" class="form-check-input" id="checkAll"></th>
                                     <th class="ps-3" style="width: 60px;">ID</th>
                                     <th>Order Number</th>
                                     <th>Customer</th>
@@ -178,6 +185,7 @@
                     serverSide: true,
                     ajax: "{{ route('backend.order.index') }}",
                     columns: [
+                        { data: 'checkbox', name: 'checkbox', orderable: false, searchable: false, className: 'text-center' },
                         { data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable: false },
                         { data: 'order_number', name: 'order_number' },
                         { data: 'customer', name: 'customer' },
@@ -188,6 +196,8 @@
                         { data: 'action', name: 'action', orderable: false, searchable: false, className: 'text-center' }
                     ]
                 });
+                
+                initBulkDelete("{{ route('backend.order.bulk-destroy') }}");
             });
         })(jQuery);
 
