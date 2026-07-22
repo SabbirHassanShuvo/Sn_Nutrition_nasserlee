@@ -181,6 +181,44 @@
                 </li>
                 @endcanany
 
+
+                {{-- Cms --}}
+                @canany(['cms_banner', 'cms_pages', 'cms_faq'])
+                <li class="nav-item">
+                    <a class="nav-link menu-link {{ getPageStatus(['backend.banner-section.*', 'backend.page.*', 'backend.feature.faq.*'], 'collapsed active') }}" href="#sidebarCMS"
+                        data-bs-toggle="collapse" role="button" aria-expanded="false"
+                        aria-controls="sidebarCMS">
+                        <i class="ri-pages-line"></i> <span data-key="t-cms">CMS</span>
+                    </a>
+                    <div class="collapse menu-dropdown {{ getPageStatus(['backend.banner-section.*', 'backend.page.*', 'backend.feature.faq.*'], 'show') }}"
+                        id="sidebarCMS">
+                        <ul class="nav nav-sm flex-column">
+                            @can('cms_banner')
+                            <li class="nav-item">
+                                <a href="{{ route('backend.banner-section.index') }}"
+                                    class="nav-link {{ getPageStatus('backend.banner-section.*') }}"
+                                    data-key="t-banner-sections"> Banner Section </a>
+                            </li>
+                            @endcan
+                            @can('cms_pages')
+                            <li class="nav-item">
+                                <a href="{{ route('backend.page.index') }}"
+                                    class="nav-link {{ getPageStatus('backend.page.*') }}"
+                                    data-key="t-pages"> Pages </a>
+                            </li>
+                            @endcan
+                            @can('cms_faq')
+                            <li class="nav-item">
+                                <a href="{{ route('backend.feature.faq.index') }}"
+                                    class="nav-link {{ getPageStatus('backend.feature.faq.*') }}"
+                                    data-key="t-faqs"> FAQs </a>
+                            </li>
+                            @endcan
+                        </ul>
+                    </div>
+                </li>
+                @endcanany
+
             </ul>
         </div>
         <!-- Sidebar -->

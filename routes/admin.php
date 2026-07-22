@@ -107,6 +107,13 @@ Route::group([ 'as'=>'backend.'], function () {
     });
 
 
+    // Cms 
+    Route::group(['middleware' => 'permission:cms_banner|banner_manage'], function () {
+        Route::delete('banner-section/bulk-destroy', [\App\Http\Controllers\Web\Backend\Cms\BannerSectionController::class,'bulkDestroy'])->name('banner-section.bulk-destroy');
+        Route::post('banner-section/status/{id}', [\App\Http\Controllers\Web\Backend\Cms\BannerSectionController::class,'status'])->name('banner-section.status');
+        Route::resource('banner-section', \App\Http\Controllers\Web\Backend\Cms\BannerSectionController::class)->except(['show']);
+    });
+
 
     require_once __DIR__ .'/settings.php';
 });

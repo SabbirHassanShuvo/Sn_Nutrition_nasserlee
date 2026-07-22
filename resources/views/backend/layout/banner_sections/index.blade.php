@@ -1,0 +1,160 @@
+@extends('backend.master')
+@section('title', 'Dashboard | Banner Sections')
+@section('content')
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="card" id="bannerList">
+                <div class="card-header border-0">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <h5 class="card-title mb-0 flex-grow-1">Banner List</h5>
+                        <div>
+                            <button type="button" class="btn btn-danger d-none" id="bulkDeleteBtn">
+                                <i class="ri-delete-bin-line align-bottom me-1"></i> Bulk Delete
+                            </button>
+                            <a class="btn btn-primary add-btn" href="{{ route('backend.banner-section.create') }}">
+                                <i class="ri-add-line align-bottom me-1"></i> Create Banner
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table align-middle table-nowrap table-striped mb-0 data-table">
+                                <thead class="table-light text-muted">
+                                    <tr>
+                                        <th style="width: 40px; text-align: center;">
+                                            <input type="checkbox" class="form-check-input" id="checkAll">
+                                        </th>
+                                        <th class="wd-10p border-bottom-0">ID</th>
+                                        <th class="wd-10p border-bottom-0">Image</th>
+                                        <th class="wd-30p border-bottom-0">Title</th>
+                                        <th class="wd-10p border-bottom-0">Priority</th>
+                                        <th class="wd-10p border-bottom-0">Status</th>
+                                        <th class="wd-10p border-bottom-0">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="list form-check-all"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+@endsection
+
+@push('scripts-bottom')
+    <script>
+        (function ($) {
+            $(function () {
+                $('.data-table').DataTable({
+                    processing: true,
+                    serverSide: true,
+                    responsive: { details: true },
+                    ajax: "{{ route('backend.banner-section.index') }}",
+                    columns: [
+                        { data: 'checkbox', name: 'checkbox', orderable: false, searchable: false, className: 'text-center' },
+                        { data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable: false },
+                        { data: 'image', name: 'image', orderable: false, searchable: false },
+                        { data: 'title', name: 'title' },
+                        { data: 'priority', name: 'priority' },
+                        { data: 'status', name: 'status', orderable: false, searchable: false },
+                        { data: 'action', name: 'action', orderable: false, searchable: false }
+                    ]
+                });
+                
+                initBulkDelete("{{ route('backend.banner-section.bulk-destroy') }}");
+            });
+        })(jQuery);
+
+        $(document).on('shown.bs.collapse shown.bs.tab', function () {
+            $($.fn.dataTable.tables(true)).DataTable()
+                .columns.adjust()
+                .responsive.recalc();
+        });
+
+        function statusBanner(id) {
+            let url = "{{ route('backend.banner-section.status', ':id') }}";
+            $.ajax({
+                type: "POST",
+                url: url.replace(':id', id),
+                data: {
+                    id: id,
+                    _token: "{{ csrf_token() }}"
+                },
+                success: function (response) {
+                    if (response.success) {
+                        $('.data-table').DataTable().ajax.reload(null, false);
+                        Swal.fire({
+                            toast: true,
+                            position: "top-end",
+                            icon: "success",
+                            title: response.message || "Status updated successfully",
+                            showConfirmButton: false,
+                            timer: 3000,
+                            timerProgressBar: true
+                        });
+                    } else {
+                        Swal.fire({
+                            toast: true,
+                            position: "top-end",
+                            icon: "error",
+                            title: response.message || "Something went wrong",
+                            showConfirmButton: false,
+                            timer: 3000,
+                            timerProgressBar: true
+                        });
+                    }
+                }
+            });
+        }
+
+        function deleteData(url) {
+            Swal.fire({
+                title: 'Are you sure?',
+                text: "You want to delete this banner?",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Yes, delete it!'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.ajax({
+                        url: url,
+                        type: 'DELETE',
+                        data: {
+                            _token: "{{ csrf_token() }}"
+                        },
+                        success: function (response) {
+                            if (response.success) {
+                                $('.data-table').DataTable().ajax.reload(null, false);
+                                Swal.fire({
+                                    toast: true,
+                                    position: "top-end",
+                                    icon: "success",
+                                    title: response.message || "Banner deleted successfully",
+                                    showConfirmButton: false,
+                                    timer: 3000,
+                                    timerProgressBar: true
+                                });
+                            } else {
+                                Swal.fire({
+                                    toast: true,
+                                    position: "top-end",
+                                    icon: "error",
+                                    title: response.message || "Failed to delete banner",
+                                    showConfirmButton: false,
+                                    timer: 3000,
+                                    timerProgressBar: true
+                                });
+                            }
+                        }
+                    });
+                }
+            });
+        }
+    </script>
+@endpush

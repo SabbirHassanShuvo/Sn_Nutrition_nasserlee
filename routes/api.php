@@ -27,4 +27,10 @@ Route::group([
 
     // Google Auth
     Route::post('/google', [GoogleAuthController::class, 'login']);
+    
+});
+
+Route::group(['middleware' => 'api'], function($router){
+    // Cms
+    Route::get('/cms/banners', [\App\Http\Controllers\API\Frontend\Cms\HomePageController::class, 'getBanners']);
 });
