@@ -63,9 +63,11 @@ class BannerSectionController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'title' => 'required|string|max:255',
+            'title' => 'required|string|max:500',
+            'title_highlight' => 'nullable|string|max:255',
             'small_badge' => 'nullable|string|max:255',
             'description' => 'nullable|string',
+            'description_highlight' => 'nullable|string|max:500',
             'button_text' => 'nullable|string|max:255',
             'button_link' => 'nullable|string|max:255',
             'image' => 'nullable|image|max:4096',
@@ -98,9 +100,11 @@ class BannerSectionController extends Controller
     public function update(Request $request, BannerSection $bannerSection)
     {
         $request->validate([
-            'title' => 'required|string|max:255',
+            'title' => 'required|string|max:500',
+            'title_highlight' => 'nullable|string|max:255',
             'small_badge' => 'nullable|string|max:255',
             'description' => 'nullable|string',
+            'description_highlight' => 'nullable|string|max:500',
             'button_text' => 'nullable|string|max:255',
             'button_link' => 'nullable|string|max:255',
             'image' => 'nullable|image|max:4096',
