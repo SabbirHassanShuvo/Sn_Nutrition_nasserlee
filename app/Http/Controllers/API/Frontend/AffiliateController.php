@@ -79,33 +79,52 @@ class AffiliateController extends Controller
         ]);
     }
 
-    public function getLinks()
+    public function getLinks(Request $request)
     {
-        $links = AffiliateLink::with('product:id,name,main_image,price')
+        $query = AffiliateLink::with('product:id,name,main_image,price')
             ->where('user_id', auth()->id())
-            ->latest()
-            ->get();
+            ->latest();
 
+        $limit = $request->input('limit', $request->input('per_page'));
+        if ($limit !== null || $request->has('paginate')) {
+            $limitInt = (int) ($limit ?? 10);
+            if ($limitInt <= 0) {
+                $limitInt = 10;
+            }
+            return response()->json($query->paginate($limitInt));
+        }
+
+        $links = $query->get();
         return response()->json($links);
     }
 
     public function getOrders(Request $request)
     {
+        $limit = (int) $request->input('limit', $request->input('per_page', 10));
+        if ($limit <= 0) {
+            $limit = 10;
+        }
+
         $orders = Order::with(['items.product:id,name,main_image', 'user:id,name'])
             ->whereHas('affiliateLink', function($q) {
                 $q->where('user_id', auth()->id());
             })
             ->latest()
-            ->paginate(10);
+            ->paginate($limit);
 
         return response()->json($orders);
     }
 
-    public function getPayoutHistory()
+    public function getPayoutHistory(Request $request)
     {
+        $limit = (int) $request->input('limit', $request->input('per_page', 10));
+        if ($limit <= 0) {
+            $limit = 10;
+        }
+
         $history = PayoutHistory::where('user_id', auth()->id())
             ->latest()
-            ->paginate(10);
+            ->paginate($limit);
 
         return response()->json($history);
     }

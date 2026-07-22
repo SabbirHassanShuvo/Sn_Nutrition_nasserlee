@@ -14,13 +14,18 @@ class HomeController extends BaseController
     /**
      * Get all active products for the home page.
      */
-    public function getAllProducts()
+    public function getAllProducts(Request $request)
     {
         try {
+            $limit = (int) $request->input('limit', $request->input('per_page', 12));
+            if ($limit <= 0) {
+                $limit = 12;
+            }
+
             $products = Product::with(['category', 'brandData'])
                 ->where('status', 'active')
                 ->latest()
-                ->paginate(12);
+                ->paginate($limit);
 
             $products->getCollection()->transform(function ($product) {
                 return [
@@ -126,7 +131,12 @@ class HomeController extends BaseController
                     break;
             }
 
-            $products = $query->paginate(12);
+            $limit = (int) $request->input('limit', $request->input('per_page', 12));
+            if ($limit <= 0) {
+                $limit = 12;
+            }
+
+            $products = $query->paginate($limit);
 
             $products->getCollection()->transform(function ($product) {
                 return [
