@@ -4,6 +4,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\API\AuthController;
 use App\Http\Controllers\Api\GoogleAuthController;
+use App\Http\Controllers\API\Frontend\Cms\HomePageController;
 
 Route::group([
     'middleware' => 'api',
@@ -32,5 +33,6 @@ Route::group([
 
 Route::group(['middleware' => 'api'], function($router){
     // Cms
-    Route::get('/cms/banners', [\App\Http\Controllers\API\Frontend\Cms\HomePageController::class, 'getBanners']);
+    Route::get('/cms/banners', [HomePageController::class, 'getBanners']);
+    Route::get('/cms/quality-control', [HomePageController::class, 'getQualityControl']);
 });

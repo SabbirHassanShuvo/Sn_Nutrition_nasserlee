@@ -4,6 +4,7 @@ namespace App\Http\Controllers\API\Frontend\Cms;
 
 use App\Http\Controllers\Api\BaseController;
 use App\Models\BannerSection;
+use App\Models\QualityControlSection;
 use Illuminate\Http\Request;
 
 class HomePageController extends BaseController
@@ -68,9 +69,72 @@ class HomePageController extends BaseController
                     ];
                 });
 
-            return $this->sendResponse($banners, 'Banner sections fetched successfully.');
+            $section = QualityControlSection::first();
+            $qualityControl = [
+                'title'       => $this->buildTitleHtml($section->title, $section->title_highlight),
+                'description' => $section->description,
+                    'image'       => $section->image ? asset($section->image) : null,
+                'cards'       => [
+                    [
+                        'title'       => $section->card1_title,
+                        'description' => $this->buildDescriptionHtml($section->card1_description, $section->card1_description_highlight),
+                    ],
+                    [
+                        'title'       => $section->card2_title,
+                        'description' => $this->buildDescriptionHtml($section->card2_description, $section->card2_description_highlight),
+                    ],
+                    [
+                        'title'       => $section->card3_title,
+                        'description' => $this->buildDescriptionHtml($section->card3_description, $section->card3_description_highlight),
+                    ],
+                ],
+            ];
+
+
+            return $this->sendResponse([
+                'banners' => $banners,
+                'qualityControl' => $qualityControl
+            ], 'Banner sections fetched successfully.');
         } catch (\Exception $e) {
             return $this->sendError('Failed to fetch banner sections.', ['error' => $e->getMessage()]);
         }
     }
+
+    /**
+     * Get the Quality Control section data for the homepage.
+     */
+    // public function getQualityControl()
+    // {
+    //     try {
+    //         $section = QualityControlSection::first();
+
+    //         if (!$section) {
+    //             return $this->sendResponse(null, 'Quality Control section not configured yet.');
+    //         }
+
+    //         $data = [
+    //             'title'       => $this->buildTitleHtml($section->title, $section->title_highlight),
+    //             'description' => $section->description,
+    //             'image'       => $section->image ? asset($section->image) : null,
+    //             'cards'       => [
+    //                 [
+    //                     'title'       => $section->card1_title,
+    //                     'description' => $this->buildDescriptionHtml($section->card1_description, $section->card1_description_highlight),
+    //                 ],
+    //                 [
+    //                     'title'       => $section->card2_title,
+    //                     'description' => $this->buildDescriptionHtml($section->card2_description, $section->card2_description_highlight),
+    //                 ],
+    //                 [
+    //                     'title'       => $section->card3_title,
+    //                     'description' => $this->buildDescriptionHtml($section->card3_description, $section->card3_description_highlight),
+    //                 ],
+    //             ],
+    //         ];
+
+    //         return $this->sendResponse($data, 'Quality Control section fetched successfully.');
+    //     } catch (\Exception $e) {
+    //         return $this->sendError('Failed to fetch Quality Control section.', ['error' => $e->getMessage()]);
+    //     }
+    // }
 }

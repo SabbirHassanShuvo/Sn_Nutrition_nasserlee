@@ -183,16 +183,17 @@
 
 
                 {{-- Cms --}}
-                @canany(['cms_banner', 'cms_pages', 'cms_faq'])
+                @canany(['cms_banner', 'cms_pages', 'cms_faq', 'cms_home_page'])
                 <li class="nav-item">
-                    <a class="nav-link menu-link {{ getPageStatus(['backend.banner-section.*', 'backend.page.*', 'backend.feature.faq.*'], 'collapsed active') }}" href="#sidebarCMS"
+                    <a class="nav-link menu-link {{ getPageStatus(['backend.banner-section.*', 'backend.page.*', 'backend.feature.faq.*', 'backend.home-page.*'], 'collapsed active') }}" href="#sidebarCMS"
                         data-bs-toggle="collapse" role="button" aria-expanded="false"
                         aria-controls="sidebarCMS">
                         <i class="ri-pages-line"></i> <span data-key="t-cms">CMS</span>
                     </a>
-                    <div class="collapse menu-dropdown {{ getPageStatus(['backend.banner-section.*', 'backend.page.*', 'backend.feature.faq.*'], 'show') }}"
+                    <div class="collapse menu-dropdown {{ getPageStatus(['backend.banner-section.*', 'backend.page.*', 'backend.feature.faq.*', 'backend.home-page.*'], 'show') }}"
                         id="sidebarCMS">
                         <ul class="nav nav-sm flex-column">
+
                             @can('cms_banner')
                             <li class="nav-item">
                                 <a href="{{ route('backend.banner-section.index') }}"
@@ -200,6 +201,15 @@
                                     data-key="t-banner-sections"> Banner Section </a>
                             </li>
                             @endcan
+
+                            @can('cms_home_page')
+                            <li class="nav-item">
+                                <a href="{{ route('backend.home-page.quality-control.edit') }}"
+                                    class="nav-link {{ getPageStatus('backend.home-page.*') }}"
+                                    data-key="t-home-page"> Quality Control </a>
+                            </li>
+                            @endcan
+
                             @can('cms_pages')
                             <li class="nav-item">
                                 <a href="{{ route('backend.page.index') }}"
@@ -207,6 +217,7 @@
                                     data-key="t-pages"> Pages </a>
                             </li>
                             @endcan
+
                             @can('cms_faq')
                             <li class="nav-item">
                                 <a href="{{ route('backend.feature.faq.index') }}"
@@ -214,6 +225,9 @@
                                     data-key="t-faqs"> FAQs </a>
                             </li>
                             @endcan
+
+            
+
                         </ul>
                     </div>
                 </li>

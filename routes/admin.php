@@ -7,6 +7,8 @@ use App\Http\Controllers\Web\Backend\FaqController;
 use App\Http\Controllers\Web\Backend\RoleController;
 use App\Http\Controllers\Web\Backend\SiteController;
 use App\Http\Controllers\Web\Backend\ProjectController;
+use App\Http\Controllers\Web\Backend\Cms\BannerSectionController;
+use App\Http\Controllers\Web\Backend\Cms\HomePageController;
 
 
 use Illuminate\Support\Facades\Mail;
@@ -109,9 +111,15 @@ Route::group([ 'as'=>'backend.'], function () {
 
     // Cms 
     Route::group(['middleware' => 'permission:cms_banner|banner_manage'], function () {
-        Route::delete('banner-section/bulk-destroy', [\App\Http\Controllers\Web\Backend\Cms\BannerSectionController::class,'bulkDestroy'])->name('banner-section.bulk-destroy');
-        Route::post('banner-section/status/{id}', [\App\Http\Controllers\Web\Backend\Cms\BannerSectionController::class,'status'])->name('banner-section.status');
-        Route::resource('banner-section', \App\Http\Controllers\Web\Backend\Cms\BannerSectionController::class)->except(['show']);
+        Route::delete('banner-section/bulk-destroy', [BannerSectionController::class,'bulkDestroy'])->name('banner-section.bulk-destroy');
+        Route::post('banner-section/status/{id}', [BannerSectionController::class,'status'])->name('banner-section.status');
+        Route::resource('banner-section', BannerSectionController::class)->except(['show']);
+    });
+
+    // CMS — Home Page sections
+    Route::prefix('cms/home-page')->name('home-page.')->group(function () {
+        Route::get('quality-control', [HomePageController::class, 'qualityControlEdit'])->name('quality-control.edit');
+        Route::put('quality-control', [HomePageController::class, 'qualityControlUpdate'])->name('quality-control.update');
     });
 
 
