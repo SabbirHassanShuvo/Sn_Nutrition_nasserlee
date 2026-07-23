@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Web\Backend\Cms;
 use App\Models\BannerSection;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use Illuminate\Validation\Rule;
 use Yajra\DataTables\Facades\DataTables;
 
 class BannerSectionController extends Controller
@@ -51,19 +52,27 @@ class BannerSectionController extends Controller
                 ->rawColumns(['checkbox', 'image', 'title', 'status', 'action'])
                 ->make(true);
         }
-        return view("backend.layout.banner_sections.index");
+        return view("backend.layout.cms.banner_sections.index");
     }
 
     public function create()
     {
         $status = BannerSection::STATUS;
-        return view("backend.layout.banner_sections.form", compact('status'));
+        return view("backend.layout.cms.banner_sections.form", compact('status'));
     }
 
     public function store(Request $request)
     {
         $request->validate([
-            'title' => 'required|string|max:500',
+            'title' => [
+                'required', 'string', 'max:500',
+                function ($attribute, $value, $fail) {
+                    $wordCount = str_word_count(trim($value));
+                    if ($wordCount > 4) {
+                        $fail('The title must not exceed 4 words (currently ' . $wordCount . ' words).');
+                    }
+                },
+            ],
             'title_highlight' => 'nullable|string|max:255',
             'small_badge' => 'nullable|string|max:255',
             'description' => 'nullable|string',
@@ -94,13 +103,21 @@ class BannerSectionController extends Controller
     public function edit(BannerSection $bannerSection)
     {
         $status = BannerSection::STATUS;
-        return view('backend.layout.banner_sections.form', compact('bannerSection', 'status'));
+        return view('backend.layout.cms.banner_sections.form', compact('bannerSection', 'status'));
     }
 
     public function update(Request $request, BannerSection $bannerSection)
     {
         $request->validate([
-            'title' => 'required|string|max:500',
+            'title' => [
+                'required', 'string', 'max:500',
+                function ($attribute, $value, $fail) {
+                    $wordCount = str_word_count(trim($value));
+                    if ($wordCount > 4) {
+                        $fail('The title must not exceed 4 words (currently ' . $wordCount . ' words).');
+                    }
+                },
+            ],
             'title_highlight' => 'nullable|string|max:255',
             'small_badge' => 'nullable|string|max:255',
             'description' => 'nullable|string',

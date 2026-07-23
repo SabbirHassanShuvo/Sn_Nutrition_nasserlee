@@ -77,12 +77,17 @@
                     <div class="mb-3">
                         <label class="form-label" for="banner-title-input">
                             Full Title <span class="text-danger">*</span>
+                            <span id="title-word-count" class="badge bg-secondary ms-2">0 / 4 words</span>
                         </label>
                         <input type="text" name="title"
                                value="{{ old('title', $bannerSection->title ?? '') }}"
                                class="form-control @error('title') is-invalid @enderror"
                                id="banner-title-input"
                                placeholder="e.g. Trusted Experts Proven Wellness">
+                        <div id="title-word-error" class="text-danger" style="font-size:.85em; display:none;">
+                            <i class="mdi mdi-alert-circle-outline"></i>
+                            Maximum 4 words allowed in the title.
+                        </div>
                         @error('title')<small class="text-danger">{{ $message }}</small>@enderror
                     </div>
 
@@ -251,9 +256,66 @@
 
 @push('scripts-bottom')
 <script>
-    // Live preview for title highlight
+    // ── Word-count helper ──
+    function countWords(str) {
+        return str.trim() === '' ? 0 : str.trim().split(/\s+/).length;
+    }
+
+    // ── Title: enforce max 4 words ──
+    const titleInput     = document.getElementById('banner-title-input');
+    const wordCountBadge = document.getElementById('title-word-count');
+    const wordError      = document.getElementById('title-word-error');
+    const MAX_WORDS      = 4;
+
+    function updateWordCount() {
+        const words = countWords(titleInput.value);
+        wordCountBadge.textContent = words + ' / ' + MAX_WORDS + ' words';
+
+        if (words > MAX_WORDS) {
+            wordCountBadge.className = 'badge bg-danger ms-2';
+            titleInput.classList.add('is-invalid');
+            wordError.style.display = 'block';
+        } else if (words === MAX_WORDS) {
+            wordCountBadge.className = 'badge bg-warning text-dark ms-2';
+            titleInput.classList.remove('is-invalid');
+            wordError.style.display = 'none';
+        } else {
+            wordCountBadge.className = 'badge bg-secondary ms-2';
+            titleInput.classList.remove('is-invalid');
+            wordError.style.display = 'none';
+        }
+    }
+
+    // Prevent typing the 5th word (allow edits within 4 words)
+    titleInput.addEventListener('keydown', function (e) {
+        const allowedKeys = ['Backspace','Delete','ArrowLeft','ArrowRight','ArrowUp','ArrowDown','Home','End','Tab'];
+        if (allowedKeys.includes(e.key) || e.ctrlKey || e.metaKey) return;
+
+        const words = countWords(this.value);
+        // If already at 4+ words and user is adding a NEW word (typing a space when last char is not space)
+        if (words >= MAX_WORDS && e.key === ' ') {
+            e.preventDefault();
+        }
+    });
+
+    titleInput.addEventListener('input', function () {
+        updateWordCount();
+        updateTitlePreview();
+    });
+
+    // Block form submit if title exceeds word limit
+    document.querySelector('form').addEventListener('submit', function (e) {
+        if (countWords(titleInput.value) > MAX_WORDS) {
+            e.preventDefault();
+            titleInput.focus();
+            titleInput.classList.add('is-invalid');
+            wordError.style.display = 'block';
+        }
+    });
+
+    // ── Live preview for title highlight ──
     function updateTitlePreview() {
-        const title     = document.getElementById('banner-title-input').value.trim();
+        const title     = titleInput.value.trim();
         const highlight = document.getElementById('title-highlight-input').value.trim();
         const box       = document.getElementById('title-preview-box');
         const preview   = document.getElementById('title-preview');
@@ -273,10 +335,10 @@
         }
     }
 
-    document.getElementById('banner-title-input').addEventListener('input', updateTitlePreview);
     document.getElementById('title-highlight-input').addEventListener('input', updateTitlePreview);
 
-    // Run on page load for edit mode
+    // Run on page load (edit mode)
+    updateWordCount();
     updateTitlePreview();
 
     // Bootstrap tooltip init
