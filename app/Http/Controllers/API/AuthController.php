@@ -272,7 +272,7 @@ class AuthController extends BaseController
         // Validation
         $validator = Validator::make($request->all(), [
             'name' => 'sometimes|nullable|string|max:255',
-            'avatar' => 'sometimes|nullable|image|mimes:jpg,jpeg,png,gif,svg,webp,ico,bmp,tiff|max:5120',
+            'avatar' => 'sometimes|nullable|image|mimes:jpg,jpeg,png,gif,svg,webp,ico,bmp,tiff',
             'address' => 'sometimes|nullable|string|max:255'
         ]);
 
