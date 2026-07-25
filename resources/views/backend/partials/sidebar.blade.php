@@ -210,6 +210,14 @@
                             </li>
                             @endcan
 
+                             @can('cms_about_page')
+                            <li class="nav-item">
+                                <a href="{{ route('backend.about-us.edit') }}"
+                                    class="nav-link {{ getPageStatus('backend.about-us.*') }}"
+                                    data-key="t-about-us"> About Us </a>
+                            </li>
+                            @endcan
+
                             @can('cms_pages')
                             <li class="nav-item">
                                 <a href="{{ route('backend.page.index') }}"

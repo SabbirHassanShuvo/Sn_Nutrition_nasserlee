@@ -122,6 +122,14 @@ Route::group([ 'as'=>'backend.'], function () {
         Route::put('quality-control', [HomePageController::class, 'qualityControlUpdate'])->name('quality-control.update');
     });
 
+    // CMS — About Page sections
+    Route::group(['middleware' => 'permission:cms_about_page'], function () {
+        Route::get('cms/about-us', [\App\Http\Controllers\Web\Backend\Cms\AboutPageController::class, 'edit'])->name('about-us.edit');
+        Route::put('cms/about-us', [\App\Http\Controllers\Web\Backend\Cms\AboutPageController::class, 'update'])->name('about-us.update');
+    });
+
+
+
 
     require_once __DIR__ .'/settings.php';
 });

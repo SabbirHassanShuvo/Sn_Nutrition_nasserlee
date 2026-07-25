@@ -27,6 +27,7 @@ class DatabaseSeeder extends Seeder
             PageSeeder::class,
             BannerSectionSeeder::class,
             QualityControlSectionSeeder::class,
+            AboutSectionSeeder::class,
         ]);
     }
 }
