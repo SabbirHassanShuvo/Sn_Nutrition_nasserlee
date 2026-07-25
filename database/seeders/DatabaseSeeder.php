@@ -30,6 +30,7 @@ class DatabaseSeeder extends Seeder
             AboutSectionSeeder::class,
             FaqCategorySeeder::class,
             FaqSeeder::class,
+            WebSettingSeeder::class,
         ]);
     }
 }

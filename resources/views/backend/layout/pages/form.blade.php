@@ -1,70 +1,81 @@
 @extends('backend.master')
+@section('title', 'Dashboard | Page Form')
+
 @section('content')
 
-    {{-- PAGE-HEADER --}}
-    <div class="page-header d-flex align-items-center justify-content-between">
-        <div>
-            <h1 class="page-title">Create Form</h1>
-        </div>
-        <div class="ms-auto d-flex align-items-center gap-2">
-            <a href="{{ route('backend.page.index') }}" class="btn btn-sm btn-outline-secondary">
-                <i class="mdi mdi-arrow-left"></i> Back
-            </a>
-            <ol class="breadcrumb mb-0">
-                <li class="breadcrumb-item"><a href="javascript:void(0);">Dashboard</a></li>
-                <li class="breadcrumb-item active" aria-current="page">Dynamic page</li>
-            </ol>
-        </div>
-    </div>
-    {{-- PAGE-HEADER --}}
-
-
+    <!-- start page title -->
     <div class="row">
-        <div class="col-lg-12 col-xl-12 col-md-12 col-sm-12">
-            <div class="card box-shadow-0">
-                <div class="card-body">
-                    <form action="{{ @$page ? route('backend.page.update', @$page->id) : route('backend.page.store')}}"
-                        method="POST">
-                        @csrf
-                        @if (@$page)
-                            @method('PATCH')
-                        @endif
-
-                        <div class="mb-3">
-                            <label for="page_title" class="form-label">Page Title</label>
-                            <input type="text" name="page_title" id="page_title" class="form-control"
-                                value="{{ old('page_title', @$page->page_title) }}" placeholder="page_title">
-                            @error('page_title')
-                                <span class="text-danger">{{ $message }}</span>
-                            @enderror
-                        </div>
-                        <div class="mb-3">
-                            <label for="page_content" class="form-label">Page Content</label>
-                            <textarea name="page_content" id="ckeditor-classic" class="form-control" rows="5"
-                                placeholder="Enter content...">{{ old('page_content', @$page->page_content) }}</textarea>
-                            @error('page_content')
-                                <span class="text-danger">{{ $message }}</span>
-                            @enderror
-                        </div>
-                        <button type="submit" class="btn btn-primary">Submit</button>
-                    </form>
+        <div class="col-12">
+            <div class="page-title-box d-sm-flex align-items-center justify-content-between">
+                <div class="d-flex align-items-center gap-2">
+                    <h4 class="mb-sm-0">{{ @$page ? 'Edit' : 'Create' }} Page</h4>
+                    <a href="{{ route('backend.page.index') }}" class="btn btn-sm btn-outline-secondary">
+                        <i class="mdi mdi-arrow-left"></i> Back
+                    </a>
+                </div>
+                <div class="page-title-right">
+                    <ol class="breadcrumb m-0">
+                        <li class="breadcrumb-item"><a href="javascript:void(0);">Pages</a></li>
+                        <li class="breadcrumb-item active">{{ @$page ? 'Edit' : 'Create' }} Page</li>
+                    </ol>
                 </div>
             </div>
         </div>
     </div>
+    <!-- end page title -->
+
+    <form method="POST"
+        action="{{ @$page ? route('backend.page.update', @$page->id) : route('backend.page.store') }}"
+        class="row">
+        @csrf
+        @if (@$page)
+            @method('PATCH')
+        @endif
+
+        <div class="col-lg-12">
+            <div class="card">
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label class="form-label" for="page_title">Page Title <span class="text-danger">*</span></label>
+                        <input type="text" name="page_title" id="page_title"
+                            value="{{ old('page_title', @$page->page_title) }}"
+                            class="form-control @error('page_title') is-invalid @enderror"
+                            placeholder="e.g. Privacy Policy">
+                        @error('page_title')
+                            <small class="text-danger">{{ $message }}</small>
+                        @enderror
+                    </div>
+
+                    @if (@$page)
+                        <div class="mb-3">
+                            <label class="form-label">Slug</label>
+                            <input type="text" class="form-control bg-light" value="{{ $page->slug }}" disabled>
+                            <small class="text-muted">Slug is auto-generated from title and cannot be changed manually.</small>
+                        </div>
+                    @endif
+
+                    <div class="mb-3">
+                        <label class="form-label" for="page_content">Page Content <span class="text-danger">*</span></label>
+                        <textarea name="page_content" id="ckeditor-classic" class="@error('page_content') is-invalid @enderror">{{ old('page_content', @$page->page_content) }}</textarea>
+                        @error('page_content')
+                            <small class="text-danger">{{ $message }}</small>
+                        @enderror
+                    </div>
+                </div>
+            </div>
+
+            <div class="text-end mb-4">
+                <a href="{{ route('backend.page.index') }}" class="btn btn-danger w-sm">Cancel</a>
+                <button type="submit" class="btn btn-success w-sm">{{ @$page ? 'Update' : 'Create' }}</button>
+            </div>
+        </div>
+        <!-- end col -->
+    </form>
+
 @endsection
 
-
 @push('scripts-top')
-<!-- ✅ CKEditor 5 Classic Editor from CDN -->
-<script src="https://cdn.ckeditor.com/ckeditor5/41.3.1/classic/ckeditor.js"></script>
-<script>
-    document.addEventListener("DOMContentLoaded", function() {
-        ClassicEditor
-            .create(document.querySelector('#ckeditor-classic'))
-            .catch(error => {
-                console.error(error);
-            });
-    });
-</script>
+    <!-- ckeditor -->
+    <script src="{{ asset('assets/libs/%40ckeditor/ckeditor5-build-classic/build/ckeditor.js') }}"></script>
+    <script src="{{ asset('') }}assets/js/pages/project-create.init.js"></script>
 @endpush

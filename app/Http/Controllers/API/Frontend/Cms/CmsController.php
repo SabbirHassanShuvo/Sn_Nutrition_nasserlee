@@ -141,4 +141,32 @@ class CmsController extends BaseController
             return $this->sendError('Failed to fetch About Us section details.', ['error' => $e->getMessage()]);
         }
     }
+
+    /**
+     * Get a specific page details by its slug.
+     */
+    public function getPageBySlug(string $slug)
+    {
+        try {
+            $page = \App\Models\Page::where('slug', $slug)
+                ->where('status', \App\Models\Page::STATUS['ACTIVE'])
+                ->first();
+
+            if (!$page) {
+                return $this->sendError('Page not found or is inactive.', [], 404);
+            }
+
+            $data = [
+                'id'           => $page->id,
+                'page_title'   => $page->page_title,
+                'slug'         => $page->slug,
+                'page_content' => $page->page_content,
+                'updated_at'   => $page->updated_at->toIso8601String(),
+            ];
+
+            return $this->sendResponse($data, 'Page details fetched successfully.');
+        } catch (\Exception $e) {
+            return $this->sendError('Failed to fetch page details.', ['error' => $e->getMessage()]);
+        }
+    }
 }

@@ -48,7 +48,7 @@ Route::group([ 'as'=>'backend.'], function () {
     // Page Management (CMS)
     Route::group(['middleware' => 'permission:cms_pages|page_manage|page_management'], function () {
         Route::post('page/status/{id}', [PageController::class,'status'])->name('page.status');
-        Route::resource('page', PageController::class)->except(['show']);
+        Route::resource('page', PageController::class);
     });
     
     // System Users

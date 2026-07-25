@@ -2,161 +2,118 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Faq;
 use App\Models\Page;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Str;
 use Yajra\DataTables\Facades\DataTables;
-use Illuminate\Support\Facades\Validator;
 
 class PageController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function index(Request $request)
     {
         if ($request->ajax()) {
             $data = Page::latest()->get();
             return DataTables::of($data)
+                ->addColumn('checkbox', fn($page) => '<input type="checkbox" class="form-check-input row-checkbox" value="' . $page->id . '">')
                 ->addIndexColumn()
-                ->addColumn('page_title', function ($data) {
-                    $page_title = $data->page_title;
-                    return $page_title;
+                ->addColumn('page_title', fn($page) => $page->page_title)
+                ->addColumn('slug', fn($page) => '<code>' . $page->slug . '</code>')
+                ->addColumn('status', function ($page) {
+                    $checked = $page->status == Page::STATUS['ACTIVE'] ? 'checked' : '';
+                    return '<div class="form-check form-switch mb-2">
+                                <input class="form-check-input" onclick="statusChange(' . $page->id . ')" type="checkbox" ' . $checked . '>
+                            </div>';
                 })
-                ->addColumn('page_content', function ($data) {
-                    $page_content = $data->page_content;
-                    return $page_content;
-                })
-
-                ->addColumn('status', function ($data) {
-                    $backgroundColor  = $data->status == Faq::STATUS['ACTIVE'] ? '#4CAF50' : '#ccc';
-                    $sliderTranslateX = $data->status == Faq::STATUS['ACTIVE'] ? '26px' : '2px';
-                    
-                     return getStatusHTML($data, $backgroundColor, $sliderTranslateX);
-                })
-
-                ->addColumn('action', function ($data) {
+                ->addColumn('action', function ($page) {
                     return '
-                    <button onclick="edit(' . $data->id . ')" type="button" class="btn btn-info btn-sm">
-                        <i class="mdi mdi-pencil"></i>
-                    </button>
-                    <button type="button" onclick="showDeleteConfirm(' . $data->id . ')" class="btn btn-danger btn-sm del">
-                        <i class="mdi mdi-delete"></i>
-                    </button>
-                ';
+                        <div class="d-flex gap-2 justify-content-center">
+                            <a href="' . route('backend.page.show', $page->id) . '" class="btn btn-soft-success btn-sm" title="Preview">
+                                <i class="mdi mdi-eye fs-14"></i>
+                            </a>
+                            <a href="' . route('backend.page.edit', $page->id) . '" class="btn btn-soft-info btn-sm" title="Edit">
+                                <i class="mdi mdi-pencil fs-14"></i>
+                            </a>
+                            <button type="button" onclick="deleteData(\'' . route('backend.page.destroy', $page->id) . '\')" class="btn btn-soft-danger btn-sm" title="Delete">
+                                <i class="mdi mdi-delete fs-14"></i>
+                            </button>
+                        </div>
+                    ';
                 })
-                ->rawColumns(['page_title', 'page_content', 'status', 'action'])
-                ->make();
+                ->rawColumns(['checkbox', 'slug', 'status', 'action'])
+                ->make(true);
         }
 
         return view('backend.layout.pages.index');
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
     public function create()
     {
         return view('backend.layout.pages.form');
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
+    public function show(Page $page)
+    {
+        return view('backend.layout.pages.show', compact('page'));
+    }
+
     public function store(Request $request)
     {
-        try {
-            $validator = Validator::make($request->all(), [
-               'page_title' => 'required|string|max:255',
-                'page_content' => 'required|string|max:2000',
-            ]);
-            // dd($validator->errors());
+        $validated = $request->validate([
+            'page_title'   => 'required|string|max:255',
+            'page_content' => 'required|string',
+        ]);
 
-            if ($validator->fails()) {
-                return redirect()->back()->withErrors($validator)->withInput();
-            }
+        $validated['slug']   = makeSlug(Page::class, $validated['page_title']);
+        $validated['status'] = Page::STATUS['ACTIVE'];
 
-            $data = new Page();
-            $data->page_title = $request->page_title;
-            $data->page_content = $request->page_content;
-            $data->save();
+        Page::create($validated);
 
-            return redirect()->route('backend.page.index')->with('success', 'Created Successfully !!');
-        } catch (\Exception $e) {
-            return redirect()->back()->with('error', 'Something went wrong! ' . $e->getMessage());
-        }
+        return redirect()->route('backend.page.index')->with('success', 'Page created successfully.');
     }
 
-
-    /**
-     * Show the form for editing the specified resource.
-     */
     public function edit(Page $page)
     {
-        return view('backend.layout.pages.form', ['page'=> $page]);
-        
+        return view('backend.layout.pages.form', compact('page'));
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
     public function update(Request $request, Page $page)
     {
-        try {
-            $validator = Validator::make($request->all(), [
-                'page_title' => 'required|string|max:255',
-                'page_content' => 'required|string',
-            ]);
+        $validated = $request->validate([
+            'page_title'   => 'required|string|max:255',
+            'page_content' => 'required|string',
+        ]);
 
-            if ($validator->fails()) {
-                return redirect()->back()->withErrors($validator)->withInput();
-            }
-
-            $page->page_title = $request->page_title;
-            $page->page_content = $request->page_content;
-            $page->save();
-
-            return redirect()->route('backend.page.index')->with('success', 'Updated Successfully.');
-        } catch (\Exception $e) {
-            // dd($e);
-            return redirect()->back()->with('error', 'Something went wrong!');
+        if ($page->page_title !== $validated['page_title']) {
+            $validated['slug'] = makeSlug(Page::class, $validated['page_title']);
         }
+
+        $page->update($validated);
+
+        return redirect()->route('backend.page.index')->with('success', 'Page updated successfully.');
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
     public function destroy(Page $page)
     {
         try {
-            
             $page->delete();
-
-            return response()->json([
-                'success' => true,
-                'message' => 'Deleted successfully.',
-            ]);
+            return response()->json(['success' => true, 'message' => 'Deleted successfully.']);
         } catch (\Exception) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Failed to delete the Data.',
-            ]);
+            return response()->json(['success' => false, 'message' => 'Failed to delete.']);
         }
     }
 
     public function status(int $id): JsonResponse
     {
-        $data = Page::findOrFail($id);
-       
-        $data->status = !$data->status ;
-        $data->save();
+        $page         = Page::findOrFail($id);
+        $page->status = $page->status == Page::STATUS['ACTIVE']
+            ? Page::STATUS['INACTIVE']
+            : Page::STATUS['ACTIVE'];
+        $page->save();
 
         return response()->json([
             'success' => true,
-            'message' => 'Status Chaned Successfully.',
-            'data'    => $data,
+            'message' => 'Status updated successfully.',
         ]);
-    
     }
 }

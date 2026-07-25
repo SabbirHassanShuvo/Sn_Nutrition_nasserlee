@@ -1,219 +1,121 @@
 @extends('backend.master')
-@section('content')
-{{-- PAGE-HEADER --}}
-<div class="page-header">
-    <div>
-        <h1 class="page-title">List of Dynamic Page</h1>
-    </div>
-    <div class="ms-auto pageheader-btn">
-        <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="javascript:void(0);">Dashboard</a></li>
-            <li class="breadcrumb-item active" aria-current="page">Dynamic Page</li>
-        </ol>
-    </div>
-</div>
-{{-- PAGE-HEADER --}}
+@section('title', 'Pages Management')
 
+@section('content')
     <div class="row">
-        <div class="col-12">
-            <div class="card">
-                <div class="card-body">
-                     <div class="d-flex justify-content-end mb-2">
-                        <a href="{{ route('backend.page.create') }}" class="btn btn-primary">Add Page</a>
+        <div class="col-lg-12">
+            <div class="card shadow-sm border-0">
+                <div class="card-header border-0 bg-white py-3 d-flex align-items-center justify-content-between">
+                    <div>
+                        <h5 class="card-title mb-0 fw-bold text-primary">Pages</h5>
+                        <p class="text-muted mb-0 fs-12">Manage dynamic CMS pages</p>
                     </div>
+                    <div class="flex-shrink-0 d-flex gap-2">
+                        <a href="{{ route('backend.page.create') }}" class="btn btn-primary btn-sm shadow-sm d-flex align-items-center">
+                            <i class="ri-add-line align-bottom me-1"></i> Add Page
+                        </a>
+                    </div>
+                </div>
+
+                <div class="card-body p-0">
                     <div class="table-responsive">
-                        <table class="table table-bordered text-nowrap border-bottom w-100" id="datatable">
-                            <thead>
+                        <table class="table align-middle table-nowrap table-hover mb-0 data-table custom-table">
+                            <thead class="table-light">
                                 <tr>
-                                    <th>#</th>
-                                    <th>Page Title</th>
-                                    <th>Page ontent</th>
-                                    <th>Status</th>
-                                    <th>Actions</th>
+                                    <th style="width: 40px; text-align: center;"><input type="checkbox" class="form-check-input" id="checkAll"></th>
+                                    <th class="ps-3" style="width: 60px;">ID</th>
+                                    <th class="text-start">Page Title</th>
+                                    <th>Slug</th>
+                                    <th class="text-center" style="width: 120px;">Status</th>
+                                    <th class="text-center" style="width: 150px;">Actions</th>
                                 </tr>
                             </thead>
-                            <tbody>
-                            {{-- dynamic data --}}
-                            </tbody>
+                            <tbody class="list"></tbody>
                         </table>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-
 @endsection
 
+@push('styles-top')
+    <style>
+        .custom-table thead th {
+            font-size: 11px;
+            text-transform: uppercase;
+            font-weight: 700;
+            padding: 12px 15px;
+            letter-spacing: 0.5px;
+        }
+        .custom-table tbody td { padding: 10px 15px; font-size: 13.5px; }
+        .btn-soft-info   { background-color: rgba(41,156,219,.1); color: #299cdb; border: none; }
+        .btn-soft-danger { background-color: rgba(240,101,72,.1); color: #f06548; border: none; }
+        .btn-soft-info:hover   { background-color: #299cdb; color: #fff; }
+        .btn-soft-danger:hover { background-color: #f06548; color: #fff; }
+    </style>
+@endpush
 
 @push('scripts-bottom')
     <script>
-        $(document).ready(function() {
+        (function ($) {
+            $(function () {
+                $('.data-table').DataTable({
+                    processing: true,
+                    serverSide: true,
+                    responsive: { details: true },
+                    ajax: "{{ route('backend.page.index') }}",
+                    columns: [
+                        { data: 'checkbox',    name: 'checkbox',    orderable: false, searchable: false, className: 'text-center' },
+                        { data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable: false, className: 'ps-3 text-muted fw-medium' },
+                        { data: 'page_title',  name: 'page_title',  className: 'text-start fw-medium' },
+                        { data: 'slug',        name: 'slug' },
+                        { data: 'status',      name: 'status',      orderable: false, searchable: false, className: 'text-center' },
+                        { data: 'action',      name: 'action',      orderable: false, searchable: false, className: 'text-center' },
+                    ]
+                });
+            });
+        })(jQuery);
 
-            $.ajaxSetup({
-                headers: {
-                    "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content"),
+        function statusChange(id) {
+            let url = "{{ route('backend.page.status', ':id') }}".replace(':id', id);
+            $.ajax({
+                type: 'POST',
+                url: url,
+                data: { _token: "{{ csrf_token() }}" },
+                success: function (res) {
+                    if (res.success) {
+                        $('.data-table').DataTable().ajax.reload(null, false);
+                        toastr.success(res.message);
+                    }
                 }
             });
-            if (!$.fn.DataTable.isDataTable('#datatable')) {
-                let dTable = $('#datatable').DataTable({
-                    order: [],
-                    lengthMenu: [
-                        [10, 25, 50, 100, -1],
-                        [10, 25, 50, 100, "All"]
-                    ],
-                    processing: true,
-                    responsive: true,
-                    serverSide: true,
+        }
 
-                    language: {
-                        processing: `<div class="text-center">
-                        <div class="spinner-border text-primary" style="width: 3rem; height: 3rem;" role="status">
-                        <span class="visually-hidden">Loading...</span>
-                        </div>
-                        </div>`
-                    },
-
-                    scroller: {
-                        loadingIndicator: false
-                    },
-                    pagingType: "full_numbers",
-                    dom: "<'row justify-content-between table-topbar'<'col-md-2 col-sm-4 px-0'l><'col-md-2 col-sm-4 px-0'f>>tipr",
-                    ajax: {
-                        url: "{{ route('backend.page.index') }}",
-                        type: "GET",
-                    },
-
-                    columns: [{
-                        data: 'DT_RowIndex',
-                        name: 'DT_RowIndex',
-                        orderable: false,
-                        searchable: false
-                    },
-                        {
-                            data: 'page_title',
-                            name: 'page_title',
-                            orderable: true,
-                            searchable: true
-                        },
-                        {
-                            data: 'page_content',
-                            name: 'page_content',
-                            orderable: true,
-                            searchable: true
-                        },
-                        {
-                            data: 'status',
-                            name: 'status',
-                            orderable: false,
-                            searchable: false
-                        },
-                        {
-                            data: 'action',
-                            name: 'action',
-                            orderable: false,
-                            searchable: false
-                        },
-                    ],
-                });
-
-                /* dTable.buttons().container().appendTo('#file_exports');
-                new DataTable('#example', {
-                    responsive: true
-                }); */
-            }
-        });
-
-        // Status Change Confirm Alert
-        function showStatusChangeAlert(id) {
-            event.preventDefault();
-
+        function deleteData(url) {
             Swal.fire({
                 title: 'Are you sure?',
-                text: 'You want to update the status?',
-                icon: 'info',
-                showCancelButton: true,
-                confirmButtonText: 'Yes',
-                cancelButtonText: 'No',
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    statusChange(id);
-                }
-            });
-        }
-        // Status Change
-        function statusChange(id) {
-            let url = '{{ route('backend.page.status', ':id') }}';
-            $.ajax({
-                type: "POST",
-                url: url.replace(':id', id),
-                data: {
-                    _token: "{{csrf_token()}}"
-                },
-                success: function(resp) {
-                    console.log(resp);
-                    // Reloade DataTable
-                    $('#datatable').DataTable().ajax.reload();
-                    if (resp.success === true) {
-                        // show toast message
-                        toastr.success(resp.message);
-                    } else if (resp.errors) {
-                        toastr.error(resp.errors[0]);
-                    } else {
-                        toastr.error(resp.message);
-                    }
-                },
-                error: function(error) {
-                    // location.reload();
-                }
-            });
-        }
-
-       // delete Confirm
-        function showDeleteConfirm(id) {
-            event.preventDefault();
-            Swal.fire({
-                title: 'Are you sure you want to delete ?',
-                text: 'If you delete this, it will be gone forever.',
+                text: "You won't be able to revert this!",
                 icon: 'warning',
                 showCancelButton: true,
                 confirmButtonColor: '#3085d6',
-                cancelButtonColor: '#d33',
-                confirmButtonText: 'Yes, delete it!',
+                cancelButtonColor:  '#d33',
+                confirmButtonText: 'Yes, delete it!'
             }).then((result) => {
                 if (result.isConfirmed) {
-                    deleteItem(id);
-                }
-            });
-        }
-
-        function edit(id) {
-            let url = "{{ route('backend.page.edit', ':id') }}";
-            url = url.replace(':id', id);
-
-            window.location.href = url;
-        }
-
-
-        // Delete Button
-        function deleteItem(id) {
-            let url = '{{ route('backend.page.destroy', ':id') }}';
-            let csrfToken = '{{ csrf_token() }}';
-            $.ajax({
-                type: "DELETE",
-                url: url.replace(':id', id),
-                headers: {
-                    'X-CSRF-TOKEN': csrfToken
-                },
-                success: function(resp) {
-                    $('#datatable').DataTable().ajax.reload();
-                    if (resp['t-success']) {
-                        toastr.success(resp.message);
-                    } else {
-                        toastr.error(resp.message);
-                    }
-                },
-                error: function(error) {
-                    toastr.error('An error occurred. Please try again.');
+                    $.ajax({
+                        url: url,
+                        type: 'DELETE',
+                        data: { _token: "{{ csrf_token() }}" },
+                        success: function (res) {
+                            if (res.success) {
+                                $('.data-table').DataTable().ajax.reload(null, false);
+                                toastr.success(res.message);
+                            } else {
+                                toastr.error(res.message);
+                            }
+                        }
+                    });
                 }
             });
         }

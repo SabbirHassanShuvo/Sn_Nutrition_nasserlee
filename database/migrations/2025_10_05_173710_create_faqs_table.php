@@ -13,6 +13,7 @@ return new class extends Migration
     {
         Schema::create('faqs', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('faq_category_id')->nullable()->constrained('faq_categories')->nullOnDelete();
             $table->string('question');
             $table->text('answer')->nullable();
             $table->integer('priority')->unsigned()->default(1);

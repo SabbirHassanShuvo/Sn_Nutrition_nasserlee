@@ -15,7 +15,9 @@ return new class extends Migration
             $table->id();
             $table->string('small_badge')->nullable();
             $table->text('title')->nullable();
+            $table->string('title_highlight')->nullable();
             $table->text('description')->nullable();
+            $table->string('description_highlight')->nullable();
             $table->string('button_text')->nullable();
             $table->string('button_link')->nullable();
             $table->string('image')->nullable();
@@ -28,7 +30,7 @@ return new class extends Migration
         });
     }
 
-    /**
+    /**         
      * Reverse the migrations.
      */
     public function down(): void

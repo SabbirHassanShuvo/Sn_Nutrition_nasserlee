@@ -169,6 +169,13 @@
                                     data-key="t-level-1.1"> System Settings </a>
                             </li>
                             @endcan
+                            @can('setting_system')
+                            <li class="nav-item">
+                                <a href="{{ route('backend.settings.web-setting.index') }}"
+                                    class="nav-link {{ getPageStatus('backend.settings.web-setting.*') }}"
+                                    data-key="t-level-1.2"> Web Settings </a>
+                            </li>
+                            @endcan
                             @can('setting_mail')
                             <li class="nav-item">
                                 <a href="{{ route('backend.settings.mail.index') }}"

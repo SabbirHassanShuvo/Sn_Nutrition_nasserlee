@@ -23,9 +23,7 @@ class FaqController extends Controller
                 ->addIndexColumn()
                 ->addColumn('question', fn($faq) => $faq->question)
                 ->addColumn('answer', fn($faq) => Str::limit(strip_tags($faq->answer), 100))
-                ->addColumn('category', function ($faq) {
-                    return $faq->faqCategory ? $faq->faqCategory->name : ($faq->category ?? '—');
-                })
+                ->addColumn('category', fn($faq) => $faq->faqCategory ? $faq->faqCategory->name : '—')
                 ->addColumn('priority', fn($faq) => $faq->priority)
                 ->addColumn('status', function ($data) {
                     return '<div class="form-check form-switch mb-2">
