@@ -9,6 +9,7 @@ use App\Http\Controllers\Web\Backend\SiteController;
 use App\Http\Controllers\Web\Backend\ProjectController;
 use App\Http\Controllers\Web\Backend\Cms\BannerSectionController;
 use App\Http\Controllers\Web\Backend\Cms\HomePageController;
+use App\Http\Controllers\Web\Backend\Cms\FaqCategoryController;
 
 
 use Illuminate\Support\Facades\Mail;
@@ -21,12 +22,7 @@ Route::group([ 'as'=>'backend.'], function () {
     Route::get('/', [SiteController::class,'index'])->name('dashboard.index');
     Route::resource('project', ProjectController::class)->except(['show']);
 
-    // FAQ Management (CMS)
-    Route::group(['middleware' => 'permission:cms_faq|faq_manage|faq_management', 'as'=>'feature.'], function(){
-        Route::delete('faq/bulk-destroy', [FaqController::class,'bulkDestroy'])->name('faq.bulk-destroy');
-        Route::post('faq/status/{id}', [FaqController::class,'status'])->name('faq.status');
-        Route::resource('faq', FaqController::class)->except(['show']);
-    });
+
 
     // Product Management
     Route::group(['middleware' => 'permission:products_manage|product_manage'], function () {
@@ -128,7 +124,19 @@ Route::group([ 'as'=>'backend.'], function () {
         Route::put('cms/about-us', [\App\Http\Controllers\Web\Backend\Cms\AboutPageController::class, 'update'])->name('about-us.update');
     });
 
+    // CMS — FAQ Category Management
+    Route::group(['middleware' => 'permission:cms_faq|faq_manage|faq_management'], function () {
+        Route::delete('faq-category/bulk-destroy', [FaqCategoryController::class, 'bulkDestroy'])->name('faq-category.bulk-destroy');
+        Route::post('faq-category/status/{id}', [FaqCategoryController::class, 'status'])->name('faq-category.status');
+        Route::resource('faq-category', FaqCategoryController::class)->except(['show']);
+    });
 
+    // CMS — FAQ Management
+    Route::group(['middleware' => 'permission:cms_faq|faq_manage|faq_management', 'as'=>'feature.'], function(){
+        Route::delete('faq/bulk-destroy', [FaqController::class,'bulkDestroy'])->name('faq.bulk-destroy');
+        Route::post('faq/status/{id}', [FaqController::class,'status'])->name('faq.status');
+        Route::resource('faq', FaqController::class)->except(['show']);
+    });
 
 
     require_once __DIR__ .'/settings.php';

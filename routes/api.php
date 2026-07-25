@@ -6,6 +6,7 @@ use App\Http\Controllers\API\AuthController;
 use App\Http\Controllers\Api\GoogleAuthController;
 use App\Http\Controllers\API\Frontend\Cms\HomePageController;
 use App\Http\Controllers\API\Frontend\Cms\CmsController;
+use App\Http\Controllers\API\Frontend\Cms\FaqApiController;
 
 Route::group([
     'middleware' => 'api',
@@ -37,4 +38,5 @@ Route::group(['middleware' => 'api'], function($router){
     Route::get('/cms/banners', [HomePageController::class, 'getBanners']);
     Route::get('/cms/quality-control', [HomePageController::class, 'getQualityControl']);
     Route::get('/cms/about-us', [CmsController::class, 'getAboutPage']);
+    Route::get('/cms/faqs', [FaqApiController::class, 'getFaqs']);
 });

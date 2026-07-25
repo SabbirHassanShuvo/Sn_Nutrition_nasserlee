@@ -28,6 +28,8 @@ class DatabaseSeeder extends Seeder
             BannerSectionSeeder::class,
             QualityControlSectionSeeder::class,
             AboutSectionSeeder::class,
+            FaqCategorySeeder::class,
+            FaqSeeder::class,
         ]);
     }
 }

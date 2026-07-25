@@ -225,6 +225,30 @@
                                     data-key="t-pages"> Pages </a>
                             </li>
                             @endcan
+                        </ul>
+                    </div>
+                </li>
+                @endcanany
+
+                {{-- Faq --}}
+                @canany(['cms_faq'])
+                <li class="nav-item">
+                    <a class="nav-link menu-link {{ getPageStatus(['backend.feature.faq.*'], 'collapsed active') }}" href="#sidebarFaq"
+                        data-bs-toggle="collapse" role="button" aria-expanded="false"
+                        aria-controls="sidebarFaq">
+                        <i class="ri-question-answer-line"></i> <span data-key="t-faq">FAQ</span>
+                    </a>
+                    <div class="collapse menu-dropdown {{ getPageStatus(['backend.feature.faq.*'], 'show') }}"
+                        id="sidebarFaq">
+                        <ul class="nav nav-sm flex-column">
+
+                            @can('cms_faq')
+                            <li class="nav-item">
+                                <a href="{{ route('backend.faq-category.index') }}"
+                                    class="nav-link {{ getPageStatus('backend.faq-category.*') }}"
+                                    data-key="t-faq-categories"> FAQ Categories </a>
+                            </li>
+                            @endcan
 
                             @can('cms_faq')
                             <li class="nav-item">
@@ -233,14 +257,10 @@
                                     data-key="t-faqs"> FAQs </a>
                             </li>
                             @endcan
-
-            
-
                         </ul>
                     </div>
                 </li>
                 @endcanany
-
             </ul>
         </div>
         <!-- Sidebar -->

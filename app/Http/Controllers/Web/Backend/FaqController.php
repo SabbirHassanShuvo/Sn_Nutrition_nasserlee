@@ -3,122 +3,120 @@
 namespace App\Http\Controllers\Web\Backend;
 
 use App\Models\Faq;
-use App\Models\User;
-use Illuminate\View\View;
+use App\Models\FaqCategory;
 use Illuminate\Http\Request;
-// use Yajra\DataTables\DataTables;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Str;
 use App\Http\Controllers\Controller;
 use Yajra\DataTables\Facades\DataTables;
 
 class FaqController extends Controller
-{   
-    public function index(Request $request){
-        if($request->ajax()){
-            $faq = Faq::latest('priority')->get();
+{
+    public function index(Request $request)
+    {
+        if ($request->ajax()) {
+            $faq = Faq::with('faqCategory')->latest('priority')->get();
             return DataTables::of($faq)
-            ->addColumn('checkbox', function ($faq) {
-                return '<input type="checkbox" class="form-check-input row-checkbox" value="' . $faq->id . '">';
-            })
-            ->addIndexColumn()
-            
-            ->addColumn('question', function($faq){
-                return ''.$faq->question.'';
-            })
-             ->addColumn('answer', function($faq){
-                return ''.$faq->answer.'';
-            })
-            ->addColumn('priority', function($faq){
-                return ''.$faq->priority.'';
-            })
-            ->addColumn('status', function ($data) {
-                return '<div class="form-check form-switch mb-2">
-                            <input class="form-check-input" onclick="statusFaq(' . $data->id . ')" type="checkbox" ' . ($data->status == Faq::STATUS['ACTIVE'] ? 'checked' : '') . '>
-                        </div>';
-            })
-            ->addColumn('action', function ($data) {
-                return '
-                    <button onclick="editFaq(' . $data->id . ')" type="button" class="btn btn-info btn-sm">
-                        <i class="mdi mdi-pencil"></i>
-                    </button>
-                    <button type="button" onclick="deleteData(\'' . route('backend.feature.faq.destroy', $data->id) . '\')" class="btn btn-danger btn-sm del">
-                        <i class="mdi mdi-delete"></i>
-                    </button>
-                ';
-            })
-            ->setRowAttr([
-                'data-id' => function ($data) {
-                    return $data->id;
-                }
-            ])
-            ])
-            ->rawColumns(['checkbox', 'question','status','action'])
-            ->make(true);
-            ;
+                ->addColumn('checkbox', function ($faq) {
+                    return '<input type="checkbox" class="form-check-input row-checkbox" value="' . $faq->id . '">';
+                })
+                ->addIndexColumn()
+                ->addColumn('question', fn($faq) => $faq->question)
+                ->addColumn('answer', fn($faq) => Str::limit(strip_tags($faq->answer), 100))
+                ->addColumn('category', function ($faq) {
+                    return $faq->faqCategory ? $faq->faqCategory->name : ($faq->category ?? '—');
+                })
+                ->addColumn('priority', fn($faq) => $faq->priority)
+                ->addColumn('status', function ($data) {
+                    return '<div class="form-check form-switch mb-2">
+                                <input class="form-check-input" onclick="statusFaq(' . $data->id . ')" type="checkbox" ' . ($data->status == Faq::STATUS['ACTIVE'] ? 'checked' : '') . '>
+                            </div>';
+                })
+                ->addColumn('action', function ($data) {
+                    return '
+                        <button onclick="editFaq(' . $data->id . ')" type="button" class="btn btn-info btn-sm">
+                            <i class="mdi mdi-pencil"></i>
+                        </button>
+                        <button type="button" onclick="deleteData(\'' . route('backend.feature.faq.destroy', $data->id) . '\')" class="btn btn-danger btn-sm del">
+                            <i class="mdi mdi-delete"></i>
+                        </button>
+                    ';
+                })
+                ->setRowAttr([
+                    'data-id' => fn($data) => $data->id,
+                ])
+                ->rawColumns(['checkbox', 'question', 'category', 'status', 'action'])
+                ->make(true);
         }
-        return view("backend.layout.faqs.index");
-    }
-    public function create(){
-        $data['status'] = Faq::STATUS;
-        return view("backend.layout.faqs.form", $data);
+
+        return view('backend.layout.cms.faqs.index');
     }
 
-    public function store(Request $request){
+    public function create()
+    {
+        $data['status']     = Faq::STATUS;
+        $data['categories'] = FaqCategory::active()->orderBy('priority')->get();
+        return view('backend.layout.cms.faqs.form', $data);
+    }
+
+    public function store(Request $request)
+    {
         $validated = $request->validate([
-            "question"  => "required",
-            'answer' => 'required',
-            'priority'=> 'required|min:1',
-            'status'=> 'required',
+            'question'        => 'required',
+            'answer'          => 'required',
+            'faq_category_id' => 'required|exists:faq_categories,id',
+            'priority'        => 'required|min:1',
+            'status'          => 'required',
         ]);
-        // dd($request->all());
+
         Faq::create($validated);
 
         return redirect()
-        ->route('backend.feature.faq.index')
-        ->with('success','new faq successfully created');
+            ->route('backend.feature.faq.index')
+            ->with('success', 'New FAQ successfully created.');
     }
 
-    public function edit(Faq $faq){
-
-        return view('backend.layout.faqs.form', ['faq'=> $faq, 'status' => Faq::STATUS]);
-    }
-    public function update(Request $request, Faq $faq){
-        $validated = $request->validate([
-            "question"  => "required",
-            'answer' => 'required',
-            'priority'=> 'required|min:1',
-            'status'=> 'required',
+    public function edit(Faq $faq)
+    {
+        return view('backend.layout.cms.faqs.form', [
+            'faq'        => $faq,
+            'status'     => Faq::STATUS,
+            'categories' => FaqCategory::active()->orderBy('priority')->get(),
         ]);
-        // dd($request->all());
+    }
+
+    public function update(Request $request, Faq $faq)
+    {
+        $validated = $request->validate([
+            'question'        => 'required',
+            'answer'          => 'required',
+            'faq_category_id' => 'required|exists:faq_categories,id',
+            'priority'        => 'required|min:1',
+            'status'          => 'required',
+        ]);
+
         $faq->update($validated);
 
-        return redirect()->route('backend.feature.faq.index')->with('success','Faq Updaed');
+        return redirect()->route('backend.feature.faq.index')->with('success', 'FAQ updated.');
     }
 
-    public function destroy(Faq $faq){
-        // dd('here');
+    public function destroy(Faq $faq)
+    {
         try {
             $faq->delete();
-            return response()->json([
-                'success' => true,
-                'message' => 'Deleted successfully.',
-            ]);
+            return response()->json(['success' => true, 'message' => 'Deleted successfully.']);
         } catch (\Exception) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Failed to delete the Data.',
-            ]);
+            return response()->json(['success' => false, 'message' => 'Failed to delete the Data.']);
         }
     }
 
-    public function status($id){
-        $faq = Faq::findOrFail($id);
+    public function status($id)
+    {
+        $faq         = Faq::findOrFail($id);
         $faq->status = !$faq->status;
         $faq->save();
-        return response()->json([
-            'success'=> true,
-            'message'=> 'status updated',
-            ]);
+
+        return response()->json(['success' => true, 'message' => 'Status updated.']);
     }
 
     public function bulkDestroy(Request $request)

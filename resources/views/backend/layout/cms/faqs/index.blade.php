@@ -3,34 +3,31 @@
     <div class="row">
         <div class="col-lg-12">
             <div class="card" id="tasksList">
-                <div class="card-header border-0">
-                    <div class="d-flex align-items-center">
-                        <h5 class="card-title mb-0 flex-grow-1">All FAQs</h5>
-                        <div class="flex-shrink-0 d-flex gap-2">
-                            <button type="button" class="btn btn-danger d-none align-items-center" id="bulkDeleteBtn">
-                                <i class="ri-delete-bin-line align-bottom me-1"></i> Bulk Delete
-                            </button>
-                            <a class="btn btn-danger add-btn" href="{{route('backend.feature.faq.create')}}">
-                                <i class="ri-add-line align-bottom me-1"></i> Create FAQ
-                            </a>
-                        </div>
+                <div class="card-header border-0 bg-white py-3 d-flex align-items-center justify-content-between">
+                    <div>
+                        <h5 class="card-title mb-0 fw-bold text-primary">FAQ</h5>
+                        <p class="text-muted mb-0 fs-12">Manage FAQ </p>
+                    </div>
+                    <div class="flex-shrink-0 d-flex gap-2">
+                        <button type="button" class="btn btn-danger btn-sm d-none align-items-center" id="bulkDeleteBtn">
+                            <i class="ri-delete-bin-line align-bottom me-1"></i> Bulk Delete
+                        </button>
+                        <a class="btn btn-primary btn-sm shadow-sm d-flex align-items-center" href="{{ route('backend.feature.faq.create') }}">
+                            <i class="ri-add-line align-bottom me-1"></i> Add FAQ
+                        </a>
                     </div>
                 </div>
 
-                <!--end card-body-->
-                <div class="card shadow-sm">
-                    <div class="card-header bg-light">
-                        <h5 class="mb-0">FAQ List</h5>
-                    </div>
-                    <div class="card-body">
-                        <div class="table-responsive table-card mb-4">
-                            <table class="table align-middle table-nowrap table-striped mb-0 data-table">
-                                <thead class="table-light text-muted">
+
+                <div class="table-responsive">
+                    <table class="table align-middle table-nowrap table-striped mb-0 data-table">
+                        <thead class="table-light text-muted">
                                     <tr>
                                         <th style="width: 40px; text-align: center;"><input type="checkbox" class="form-check-input" id="checkAll"></th>
                                         <th class="wd-10p border-bottom-0">ID</th>
                                         <th class="wd-30p border-bottom-0">Question</th>
                                         <th class="wd-30p border-bottom-0">Answer</th>
+                                        <th class="wd-10p border-bottom-0">Category</th>
                                         <th class="wd-10p border-bottom-0">Priority</th>
                                         <th class="wd-10p border-bottom-0">Status</th>
                                         <th class="wd-10p border-bottom-0">Actions</th>
@@ -39,10 +36,6 @@
                                 <tbody class="list form-check-all"></tbody>
                             </table>
                         </div>
-                    </div>
-                </div>
-
-                <!--end card-body-->
             </div>
             <!--end card-->
         </div>
@@ -70,6 +63,7 @@
                         { data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable: false },
                         { data: 'question', name: 'question' },
                         { data: 'answer', name: 'answer' },
+                        { data: 'category', name: 'category' },
                         { data: 'priority', name: 'priority' },
                         { data: 'status', name: 'status', orderable: false, searchable: false },
                         { data: 'action', name: 'action', orderable: false, searchable: false }
