@@ -4,17 +4,15 @@
     <div class="row">
         <div class="col-lg-12">
             <div class="card" id="bannerList">
-                <div class="card-header border-0">
-                    <div class="d-flex align-items-center justify-content-between">
-                        <h5 class="card-title mb-0 flex-grow-1">Banner List</h5>
-                        <div>
-                            <button type="button" class="btn btn-danger d-none" id="bulkDeleteBtn">
-                                <i class="ri-delete-bin-line align-bottom me-1"></i> Bulk Delete
-                            </button>
-                            <a class="btn btn-primary add-btn" href="{{ route('backend.banner-section.create') }}">
-                                <i class="ri-add-line align-bottom me-1"></i> Create Banner
-                            </a>
-                        </div>
+            <div class="card-header border-0 bg-white py-3 d-flex align-items-center justify-content-between">
+                    <div>
+                        <h5 class="card-title mb-0 fw-bold text-primary">Banner Sections</h5>
+                        <p class="text-muted mb-0 fs-12">Manage dynamic banner sections</p>
+                    </div>
+                    <div class="flex-shrink-0 d-flex gap-2">
+                        <a href="{{ route('backend.banner-section.create') }}" class="btn btn-primary btn-sm shadow-sm d-flex align-items-center">
+                            <i class="ri-add-line align-bottom me-1"></i> Add Banner
+                        </a>
                     </div>
                 </div>
 

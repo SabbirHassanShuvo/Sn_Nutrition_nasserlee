@@ -190,14 +190,14 @@
 
 
                 {{-- Cms --}}
-                @canany(['cms_banner', 'cms_pages', 'cms_faq', 'cms_home_page'])
+                @canany(['cms_banner', 'cms_pages', 'cms_faq', 'cms_home_page', 'cms_about_page', 'cms_contact_page'])
                 <li class="nav-item">
-                    <a class="nav-link menu-link {{ getPageStatus(['backend.banner-section.*', 'backend.page.*', 'backend.feature.faq.*', 'backend.home-page.*'], 'collapsed active') }}" href="#sidebarCMS"
+                    <a class="nav-link menu-link {{ getPageStatus(['backend.banner-section.*', 'backend.page.*', 'backend.feature.faq.*', 'backend.home-page.*', 'backend.about-us.*', 'backend.contact-us.*'], 'collapsed active') }}" href="#sidebarCMS"
                         data-bs-toggle="collapse" role="button" aria-expanded="false"
                         aria-controls="sidebarCMS">
                         <i class="ri-pages-line"></i> <span data-key="t-cms">CMS</span>
                     </a>
-                    <div class="collapse menu-dropdown {{ getPageStatus(['backend.banner-section.*', 'backend.page.*', 'backend.feature.faq.*', 'backend.home-page.*'], 'show') }}"
+                    <div class="collapse menu-dropdown {{ getPageStatus(['backend.banner-section.*', 'backend.page.*', 'backend.feature.faq.*', 'backend.home-page.*', 'backend.about-us.*', 'backend.contact-us.*'], 'show') }}"
                         id="sidebarCMS">
                         <ul class="nav nav-sm flex-column">
 
@@ -222,6 +222,14 @@
                                 <a href="{{ route('backend.about-us.edit') }}"
                                     class="nav-link {{ getPageStatus('backend.about-us.*') }}"
                                     data-key="t-about-us"> About Us </a>
+                            </li>
+                            @endcan
+
+                            @can('cms_contact_page')
+                            <li class="nav-item">
+                                <a href="{{ route('backend.contact-us.edit') }}"
+                                    class="nav-link {{ getPageStatus('backend.contact-us.*') }}"
+                                    data-key="t-contact-us"> Contact Us </a>
                             </li>
                             @endcan
 

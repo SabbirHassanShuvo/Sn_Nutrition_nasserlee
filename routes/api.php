@@ -39,6 +39,7 @@ Route::group(['middleware' => 'api'], function($router){
     Route::get('/cms/banners', [HomePageController::class, 'getBanners']);
     Route::get('/cms/quality-control', [HomePageController::class, 'getQualityControl']);
     Route::get('/cms/about-us', [CmsController::class, 'getAboutPage']);
+    Route::get('/cms/contact-us', [CmsController::class, 'getContactPage']);
     Route::get('/cms/faqs', [FaqApiController::class, 'getFaqs']);
     Route::get('/cms/page/{slug}', [CmsController::class, 'getPageBySlug']);
     Route::get('/cms/web-settings', [WebSettingApiController::class, 'getWebSettings']);

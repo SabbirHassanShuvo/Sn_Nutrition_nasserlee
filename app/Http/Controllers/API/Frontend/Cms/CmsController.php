@@ -4,6 +4,7 @@ namespace App\Http\Controllers\API\Frontend\Cms;
 
 use App\Http\Controllers\API\BaseController;
 use App\Models\AboutSection;
+use App\Models\WebSetting;
 use Illuminate\Http\Request;
 
 class CmsController extends BaseController
@@ -139,6 +140,50 @@ class CmsController extends BaseController
             return $this->sendResponse($data, 'About Us section details fetched successfully.');
         } catch (\Exception $e) {
             return $this->sendError('Failed to fetch About Us section details.', ['error' => $e->getMessage()]);
+        }
+    }
+
+    /**
+     * Get the Contact Us section data for the frontend.
+     */
+    public function getContactPage()
+    {
+        try {
+            $settings = WebSetting::first();
+
+            if (!$settings) {
+                return $this->sendResponse(null, 'Contact Us section not configured yet.');
+            }
+
+            $titleHtml = trim($settings->contact_title);
+            if ($settings->contact_title_highlight) {
+                $titleHtml .= " <span class='font-play-fair text-primary'>" . trim($settings->contact_title_highlight) . "</span>";
+            }
+
+            $data = [
+                'badge'       => $settings->contact_badge,
+                'title'       => $titleHtml,
+                'description' => $settings->contact_subtitle,
+                'phone'       => $settings->footer_phone,
+                'hours'       => $settings->contact_phone_hours,
+                'email'         => $settings->footer_email,
+                'response_time' => $settings->contact_email_response,
+                'address' => $settings->footer_address,
+                'details' => $settings->contact_address_details,
+                'map_iframe' => $settings->contact_map_iframe,
+                'follow_title'    => $settings->contact_follow_title,
+                'follow_subtitle' => $settings->contact_follow_subtitle,
+                'facebook'  => $settings->facebook_url,
+                'instagram' => $settings->instagram_url,
+                'twitter'   => $settings->twitter_url,
+                'whatsapp'  => $settings->whatsapp_url,
+                'linkedin'  => $settings->linkedin_url,
+             
+            ];
+
+            return $this->sendResponse($data, 'Contact Us details fetched successfully.');
+        } catch (\Exception $e) {
+            return $this->sendError('Failed to fetch Contact Us details.', ['error' => $e->getMessage()]);
         }
     }
 

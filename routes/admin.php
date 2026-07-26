@@ -10,6 +10,7 @@ use App\Http\Controllers\Web\Backend\ProjectController;
 use App\Http\Controllers\Web\Backend\Cms\BannerSectionController;
 use App\Http\Controllers\Web\Backend\Cms\HomePageController;
 use App\Http\Controllers\Web\Backend\Cms\FaqCategoryController;
+use App\Http\Controllers\Web\Backend\Cms\ContactPageController;
 
 
 use Illuminate\Support\Facades\Mail;
@@ -122,6 +123,12 @@ Route::group([ 'as'=>'backend.'], function () {
     Route::group(['middleware' => 'permission:cms_about_page'], function () {
         Route::get('cms/about-us', [\App\Http\Controllers\Web\Backend\Cms\AboutPageController::class, 'edit'])->name('about-us.edit');
         Route::put('cms/about-us', [\App\Http\Controllers\Web\Backend\Cms\AboutPageController::class, 'update'])->name('about-us.update');
+    });
+
+    // CMS — Contact Page sections
+    Route::group(['middleware' => 'permission:cms_contact_page'], function () {
+        Route::get('cms/contact-us', [ContactPageController::class, 'edit'])->name('contact-us.edit');
+        Route::put('cms/contact-us', [ContactPageController::class, 'update'])->name('contact-us.update');
     });
 
     // CMS — FAQ Category Management
