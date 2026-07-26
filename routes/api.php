@@ -8,6 +8,10 @@ use App\Http\Controllers\Api\Frontend\MyInformationController;
 use App\Http\Controllers\Api\Frontend\UserAddressController;
 use App\Http\Controllers\Api\Frontend\UserOrderController;
 
+use App\Http\Controllers\Api\Frontend\ConsultationController;
+use App\Http\Controllers\Api\Frontend\GymApiController;
+use App\Http\Controllers\Api\Frontend\PharmacyApiController;
+
 Route::group([
     'middleware' => 'api',
     'prefix' => 'auth'
@@ -32,7 +36,11 @@ Route::group([
     Route::post('/google', [GoogleAuthController::class, 'login']);
 });
 
-// Authenticated User Information, Address & Orders APIs (GET & POST Only)
+// Public Specialist API
+Route::get('/consultations/specialists', [ConsultationController::class, 'getSpecialists']);
+Route::post('/consultations/book', [ConsultationController::class, 'book']);
+
+// Authenticated User Information, Address & Orders & Consultation APIs
 Route::group([
     'middleware' => ['api', 'auth:api'],
     'prefix' => 'user'
@@ -44,7 +52,7 @@ Route::group([
     Route::get('/bmi-gauge', [MyInformationController::class, 'getBmiGauge']);
     Route::get('/supplement-intake-history', [MyInformationController::class, 'getSupplementHistory']);
 
-    // Standalone Multi-Address Management
+    // Multi-Address Management
     Route::get('/addresses', [UserAddressController::class, 'index']);
     Route::post('/addresses', [UserAddressController::class, 'store']);
     Route::get('/addresses/{id}', [UserAddressController::class, 'show']);
@@ -52,9 +60,15 @@ Route::group([
     Route::post('/addresses/{id}/delete', [UserAddressController::class, 'destroy']);
     Route::post('/addresses/{id}/set-default', [UserAddressController::class, 'setDefault']);
 
-    // Orders Tab APIs
+    // Orders Management APIs
     Route::get('/orders', [UserOrderController::class, 'index']);
     Route::get('/orders/{identifier}', [UserOrderController::class, 'show']);
     Route::get('/orders/{identifier}/invoice', [UserOrderController::class, 'invoice']);
     Route::get('/orders/{identifier}/invoice-view', [UserOrderController::class, 'invoiceView']);
+
+    // Consultation Bookings APIs
+    Route::post('/consultations/book', [ConsultationController::class, 'book']);
+    Route::get('/consultations/my-bookings', [ConsultationController::class, 'myBookings']);
+    Route::get('/consultations/nearby-gyms', [GymApiController::class, 'getNearbyGyms']);
+    Route::get('/consultations/nearby-pharmacies', [PharmacyApiController::class, 'getNearbyPharmacies']);
 });

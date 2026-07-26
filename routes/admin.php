@@ -106,7 +106,28 @@ Route::group([ 'as'=>'backend.'], function () {
         Route::resource('promo-code', \App\Http\Controllers\Web\Backend\PromoCodeController::class);
     });
 
+    // Specialist Management
+    Route::delete('specialist/bulk-destroy', [\App\Http\Controllers\Web\Backend\SpecialistController::class, 'bulkDestroy'])->name('specialist.bulk-destroy');
+    Route::post('specialist/status/{id}', [\App\Http\Controllers\Web\Backend\SpecialistController::class, 'status'])->name('specialist.status');
+    Route::post('specialist/store-specialty', [\App\Http\Controllers\Web\Backend\SpecialistController::class, 'storeSpecialty'])->name('specialist.store-specialty');
+    Route::resource('specialist', \App\Http\Controllers\Web\Backend\SpecialistController::class);
+
+    // Consultation Bookings & Zoom Meeting Generation
+    Route::get('consultation-booking', [\App\Http\Controllers\Web\Backend\ConsultationBookingController::class, 'index'])->name('consultation-booking.index');
+    Route::post('consultation-booking/{id}/approve-zoom', [\App\Http\Controllers\Web\Backend\ConsultationBookingController::class, 'approveAndGenerateZoom'])->name('consultation-booking.approve-zoom');
+    Route::post('consultation-booking/{id}/status', [\App\Http\Controllers\Web\Backend\ConsultationBookingController::class, 'updateStatus'])->name('consultation-booking.status');
+
+    // Nearby Gyms Management
+    Route::delete('gym/bulk-destroy', [\App\Http\Controllers\Web\Backend\GymController::class, 'bulkDestroy'])->name('gym.bulk-destroy');
+    Route::post('gym/status/{id}', [\App\Http\Controllers\Web\Backend\GymController::class, 'status'])->name('gym.status');
+    Route::resource('gym', \App\Http\Controllers\Web\Backend\GymController::class);
+
+    // Nearby Pharmacies Management
+    Route::delete('pharmacies/bulk-destroy', [\App\Http\Controllers\Web\Backend\PharmacyController::class, 'bulkDestroy'])->name('pharmacies.bulk-destroy');
+    Route::post('pharmacies/status/{id}', [\App\Http\Controllers\Web\Backend\PharmacyController::class, 'status'])->name('pharmacies.status');
+    Route::resource('pharmacies', \App\Http\Controllers\Web\Backend\PharmacyController::class);
 
 
     require_once __DIR__ .'/settings.php';
+
 });

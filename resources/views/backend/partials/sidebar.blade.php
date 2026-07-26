@@ -136,6 +136,33 @@
                 </li>
                 @endcanany
 
+                <li class="nav-item">
+                    <a class="nav-link menu-link {{ request()->routeIs('backend.specialist.*') ? 'active' : '' }}"
+                        href="{{ route('backend.specialist.index') }}">
+                        <i class="ri-user-star-line"></i> <span>Specialists</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link menu-link {{ request()->routeIs('backend.consultation-booking.*') ? 'active' : '' }}"
+                        href="{{ route('backend.consultation-booking.index') }}">
+                        <i class="ri-video-chat-line"></i> <span>Consultation Bookings</span>
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link menu-link {{ request()->routeIs('backend.gym.*') ? 'active' : '' }}"
+                        href="{{ route('backend.gym.index') }}">
+                        <i class="ri-map-pin-user-line"></i> <span>Nearby Gyms</span>
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link menu-link {{ request()->routeIs('backend.pharmacies.*') ? 'active' : '' }}"
+                        href="{{ route('backend.pharmacies.index') }}">
+                        <i class="ri-capsule-line"></i> <span>Pharmacies</span>
+                    </a>
+                </li>
+
                 @canany(['onboarding_options_manage', 'onboarding_manage'])
                 <li class="nav-item">
                     <a class="nav-link menu-link {{ request()->routeIs('backend.onboarding-option.*') ? 'active' : '' }}"
