@@ -71,4 +71,6 @@ Route::group([
     Route::get('/consultations/my-bookings', [ConsultationController::class, 'myBookings']);
     Route::get('/consultations/nearby-gyms', [GymApiController::class, 'getNearbyGyms']);
     Route::get('/consultations/nearby-pharmacies', [PharmacyApiController::class, 'getNearbyPharmacies']);
+
+    
 });
