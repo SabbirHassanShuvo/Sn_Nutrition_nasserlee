@@ -41,20 +41,16 @@ return new class extends Migration
             $table->string('standards_title_highlight')->nullable(); // e.g. Standards
             $table->text('standards_description')->nullable();
 
-            // Product Standards - 4 items (Icon, Title, Description)
-            $table->string('standard1_icon')->nullable();
+            // Product Standards - 4 items (Title, Description)
             $table->string('standard1_title')->nullable();
             $table->text('standard1_description')->nullable();
 
-            $table->string('standard2_icon')->nullable();
             $table->string('standard2_title')->nullable();
             $table->text('standard2_description')->nullable();
 
-            $table->string('standard3_icon')->nullable();
             $table->string('standard3_title')->nullable();
             $table->text('standard3_description')->nullable();
 
-            $table->string('standard4_icon')->nullable();
             $table->string('standard4_title')->nullable();
             $table->text('standard4_description')->nullable();
 
@@ -63,20 +59,16 @@ return new class extends Migration
             $table->string('stand_title_highlight')->nullable(); // e.g. Stand For
             $table->text('stand_description')->nullable();
 
-            // What We Stand For - 4 items (Icon, Title, Description)
-            $table->string('stand1_icon')->nullable();
+            // What We Stand For - 4 items (Title, Description)
             $table->string('stand1_title')->nullable();
             $table->text('stand1_description')->nullable();
 
-            $table->string('stand2_icon')->nullable();
             $table->string('stand2_title')->nullable();
             $table->text('stand2_description')->nullable();
 
-            $table->string('stand3_icon')->nullable();
             $table->string('stand3_title')->nullable();
             $table->text('stand3_description')->nullable();
 
-            $table->string('stand4_icon')->nullable();
             $table->string('stand4_title')->nullable();
             $table->text('stand4_description')->nullable();
 

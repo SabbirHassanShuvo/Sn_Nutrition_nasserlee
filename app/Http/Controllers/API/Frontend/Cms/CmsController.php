@@ -88,22 +88,18 @@ class CmsController extends BaseController
                     'description' => $section->standards_description,
                     'items' => [
                         [
-                            'icon'        => $section->standard1_icon,
                             'title'       => $section->standard1_title,
                             'description' => $section->standard1_description,
                         ],
                         [
-                            'icon'        => $section->standard2_icon,
                             'title'       => $section->standard2_title,
                             'description' => $section->standard2_description,
                         ],
                         [
-                            'icon'        => $section->standard3_icon,
                             'title'       => $section->standard3_title,
                             'description' => $section->standard3_description,
                         ],
                         [
-                            'icon'        => $section->standard4_icon,
                             'title'       => $section->standard4_title,
                             'description' => $section->standard4_description,
                         ],
@@ -114,22 +110,18 @@ class CmsController extends BaseController
                     'description' => $section->stand_description,
                     'items' => [
                         [
-                            'icon'        => $section->stand1_icon,
                             'title'       => $section->stand1_title,
                             'description' => $section->stand1_description,
                         ],
                         [
-                            'icon'        => $section->stand2_icon,
                             'title'       => $section->stand2_title,
                             'description' => $section->stand2_description,
                         ],
                         [
-                            'icon'        => $section->stand3_icon,
                             'title'       => $section->stand3_title,
                             'description' => $section->stand3_description,
                         ],
                         [
-                            'icon'        => $section->stand4_icon,
                             'title'       => $section->stand4_title,
                             'description' => $section->stand4_description,
                         ],

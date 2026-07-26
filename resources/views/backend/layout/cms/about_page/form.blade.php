@@ -367,12 +367,8 @@
                         <div class="p-3 bg-light rounded mb-3 border-start border-4 border-success">
                             <div class="d-flex align-items-center justify-content-between mb-2">
                                 <h6 class="fw-semibold mb-0">Standard Item {{ $i }}</h6>
-                                <span class="badge bg-success-subtle text-success fs-12 px-3 py-1">
-                                    Icon Preview: <i class="{{ $section->{"standard".$i."_icon"} ?? 'ri-checkbox-circle-line' }} ms-1 align-middle fs-15"></i>
-                                </span>
                             </div>
                             <div class="row g-2">
-                                <input type="hidden" name="standard{{ $i }}_icon" value="{{ $section->{"standard".$i."_icon"} ?? '' }}">
                                 <div class="col-12">
                                     <label class="about-label">Title</label>
                                     <input type="text" name="standard{{ $i }}_title" value="{{ old('standard'.$i.'_title', $section->{"standard".$i."_title"} ?? '') }}" class="form-control about-input" placeholder="e.g. Halal Certified">
@@ -425,12 +421,8 @@
                         <div class="p-3 bg-light rounded mb-3 border-start border-4 border-primary">
                             <div class="d-flex align-items-center justify-content-between mb-2">
                                 <h6 class="fw-semibold mb-0">Stand For Item {{ $i }}</h6>
-                                <span class="badge bg-primary-subtle text-primary fs-12 px-3 py-1">
-                                    Icon Preview: <i class="{{ $section->{"stand".$i."_icon"} ?? 'ri-checkbox-circle-line' }} ms-1 align-middle fs-15"></i>
-                                </span>
                             </div>
                             <div class="row g-2">
-                                <input type="hidden" name="stand{{ $i }}_icon" value="{{ $section->{"stand".$i."_icon"} ?? '' }}">
                                 <div class="col-12">
                                     <label class="about-label">Title</label>
                                     <input type="text" name="stand{{ $i }}_title" value="{{ old('stand'.$i.'_title', $section->{"stand".$i."_title"} ?? '') }}" class="form-control about-input" placeholder="e.g. Science-Backed">

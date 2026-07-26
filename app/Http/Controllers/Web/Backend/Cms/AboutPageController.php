@@ -47,19 +47,15 @@ class AboutPageController extends Controller
             'standards_title_highlight'   => 'nullable|string|max:255',
             'standards_description'       => 'nullable|string',
 
-            'standard1_icon'              => 'nullable|string|max:255',
             'standard1_title'             => 'nullable|string|max:255',
             'standard1_description'       => 'nullable|string',
 
-            'standard2_icon'              => 'nullable|string|max:255',
             'standard2_title'             => 'nullable|string|max:255',
             'standard2_description'       => 'nullable|string',
 
-            'standard3_icon'              => 'nullable|string|max:255',
             'standard3_title'             => 'nullable|string|max:255',
             'standard3_description'       => 'nullable|string',
 
-            'standard4_icon'              => 'nullable|string|max:255',
             'standard4_title'             => 'nullable|string|max:255',
             'standard4_description'       => 'nullable|string',
 
@@ -67,19 +63,15 @@ class AboutPageController extends Controller
             'stand_title_highlight'       => 'nullable|string|max:255',
             'stand_description'           => 'nullable|string',
 
-            'stand1_icon'                 => 'nullable|string|max:255',
             'stand1_title'                => 'nullable|string|max:255',
             'stand1_description'          => 'nullable|string',
 
-            'stand2_icon'                 => 'nullable|string|max:255',
             'stand2_title'                => 'nullable|string|max:255',
             'stand2_description'          => 'nullable|string',
 
-            'stand3_icon'                 => 'nullable|string|max:255',
             'stand3_title'                => 'nullable|string|max:255',
             'stand3_description'          => 'nullable|string',
 
-            'stand4_icon'                 => 'nullable|string|max:255',
             'stand4_title'                => 'nullable|string|max:255',
             'stand4_description'          => 'nullable|string',
         ]);
