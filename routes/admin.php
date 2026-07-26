@@ -11,6 +11,7 @@ use App\Http\Controllers\Web\Backend\Cms\BannerSectionController;
 use App\Http\Controllers\Web\Backend\Cms\HomePageController;
 use App\Http\Controllers\Web\Backend\Cms\FaqCategoryController;
 use App\Http\Controllers\Web\Backend\Cms\ContactPageController;
+use App\Http\Controllers\Web\Backend\BlogController;
 
 
 use Illuminate\Support\Facades\Mail;
@@ -31,6 +32,8 @@ Route::group([ 'as'=>'backend.'], function () {
         Route::post('product/status/{id}', [\App\Http\Controllers\Web\Backend\ProductController::class,'status'])->name('product.status');
         Route::resource('product', \App\Http\Controllers\Web\Backend\ProductController::class);
     });
+
+
 
     // Category Management
     Route::group(['middleware' => 'permission:categories_manage|category_manage'], function () {
@@ -145,6 +148,12 @@ Route::group([ 'as'=>'backend.'], function () {
         Route::resource('faq', FaqController::class)->except(['show']);
     });
 
+        // Blog Management
+    Route::group(['middleware' => 'permission:blog_manage'], function () {
+        Route::delete('blog/bulk-destroy', [BlogController::class,'bulkDestroy'])->name('blog.bulk-destroy');
+        Route::post('blog/status/{id}', [BlogController::class,'status'])->name('blog.status');
+        Route::resource('blog', BlogController::class);
+    });
 
     require_once __DIR__ .'/settings.php';
 });

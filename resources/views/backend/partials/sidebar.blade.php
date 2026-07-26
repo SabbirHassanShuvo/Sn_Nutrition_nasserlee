@@ -233,6 +233,14 @@
                             </li>
                             @endcan
 
+                            @can('blog_manage')
+                            <li class="nav-item">
+                                <a href="{{ route('backend.blog.index') }}"
+                                    class="nav-link {{ getPageStatus('backend.blog.*') }}"
+                                    data-key="t-blogs"> Blogs </a>
+                            </li>
+                            @endcan
+
                             @can('cms_pages')
                             <li class="nav-item">
                                 <a href="{{ route('backend.page.index') }}"

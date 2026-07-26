@@ -8,6 +8,7 @@ use App\Http\Controllers\API\Frontend\Cms\HomePageController;
 use App\Http\Controllers\API\Frontend\Cms\CmsController;
 use App\Http\Controllers\API\Frontend\Cms\FaqApiController;
 use App\Http\Controllers\API\Frontend\Cms\WebSettingApiController;
+use App\Http\Controllers\API\Frontend\BlogApiController;
 
 Route::group([
     'middleware' => 'api',
@@ -43,4 +44,8 @@ Route::group(['middleware' => 'api'], function($router){
     Route::get('/cms/faqs', [FaqApiController::class, 'getFaqs']);
     Route::get('/cms/page/{slug}', [CmsController::class, 'getPageBySlug']);
     Route::get('/cms/web-settings', [WebSettingApiController::class, 'getWebSettings']);
+
+    // Blogs
+    Route::get('/blogs', [BlogApiController::class, 'index']);
+    Route::get('/blogs/{id}', [BlogApiController::class, 'show']);
 });
