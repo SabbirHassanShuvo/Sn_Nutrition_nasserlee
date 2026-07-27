@@ -99,7 +99,15 @@ class GymApiController extends Controller
                 ->get()
                 ->map(function ($gym) {
                     $distKm = round((float) ($gym->distance_in_km ?? 0.4), 1);
-                    $image = $gym->image ? asset($gym->image) : "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=300&q=80";
+                    
+                    $image = "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=300&q=80";
+                    if (!empty($gym->image)) {
+                        if (filter_var($gym->image, FILTER_VALIDATE_URL) || str_starts_with($gym->image, 'http://') || str_starts_with($gym->image, 'https://')) {
+                            $image = $gym->image;
+                        } else {
+                            $image = asset(ltrim($gym->image, '/'));
+                        }
+                    }
 
                     return [
                         'id' => $gym->id,
@@ -113,7 +121,6 @@ class GymApiController extends Controller
                         'opening_hours' => $gym->opening_hours ?? '06:00 - 22:00',
                         'tags' => $gym->facilities ?? ['Cardio', 'Weights', 'Classes'],
                         'facilities' => $gym->facilities ?? ['Cardio', 'Weights', 'Classes'],
-                        'img' => $image,
                         'image' => $image,
                         'open' => true,
                         'open_status' => 'Open',

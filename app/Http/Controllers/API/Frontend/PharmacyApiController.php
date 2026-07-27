@@ -104,7 +104,15 @@ class PharmacyApiController extends Controller
                 ->get()
                 ->map(function ($pharmacy) {
                     $distKm = round((float) ($pharmacy->distance_in_km ?? 0.2), 1);
-                    $image = $pharmacy->image ? asset($pharmacy->image) : "https://images.unsplash.com/photo-1586015555751-63bb77f4322a?w=300&q=80";
+                    
+                    $image = "https://images.unsplash.com/photo-1586015555751-63bb77f4322a?w=300&q=80";
+                    if (!empty($pharmacy->image)) {
+                        if (filter_var($pharmacy->image, FILTER_VALIDATE_URL) || str_starts_with($pharmacy->image, 'http://') || str_starts_with($pharmacy->image, 'https://')) {
+                            $image = $pharmacy->image;
+                        } else {
+                            $image = asset(ltrim($pharmacy->image, '/'));
+                        }
+                    }
 
                     return [
                         'id' => $pharmacy->id,
@@ -119,7 +127,6 @@ class PharmacyApiController extends Controller
                         'opening_hours' => $pharmacy->opening_hours ?? '08:00 - 22:00',
                         'tags' => $pharmacy->services ?? ['24h Available', 'Delivery', 'Vaccines'],
                         'services' => $pharmacy->services ?? ['24h Available', 'Delivery', 'Vaccines'],
-                        'img' => $image,
                         'image' => $image,
                         'open' => true,
                         'open_status' => 'Open',

@@ -11,6 +11,7 @@ use App\Http\Controllers\Api\Frontend\UserOrderController;
 use App\Http\Controllers\Api\Frontend\ConsultationController;
 use App\Http\Controllers\Api\Frontend\GymApiController;
 use App\Http\Controllers\Api\Frontend\PharmacyApiController;
+use App\Http\Controllers\Api\Frontend\UserSettingsController;
 
 Route::group([
     'middleware' => 'api',
@@ -36,9 +37,11 @@ Route::group([
     Route::post('/google', [GoogleAuthController::class, 'login']);
 });
 
-// Public Specialist API
+// Specialist & Consultation APIs
 Route::get('/consultations/specialists', [ConsultationController::class, 'getSpecialists']);
 Route::post('/consultations/book', [ConsultationController::class, 'book']);
+Route::get('/consultations/nearby-gyms', [GymApiController::class, 'getNearbyGyms']);
+Route::get('/consultations/nearby-pharmacies', [PharmacyApiController::class, 'getNearbyPharmacies']);
 
 // Authenticated User Information, Address & Orders & Consultation APIs
 Route::group([
@@ -72,5 +75,11 @@ Route::group([
     Route::get('/consultations/nearby-gyms', [GymApiController::class, 'getNearbyGyms']);
     Route::get('/consultations/nearby-pharmacies', [PharmacyApiController::class, 'getNearbyPharmacies']);
 
-    
+    // User Settings APIs (Password, Notifications, Account Deletion)
+    Route::get('/settings', [UserSettingsController::class, 'index']);
+    Route::get('/settings/notifications', [UserSettingsController::class, 'getNotifications']);
+    Route::post('/settings/notifications', [UserSettingsController::class, 'updateNotifications']);
+    Route::post('/settings/password', [UserSettingsController::class, 'updatePassword']);
+    Route::post('/settings/change-password', [UserSettingsController::class, 'updatePassword']);
+    Route::post('/settings/delete-account', [UserSettingsController::class, 'deleteAccount']);
 });

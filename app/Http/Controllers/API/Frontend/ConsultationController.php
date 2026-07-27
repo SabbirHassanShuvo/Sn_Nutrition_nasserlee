@@ -22,7 +22,14 @@ class ConsultationController extends Controller
             ->latest()
             ->get()
             ->map(function ($specialist) {
-                $avatarUrl = $specialist->avatar ? asset($specialist->avatar) : "https://i.pravatar.cc/48?img=" . ($specialist->id + 10);
+                $avatarUrl = "https://i.pravatar.cc/48?img=" . ($specialist->id + 10);
+                if (!empty($specialist->avatar)) {
+                    if (filter_var($specialist->avatar, FILTER_VALIDATE_URL) || str_starts_with($specialist->avatar, 'http://') || str_starts_with($specialist->avatar, 'https://')) {
+                        $avatarUrl = $specialist->avatar;
+                    } else {
+                        $avatarUrl = asset(ltrim($specialist->avatar, '/'));
+                    }
+                }
                 $specialtiesArr = !empty($specialist->specialties) && is_array($specialist->specialties) 
                     ? $specialist->specialties 
                     : ["Weight management", "Sports nutrition"];
