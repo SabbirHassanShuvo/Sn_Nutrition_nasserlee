@@ -13,14 +13,23 @@ class WishlistController extends BaseController
     /**
      * Get the logged-in user's wishlist.
      */
-    public function index()
+    public function index(Request $request)
     {
         try {
             $user = Auth::user();
-            $wishlist = Wishlist::with(['product.category', 'product.brandData'])
+            $query = Wishlist::with(['product.category', 'product.brandData'])
                 ->where('user_id', $user->id)
-                ->get()
-                ->map(function ($item) {
+                ->latest();
+
+            $limit = $request->input('limit', $request->input('per_page'));
+            if ($limit !== null || $request->has('paginate')) {
+                $limitInt = (int) ($limit ?? 10);
+                if ($limitInt <= 0) {
+                    $limitInt = 10;
+                }
+
+                $wishlist = $query->paginate($limitInt);
+                $wishlist->getCollection()->transform(function ($item) {
                     $product = $item->product;
                     return [
                         'wishlist_id' => $item->id,
@@ -43,6 +52,33 @@ class WishlistController extends BaseController
                         ] : null,
                     ];
                 });
+
+                return $this->sendResponse($wishlist, 'Wishlist fetched successfully.');
+            }
+
+            $wishlist = $query->get()->map(function ($item) {
+                $product = $item->product;
+                return [
+                    'wishlist_id' => $item->id,
+                    'id' => $product->id,
+                    'name' => $product->name,
+                    'slug' => $product->slug,
+                    'short_description' => $product->short_description,
+                    'price' => (float) $product->price,
+                    'old_price' => $product->old_price ? (float) $product->old_price : null,
+                    'image' => $product->main_image ? asset($product->main_image) : null,
+                    'is_popular' => (bool) $product->is_popular,
+                    'in_stock' => (bool) $product->in_stock,
+                    'quantity' => (int) $product->quantity,
+                    'rating' => (float) $product->rating,
+                    'category' => $product->category ? $product->category->name : null,
+                    'brand' => $product->brandData ? [
+                        'name' => $product->brandData->name,
+                        'specialty' => $product->brandData->specialty,
+                        'rating' => (float) $product->brandData->rating,
+                    ] : null,
+                ];
+            });
 
             return $this->sendResponse($wishlist, 'Wishlist fetched successfully.');
         } catch (\Exception $e) {

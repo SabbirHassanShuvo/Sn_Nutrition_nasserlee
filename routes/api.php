@@ -4,11 +4,22 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\API\AuthController;
 use App\Http\Controllers\Api\GoogleAuthController;
+<<<<<<< HEAD
 use App\Http\Controllers\API\Frontend\Cms\HomePageController;
 use App\Http\Controllers\API\Frontend\Cms\CmsController;
 use App\Http\Controllers\API\Frontend\Cms\FaqApiController;
 use App\Http\Controllers\API\Frontend\Cms\WebSettingApiController;
 use App\Http\Controllers\API\Frontend\BlogApiController;
+=======
+use App\Http\Controllers\Api\Frontend\MyInformationController;
+use App\Http\Controllers\Api\Frontend\UserAddressController;
+use App\Http\Controllers\Api\Frontend\UserOrderController;
+
+use App\Http\Controllers\Api\Frontend\ConsultationController;
+use App\Http\Controllers\Api\Frontend\GymApiController;
+use App\Http\Controllers\Api\Frontend\PharmacyApiController;
+use App\Http\Controllers\Api\Frontend\UserSettingsController;
+>>>>>>> c86496bac39eb8c4a7699421130f62ac5fa2d946
 
 Route::group([
     'middleware' => 'api',
@@ -32,6 +43,7 @@ Route::group([
 
     // Google Auth
     Route::post('/google', [GoogleAuthController::class, 'login']);
+<<<<<<< HEAD
     
 });
 
@@ -49,4 +61,53 @@ Route::group(['middleware' => 'api'], function($router){
     // Blogs
     Route::get('/blogs', [BlogApiController::class, 'index']);
     Route::get('/blogs/{id}', [BlogApiController::class, 'show']);
+=======
+});
+
+// Specialist & Consultation APIs
+Route::get('/consultations/specialists', [ConsultationController::class, 'getSpecialists']);
+Route::post('/consultations/book', [ConsultationController::class, 'book']);
+Route::get('/consultations/nearby-gyms', [GymApiController::class, 'getNearbyGyms']);
+Route::get('/consultations/nearby-pharmacies', [PharmacyApiController::class, 'getNearbyPharmacies']);
+
+// Authenticated User Information, Address & Orders & Consultation APIs
+Route::group([
+    'middleware' => ['api', 'auth:api'],
+    'prefix' => 'user'
+], function () {
+    // My Information, Personal Profile & Fitness Profile
+    Route::get('/my-information', [MyInformationController::class, 'index']);
+    Route::post('/personal-info/update', [MyInformationController::class, 'updatePersonalInfo']);
+    Route::post('/fitness-profile/update', [MyInformationController::class, 'updateFitnessProfile']);
+    Route::get('/bmi-gauge', [MyInformationController::class, 'getBmiGauge']);
+    Route::get('/supplement-intake-history', [MyInformationController::class, 'getSupplementHistory']);
+
+    // Multi-Address Management
+    Route::get('/addresses', [UserAddressController::class, 'index']);
+    Route::post('/addresses', [UserAddressController::class, 'store']);
+    Route::get('/addresses/{id}', [UserAddressController::class, 'show']);
+    Route::post('/addresses/{id}/update', [UserAddressController::class, 'update']);
+    Route::post('/addresses/{id}/delete', [UserAddressController::class, 'destroy']);
+    Route::post('/addresses/{id}/set-default', [UserAddressController::class, 'setDefault']);
+
+    // Orders Management APIs
+    Route::get('/orders', [UserOrderController::class, 'index']);
+    Route::get('/orders/{identifier}', [UserOrderController::class, 'show']);
+    Route::get('/orders/{identifier}/invoice', [UserOrderController::class, 'invoice']);
+    Route::get('/orders/{identifier}/invoice-view', [UserOrderController::class, 'invoiceView']);
+
+    // Consultation Bookings APIs
+    Route::post('/consultations/book', [ConsultationController::class, 'book']);
+    Route::get('/consultations/my-bookings', [ConsultationController::class, 'myBookings']);
+    Route::get('/consultations/nearby-gyms', [GymApiController::class, 'getNearbyGyms']);
+    Route::get('/consultations/nearby-pharmacies', [PharmacyApiController::class, 'getNearbyPharmacies']);
+
+    // User Settings APIs (Password, Notifications, Account Deletion)
+    Route::get('/settings', [UserSettingsController::class, 'index']);
+    Route::get('/settings/notifications', [UserSettingsController::class, 'getNotifications']);
+    Route::post('/settings/notifications', [UserSettingsController::class, 'updateNotifications']);
+    Route::post('/settings/password', [UserSettingsController::class, 'updatePassword']);
+    Route::post('/settings/change-password', [UserSettingsController::class, 'updatePassword']);
+    Route::post('/settings/delete-account', [UserSettingsController::class, 'deleteAccount']);
+>>>>>>> c86496bac39eb8c4a7699421130f62ac5fa2d946
 });
