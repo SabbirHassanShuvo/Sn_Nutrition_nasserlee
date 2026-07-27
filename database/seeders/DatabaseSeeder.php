@@ -28,6 +28,7 @@ class DatabaseSeeder extends Seeder
             BannerSectionSeeder::class,
             QualityControlSectionSeeder::class,
             AboutSectionSeeder::class,
+            HowItWorksSectionSeeder::class,
             FaqCategorySeeder::class,
             FaqSeeder::class,
             WebSettingSeeder::class,

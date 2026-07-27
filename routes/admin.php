@@ -128,6 +128,12 @@ Route::group([ 'as'=>'backend.'], function () {
         Route::put('cms/about-us', [\App\Http\Controllers\Web\Backend\Cms\AboutPageController::class, 'update'])->name('about-us.update');
     });
 
+    // CMS — How It Works Page sections
+    Route::group(['middleware' => 'permission:cms_how_it_works'], function () {
+        Route::get('cms/how-it-works', [\App\Http\Controllers\Web\Backend\Cms\HowItWorksController::class, 'edit'])->name('how-it-works.edit');
+        Route::put('cms/how-it-works', [\App\Http\Controllers\Web\Backend\Cms\HowItWorksController::class, 'update'])->name('how-it-works.update');
+    });
+
     // CMS — Contact Page sections
     Route::group(['middleware' => 'permission:cms_contact_page'], function () {
         Route::get('cms/contact-us', [ContactPageController::class, 'edit'])->name('contact-us.edit');

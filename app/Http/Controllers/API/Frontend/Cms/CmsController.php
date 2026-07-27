@@ -5,6 +5,8 @@ namespace App\Http\Controllers\API\Frontend\Cms;
 use App\Http\Controllers\API\BaseController;
 use App\Models\AboutSection;
 use App\Models\WebSetting;
+use App\Models\BannerSection;
+use App\Models\HowItWorksSection;
 use Illuminate\Http\Request;
 
 class CmsController extends BaseController
@@ -204,6 +206,179 @@ class CmsController extends BaseController
             return $this->sendResponse($data, 'Page details fetched successfully.');
         } catch (\Exception $e) {
             return $this->sendError('Failed to fetch page details.', ['error' => $e->getMessage()]);
+        }
+    }
+
+    /**
+     * Get the How It Works page data for the frontend.
+     */
+    public function getHowItWorksPage()
+    {
+        try {
+            $section = HowItWorksSection::first();
+
+            $bannerData = null;
+            if ($section) {
+                $formattedTitle = $section->banner_title;
+                if ($section->banner_title_highlight_1 && str_contains($formattedTitle, $section->banner_title_highlight_1)) {
+                    $formattedTitle = str_replace(
+                        $section->banner_title_highlight_1,
+                        "<span class='font-play-fair text-primary'>" . $section->banner_title_highlight_1 . "</span>",
+                        $formattedTitle
+                    );
+                }
+                if ($section->banner_title_highlight_2 && str_contains($formattedTitle, $section->banner_title_highlight_2)) {
+                    $formattedTitle = str_replace(
+                        $section->banner_title_highlight_2,
+                        "<span class='font-play-fair text-primary'>" . $section->banner_title_highlight_2 . "</span>",
+                        $formattedTitle
+                    );
+                }
+
+                $bannerData = [
+                    'subtitle'    => $section->banner_small_badge,
+                    'title'       => $formattedTitle,
+                    'description' => $section->banner_description,
+                    'button_text' => $section->banner_button_text,
+                    'button_link' => $section->banner_button_link,
+                    'point_1'     => $section->banner_point_1,
+                    'point_2'     => $section->banner_point_2,
+                    'point_3'     => $section->banner_point_3,
+                    'mockup'      => [
+                        'earnings_value'      => $section->banner_earnings_value,
+                        'earnings_comparison' => $section->banner_earnings_comparison,
+                        'earnings_change'     => $section->banner_earnings_change,
+                        'categories'          => [
+                            [
+                                'name'    => $section->banner_category1_name,
+                                'percent' => $section->banner_category1_percent,
+                            ],
+                            [
+                                'name'    => $section->banner_category2_name,
+                                'percent' => $section->banner_category2_percent,
+                            ],
+                            [
+                                'name'    => $section->banner_category3_name,
+                                'percent' => $section->banner_category3_percent,
+                            ],
+                        ],
+                    ],
+                ];
+            }
+
+            $data = [
+                'banner' => $bannerData,
+                'stats' => $section ? [
+                    [
+                        'value' => $section->stat1_value,
+                        'label' => $section->stat1_label,
+                    ],
+                    [
+                        'value' => $section->stat2_value,
+                        'label' => $section->stat2_label,
+                    ],
+                    [
+                        'value' => $section->stat3_value,
+                        'label' => $section->stat3_label,
+                    ],
+                    [
+                        'value' => $section->stat4_value,
+                        'label' => $section->stat4_label,
+                    ],
+                ] : [],
+                'features' => $section ? [
+                    'title'       => $this->buildTitleHtml($section->features_title, $section->features_title_highlight),
+                    'description' => $section->features_description,
+                    'items' => [
+                        [
+                            'title'       => $section->feature1_title,
+                            'description' => $section->feature1_description,
+                            'icon'        => $section->feature1_icon ? asset($section->feature1_icon) : null,
+                        ],
+                        [
+                            'title'       => $section->feature2_title,
+                            'description' => $section->feature2_description,
+                            'icon'        => $section->feature2_icon ? asset($section->feature2_icon) : null,
+                        ],
+                        [
+                            'title'       => $section->feature3_title,
+                            'description' => $section->feature3_description,
+                            'icon'        => $section->feature3_icon ? asset($section->feature3_icon) : null,
+                        ],
+                        [
+                            'title'       => $section->feature4_title,
+                            'description' => $section->feature4_description,
+                            'icon'        => $section->feature4_icon ? asset($section->feature4_icon) : null,
+                        ],
+                        [
+                            'title'       => $section->feature5_title,
+                            'description' => $section->feature5_description,
+                            'icon'        => $section->feature5_icon ? asset($section->feature5_icon) : null,
+                        ],
+                        [
+                            'title'       => $section->feature6_title,
+                            'description' => $section->feature6_description,
+                            'icon'        => $section->feature6_icon ? asset($section->feature6_icon) : null,
+                        ],
+                    ]
+                ] : null,
+                'steps' => $section ? [
+                    'title'       => $this->buildTitleHtml($section->steps_title, $section->steps_title_highlight),
+                    'description' => $section->steps_description,
+                    'items' => [
+                        [
+                            'step'        => 1,
+                            'title'       => $section->step1_title,
+                            'description' => $section->step1_description,
+                        ],
+                        [
+                            'step'        => 2,
+                            'title'       => $section->step2_title,
+                            'description' => $section->step2_description,
+                        ],
+                        [
+                            'step'        => 3,
+                            'title'       => $section->step3_title,
+                            'description' => $section->step3_description,
+                        ],
+                        [
+                            'step'        => 4,
+                            'title'       => $section->step4_title,
+                            'description' => $section->step4_description,
+                        ],
+                    ]
+                ] : null,
+                'tiers' => $section ? [
+                    'title'       => $this->buildTitleHtml($section->tiers_title, $section->tiers_title_highlight),
+                    'description' => $section->tiers_description,
+                    'items' => [
+                        [
+                            'name'        => $section->tier1_name,
+                            'commission'  => $section->tier1_commission,
+                            'sales'       => $section->tier1_sales,
+                        ],
+                        [
+                            'name'        => $section->tier2_name,
+                            'commission'  => $section->tier2_commission,
+                            'sales'       => $section->tier2_sales,
+                        ],
+                        [
+                            'name'        => $section->tier3_name,
+                            'commission'  => $section->tier3_commission,
+                            'sales'       => $section->tier3_sales,
+                        ],
+                        [
+                            'name'        => $section->tier4_name,
+                            'commission'  => $section->tier4_commission,
+                            'sales'       => $section->tier4_sales,
+                        ],
+                    ]
+                ] : null,
+            ];
+
+            return $this->sendResponse($data, 'How It Works page details fetched successfully.');
+        } catch (\Exception $e) {
+            return $this->sendError('Failed to fetch How It Works page details.', ['error' => $e->getMessage()]);
         }
     }
 }

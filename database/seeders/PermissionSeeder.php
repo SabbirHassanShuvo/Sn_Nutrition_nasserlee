@@ -21,6 +21,7 @@ class PermissionSeeder extends Seeder
             'cms_banner',
             'cms_about_page',
             'cms_contact_page',
+            'cms_how_it_works',
 
             'setting_profile',
             'setting_system',
