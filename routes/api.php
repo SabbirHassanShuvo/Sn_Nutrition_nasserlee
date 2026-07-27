@@ -4,13 +4,13 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\API\AuthController;
 use App\Http\Controllers\Api\GoogleAuthController;
-<<<<<<< HEAD
+
 use App\Http\Controllers\API\Frontend\Cms\HomePageController;
 use App\Http\Controllers\API\Frontend\Cms\CmsController;
 use App\Http\Controllers\API\Frontend\Cms\FaqApiController;
 use App\Http\Controllers\API\Frontend\Cms\WebSettingApiController;
 use App\Http\Controllers\API\Frontend\BlogApiController;
-=======
+
 use App\Http\Controllers\Api\Frontend\MyInformationController;
 use App\Http\Controllers\Api\Frontend\UserAddressController;
 use App\Http\Controllers\Api\Frontend\UserOrderController;
@@ -19,7 +19,6 @@ use App\Http\Controllers\Api\Frontend\ConsultationController;
 use App\Http\Controllers\Api\Frontend\GymApiController;
 use App\Http\Controllers\Api\Frontend\PharmacyApiController;
 use App\Http\Controllers\Api\Frontend\UserSettingsController;
->>>>>>> c86496bac39eb8c4a7699421130f62ac5fa2d946
 
 Route::group([
     'middleware' => 'api',
@@ -43,8 +42,6 @@ Route::group([
 
     // Google Auth
     Route::post('/google', [GoogleAuthController::class, 'login']);
-<<<<<<< HEAD
-    
 });
 
 Route::group(['middleware' => 'api'], function($router){
@@ -61,7 +58,7 @@ Route::group(['middleware' => 'api'], function($router){
     // Blogs
     Route::get('/blogs', [BlogApiController::class, 'index']);
     Route::get('/blogs/{id}', [BlogApiController::class, 'show']);
-=======
+
 });
 
 // Specialist & Consultation APIs
@@ -109,5 +106,5 @@ Route::group([
     Route::post('/settings/password', [UserSettingsController::class, 'updatePassword']);
     Route::post('/settings/change-password', [UserSettingsController::class, 'updatePassword']);
     Route::post('/settings/delete-account', [UserSettingsController::class, 'deleteAccount']);
->>>>>>> c86496bac39eb8c4a7699421130f62ac5fa2d946
+
 });
