@@ -146,7 +146,6 @@
     {{-- ── Form ── --}}
     <form method="POST"
           action="{{ route('backend.how-it-works.update') }}"
-          enctype="multipart/form-data"
           class="row g-4">
         @csrf
         @method('PUT')
@@ -378,33 +377,37 @@
                     <hr class="my-4">
                     <h6 class="fw-semibold mb-3 text-muted"><i class="ri-grid-line me-1"></i>Feature Items (6 items)</h6>
 
+                    @php
+                    $featureIcons = [
+                        1 => 'ri-link-m',
+                        2 => 'ri-bar-chart-line',
+                        3 => 'ri-wallet-3-line',
+                        4 => 'ri-medal-line',
+                        5 => 'ri-shield-check-line',
+                        6 => 'ri-shopping-bag-line'
+                    ];
+                    @endphp
+
                     <div class="row g-3">
                         @for ($i = 1; $i <= 6; $i++)
                             <div class="col-md-4">
                                 <div class="p-3 bg-light rounded border-start border-4 border-success">
-                                    <h6 class="fw-semibold mb-2">Feature Item {{ $i }}</h6>
+                                    <h6 class="fw-semibold mb-2 d-flex align-items-center gap-2">
+                                        <i class="{{ $featureIcons[$i] }} text-success fs-18"></i>
+                                        Feature Item {{ $i }}
+                                    </h6>
                                     <div class="mb-2">
                                         <label class="how-label">Title</label>
                                         <input type="text" name="feature{{ $i }}_title" 
                                                value="{{ old('feature'.$i.'_title', $section->{"feature".$i."_title"} ?? '') }}" 
                                                class="form-control how-input" placeholder="Feature Title">
                                     </div>
-                                    <div class="mb-2">
+                                    <div>
                                         <label class="how-label">Description</label>
                                         <textarea name="feature{{ $i }}_description" 
-                                                  class="form-control how-textarea" rows="2"
+                                                  class="form-control how-textarea" rows="3"
                                                   placeholder="Feature Description">{{ old('feature'.$i.'_description', $section->{"feature".$i."_description"} ?? '') }}</textarea>
                                     </div>
-                                    <div class="mb-2">
-                                        <label class="how-label">Feature Icon Image</label>
-                                        <input type="file" name="feature{{ $i }}_icon" class="form-control how-input" accept="image/*">
-                                    </div>
-                                    @if (!empty($section->{"feature".$i."_icon"}))
-                                        <div class="mt-2 text-center bg-white p-2 rounded shadow-sm">
-                                            <img src="{{ asset($section->{"feature".$i."_icon"}) }}" alt="Feature Icon {{ $i }}" style="max-height: 40px; object-fit: contain;">
-                                            <div class="text-muted small mt-1" style="font-size: 0.72rem;">Current Icon</div>
-                                        </div>
-                                    @endif
                                 </div>
                             </div>
                         @endfor

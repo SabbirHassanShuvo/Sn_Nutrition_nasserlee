@@ -293,32 +293,32 @@ class CmsController extends BaseController
                         [
                             'title'       => $section->feature1_title,
                             'description' => $section->feature1_description,
-                            'icon'        => $section->feature1_icon ? asset($section->feature1_icon) : null,
+                            'icon'        => 'ri-link-m',
                         ],
                         [
                             'title'       => $section->feature2_title,
                             'description' => $section->feature2_description,
-                            'icon'        => $section->feature2_icon ? asset($section->feature2_icon) : null,
+                            'icon'        => 'ri-bar-chart-line',
                         ],
                         [
                             'title'       => $section->feature3_title,
                             'description' => $section->feature3_description,
-                            'icon'        => $section->feature3_icon ? asset($section->feature3_icon) : null,
+                            'icon'        => 'ri-wallet-3-line',
                         ],
                         [
                             'title'       => $section->feature4_title,
                             'description' => $section->feature4_description,
-                            'icon'        => $section->feature4_icon ? asset($section->feature4_icon) : null,
+                            'icon'        => 'ri-medal-line',
                         ],
                         [
                             'title'       => $section->feature5_title,
                             'description' => $section->feature5_description,
-                            'icon'        => $section->feature5_icon ? asset($section->feature5_icon) : null,
+                            'icon'        => 'ri-shield-check-line',
                         ],
                         [
                             'title'       => $section->feature6_title,
                             'description' => $section->feature6_description,
-                            'icon'        => $section->feature6_icon ? asset($section->feature6_icon) : null,
+                            'icon'        => 'ri-shopping-bag-line',
                         ],
                     ]
                 ] : null,

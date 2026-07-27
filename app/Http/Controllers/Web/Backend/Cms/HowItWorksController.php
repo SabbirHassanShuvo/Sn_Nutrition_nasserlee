@@ -31,7 +31,6 @@ class HowItWorksController extends Controller
             'banner_title_highlight_2' => 'nullable|string|max:255',
             'banner_description'       => 'nullable|string',
             'banner_button_text'       => 'nullable|string|max:255',
-            'banner_button_link'       => 'nullable|string|max:255',
             'banner_point_1'           => 'nullable|string|max:255',
             'banner_point_2'           => 'nullable|string|max:255',
             'banner_point_3'           => 'nullable|string|max:255',
@@ -64,23 +63,18 @@ class HowItWorksController extends Controller
 
             'feature1_title'       => 'nullable|string|max:255',
             'feature1_description' => 'nullable|string',
-            'feature1_icon'        => 'nullable|image|max:2048',
 
             'feature2_title'       => 'nullable|string|max:255',
             'feature2_description' => 'nullable|string',
-            'feature2_icon'        => 'nullable|image|max:2048',
 
             'feature3_title'       => 'nullable|string|max:255',
             'feature3_description' => 'nullable|string',
-            'feature3_icon'        => 'nullable|image|max:2048',
 
             'feature4_title'       => 'nullable|string|max:255',
             'feature4_description' => 'nullable|string',
-            'feature4_icon'        => 'nullable|image|max:2048',
 
             'feature5_title'       => 'nullable|string|max:255',
             'feature5_description' => 'nullable|string',
-            'feature5_icon'        => 'nullable|image|max:2048',
 
             'feature6_title'       => 'nullable|string|max:255',
             'feature6_description' => 'nullable|string',
@@ -125,27 +119,7 @@ class HowItWorksController extends Controller
         ]);
 
         $section = HowItWorksSection::firstOrCreate([]);
-        
-        $data = $request->except([
-            'feature1_icon',
-            'feature2_icon',
-            'feature3_icon',
-            'feature4_icon',
-            'feature5_icon',
-        ]);
-
-        for ($i = 1; $i <= 5; $i++) {
-            $fieldName = 'feature' . $i . '_icon';
-            if ($request->hasFile($fieldName)) {
-                if ($section->$fieldName) {
-                    $data[$fieldName] = fileUpdate($request->file($fieldName), 'cms/howitworks', $section->$fieldName);
-                } else {
-                    $data[$fieldName] = fileUpload($request->file($fieldName), 'cms/howitworks');
-                }
-            }
-        }
-
-        $section->update($data);
+        $section->update($request->all());
 
         return redirect()
             ->route('backend.how-it-works.edit')
