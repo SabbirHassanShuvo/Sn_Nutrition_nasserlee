@@ -240,7 +240,6 @@ class CmsController extends BaseController
                     'title'       => $formattedTitle,
                     'description' => $section->banner_description,
                     'button_text' => $section->banner_button_text,
-                    'button_link' => $section->banner_button_link,
                     'point_1'     => $section->banner_point_1,
                     'point_2'     => $section->banner_point_2,
                     'point_3'     => $section->banner_point_3,
