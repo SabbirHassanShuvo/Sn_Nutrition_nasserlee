@@ -49,4 +49,6 @@ Route::group(['middleware' => 'api'], function($router){
     // Blogs
     Route::get('/blogs', [BlogApiController::class, 'index']);
     Route::get('/blogs/{id}', [BlogApiController::class, 'show']);
+
+    // test
 });
