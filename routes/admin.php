@@ -7,6 +7,11 @@ use App\Http\Controllers\Web\Backend\FaqController;
 use App\Http\Controllers\Web\Backend\RoleController;
 use App\Http\Controllers\Web\Backend\SiteController;
 use App\Http\Controllers\Web\Backend\ProjectController;
+use App\Http\Controllers\Web\Backend\Cms\BannerSectionController;
+use App\Http\Controllers\Web\Backend\Cms\HomePageController;
+use App\Http\Controllers\Web\Backend\Cms\FaqCategoryController;
+use App\Http\Controllers\Web\Backend\Cms\ContactPageController;
+use App\Http\Controllers\Web\Backend\BlogController;
 
 
 use Illuminate\Support\Facades\Mail;
@@ -19,12 +24,7 @@ Route::group([ 'as'=>'backend.'], function () {
     Route::get('/', [SiteController::class,'index'])->name('dashboard.index');
     Route::resource('project', ProjectController::class)->except(['show']);
 
-    // FAQ Management (CMS)
-    Route::group(['middleware' => 'permission:cms_faq|faq_manage|faq_management', 'as'=>'feature.'], function(){
-        Route::delete('faq/bulk-destroy', [FaqController::class,'bulkDestroy'])->name('faq.bulk-destroy');
-        Route::post('faq/status/{id}', [FaqController::class,'status'])->name('faq.status');
-        Route::resource('faq', FaqController::class)->except(['show']);
-    });
+
 
     // Product Management
     Route::group(['middleware' => 'permission:products_manage|product_manage'], function () {
@@ -32,6 +32,8 @@ Route::group([ 'as'=>'backend.'], function () {
         Route::post('product/status/{id}', [\App\Http\Controllers\Web\Backend\ProductController::class,'status'])->name('product.status');
         Route::resource('product', \App\Http\Controllers\Web\Backend\ProductController::class);
     });
+
+
 
     // Category Management
     Route::group(['middleware' => 'permission:categories_manage|category_manage'], function () {
@@ -50,7 +52,7 @@ Route::group([ 'as'=>'backend.'], function () {
     // Page Management (CMS)
     Route::group(['middleware' => 'permission:cms_pages|page_manage|page_management'], function () {
         Route::post('page/status/{id}', [PageController::class,'status'])->name('page.status');
-        Route::resource('page', PageController::class)->except(['show']);
+        Route::resource('page', PageController::class);
     });
     
     // System Users
@@ -106,7 +108,79 @@ Route::group([ 'as'=>'backend.'], function () {
         Route::resource('promo-code', \App\Http\Controllers\Web\Backend\PromoCodeController::class);
     });
 
+    // Specialist Management
+    Route::delete('specialist/bulk-destroy', [\App\Http\Controllers\Web\Backend\SpecialistController::class, 'bulkDestroy'])->name('specialist.bulk-destroy');
+    Route::post('specialist/status/{id}', [\App\Http\Controllers\Web\Backend\SpecialistController::class, 'status'])->name('specialist.status');
+    Route::post('specialist/store-specialty', [\App\Http\Controllers\Web\Backend\SpecialistController::class, 'storeSpecialty'])->name('specialist.store-specialty');
+    Route::resource('specialist', \App\Http\Controllers\Web\Backend\SpecialistController::class);
 
+    // Consultation Bookings & Zoom Meeting Generation
+    Route::get('consultation-booking', [\App\Http\Controllers\Web\Backend\ConsultationBookingController::class, 'index'])->name('consultation-booking.index');
+    Route::post('consultation-booking/{id}/approve-zoom', [\App\Http\Controllers\Web\Backend\ConsultationBookingController::class, 'approveAndGenerateZoom'])->name('consultation-booking.approve-zoom');
+    Route::post('consultation-booking/{id}/status', [\App\Http\Controllers\Web\Backend\ConsultationBookingController::class, 'updateStatus'])->name('consultation-booking.status');
+
+    // Nearby Gyms Management
+    Route::delete('gym/bulk-destroy', [\App\Http\Controllers\Web\Backend\GymController::class, 'bulkDestroy'])->name('gym.bulk-destroy');
+    Route::post('gym/status/{id}', [\App\Http\Controllers\Web\Backend\GymController::class, 'status'])->name('gym.status');
+    Route::resource('gym', \App\Http\Controllers\Web\Backend\GymController::class);
+
+    // Nearby Pharmacies Management
+    Route::delete('pharmacies/bulk-destroy', [\App\Http\Controllers\Web\Backend\PharmacyController::class, 'bulkDestroy'])->name('pharmacies.bulk-destroy');
+    Route::post('pharmacies/status/{id}', [\App\Http\Controllers\Web\Backend\PharmacyController::class, 'status'])->name('pharmacies.status');
+    Route::resource('pharmacies', \App\Http\Controllers\Web\Backend\PharmacyController::class);
+
+    // Cms 
+    Route::group(['middleware' => 'permission:cms_banner|banner_manage'], function () {
+        Route::delete('banner-section/bulk-destroy', [BannerSectionController::class,'bulkDestroy'])->name('banner-section.bulk-destroy');
+        Route::post('banner-section/status/{id}', [BannerSectionController::class,'status'])->name('banner-section.status');
+        Route::resource('banner-section', BannerSectionController::class)->except(['show']);
+    });
+
+    // CMS — Home Page sections
+    Route::prefix('cms/home-page')->name('home-page.')->group(function () {
+        Route::get('quality-control', [HomePageController::class, 'qualityControlEdit'])->name('quality-control.edit');
+        Route::put('quality-control', [HomePageController::class, 'qualityControlUpdate'])->name('quality-control.update');
+    });
+
+    // CMS — About Page sections
+    Route::group(['middleware' => 'permission:cms_about_page'], function () {
+        Route::get('cms/about-us', [\App\Http\Controllers\Web\Backend\Cms\AboutPageController::class, 'edit'])->name('about-us.edit');
+        Route::put('cms/about-us', [\App\Http\Controllers\Web\Backend\Cms\AboutPageController::class, 'update'])->name('about-us.update');
+    });
+
+    // CMS — How It Works Page sections
+    Route::group(['middleware' => 'permission:cms_how_it_works'], function () {
+        Route::get('cms/how-it-works', [\App\Http\Controllers\Web\Backend\Cms\HowItWorksController::class, 'edit'])->name('how-it-works.edit');
+        Route::put('cms/how-it-works', [\App\Http\Controllers\Web\Backend\Cms\HowItWorksController::class, 'update'])->name('how-it-works.update');
+    });
+
+    // CMS — Contact Page sections
+    Route::group(['middleware' => 'permission:cms_contact_page'], function () {
+        Route::get('cms/contact-us', [ContactPageController::class, 'edit'])->name('contact-us.edit');
+        Route::put('cms/contact-us', [ContactPageController::class, 'update'])->name('contact-us.update');
+    });
+
+    // CMS — FAQ Category Management
+    Route::group(['middleware' => 'permission:cms_faq|faq_manage|faq_management'], function () {
+        Route::delete('faq-category/bulk-destroy', [FaqCategoryController::class, 'bulkDestroy'])->name('faq-category.bulk-destroy');
+        Route::post('faq-category/status/{id}', [FaqCategoryController::class, 'status'])->name('faq-category.status');
+        Route::resource('faq-category', FaqCategoryController::class)->except(['show']);
+    });
+
+    // CMS — FAQ Management
+    Route::group(['middleware' => 'permission:cms_faq|faq_manage|faq_management', 'as'=>'feature.'], function(){
+        Route::delete('faq/bulk-destroy', [FaqController::class,'bulkDestroy'])->name('faq.bulk-destroy');
+        Route::post('faq/status/{id}', [FaqController::class,'status'])->name('faq.status');
+        Route::resource('faq', FaqController::class)->except(['show']);
+    });
+
+        // Blog Management
+    Route::group(['middleware' => 'permission:blog_manage'], function () {
+        Route::delete('blog/bulk-destroy', [BlogController::class,'bulkDestroy'])->name('blog.bulk-destroy');
+        Route::post('blog/status/{id}', [BlogController::class,'status'])->name('blog.status');
+        Route::resource('blog', BlogController::class);
+    });
 
     require_once __DIR__ .'/settings.php';
+
 });

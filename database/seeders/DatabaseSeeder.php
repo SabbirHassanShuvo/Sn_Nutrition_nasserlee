@@ -25,6 +25,14 @@ class DatabaseSeeder extends Seeder
             UserSeeder::class,
             SystemSeeder::class,
             PageSeeder::class,
+            BannerSectionSeeder::class,
+            QualityControlSectionSeeder::class,
+            AboutSectionSeeder::class,
+            HowItWorksSectionSeeder::class,
+            FaqCategorySeeder::class,
+            FaqSeeder::class,
+            WebSettingSeeder::class,
+            BlogSeeder::class,
         ]);
     }
 }

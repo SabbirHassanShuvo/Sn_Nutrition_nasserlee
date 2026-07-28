@@ -1,36 +1,33 @@
 @extends('backend.master')
+@section('title', 'Dashboard | Banner Sections')
 @section('content')
     <div class="row">
         <div class="col-lg-12">
-            <div class="card" id="tasksList">
-                <div class="card-header border-0">
-                    <div class="d-flex align-items-center">
-                        <h5 class="card-title mb-0 flex-grow-1">All FAQs</h5>
-                        <div class="flex-shrink-0 d-flex gap-2">
-                            <button type="button" class="btn btn-danger d-none align-items-center" id="bulkDeleteBtn">
-                                <i class="ri-delete-bin-line align-bottom me-1"></i> Bulk Delete
-                            </button>
-                            <a class="btn btn-danger add-btn" href="{{route('backend.feature.faq.create')}}">
-                                <i class="ri-add-line align-bottom me-1"></i> Create FAQ
-                            </a>
-                        </div>
+            <div class="card" id="bannerList">
+            <div class="card-header border-0 bg-white py-3 d-flex align-items-center justify-content-between">
+                    <div>
+                        <h5 class="card-title mb-0 fw-bold text-primary">Banner Sections</h5>
+                        <p class="text-muted mb-0 fs-12">Manage dynamic banner sections</p>
+                    </div>
+                    <div class="flex-shrink-0 d-flex gap-2">
+                        <a href="{{ route('backend.banner-section.create') }}" class="btn btn-primary btn-sm shadow-sm d-flex align-items-center">
+                            <i class="ri-add-line align-bottom me-1"></i> Add Banner
+                        </a>
                     </div>
                 </div>
 
-                <!--end card-body-->
-                <div class="card shadow-sm">
-                    <div class="card-header bg-light">
-                        <h5 class="mb-0">FAQ List</h5>
-                    </div>
+                <div>
                     <div class="card-body">
-                        <div class="table-responsive table-card mb-4">
+                        <div class="table-responsive">
                             <table class="table align-middle table-nowrap table-striped mb-0 data-table">
                                 <thead class="table-light text-muted">
                                     <tr>
-                                        <th style="width: 40px; text-align: center;"><input type="checkbox" class="form-check-input" id="checkAll"></th>
+                                        <th style="width: 40px; text-align: center;">
+                                            <input type="checkbox" class="form-check-input" id="checkAll">
+                                        </th>
                                         <th class="wd-10p border-bottom-0">ID</th>
-                                        <th class="wd-30p border-bottom-0">Question</th>
-                                        <th class="wd-30p border-bottom-0">Answer</th>
+                                        <th class="wd-10p border-bottom-0">Image</th>
+                                        <th class="wd-30p border-bottom-0">Title</th>
                                         <th class="wd-10p border-bottom-0">Priority</th>
                                         <th class="wd-10p border-bottom-0">Status</th>
                                         <th class="wd-10p border-bottom-0">Actions</th>
@@ -41,21 +38,12 @@
                         </div>
                     </div>
                 </div>
-
-                <!--end card-body-->
             </div>
-            <!--end card-->
         </div>
-        <!--end col-->
     </div>
-    <!--end row-->
 @endsection
 
-@push('scripts-top')
-
-@endpush
 @push('scripts-bottom')
-
     <script>
         (function ($) {
             $(function () {
@@ -63,53 +51,50 @@
                     processing: true,
                     serverSide: true,
                     responsive: { details: true },
-
-                    ajax: "{{ route('backend.feature.faq.index') }}",
+                    ajax: "{{ route('backend.banner-section.index') }}",
                     columns: [
                         { data: 'checkbox', name: 'checkbox', orderable: false, searchable: false, className: 'text-center' },
                         { data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable: false },
-                        { data: 'question', name: 'question' },
-                        { data: 'answer', name: 'answer' },
+                        { data: 'image', name: 'image', orderable: false, searchable: false },
+                        { data: 'title', name: 'title' },
                         { data: 'priority', name: 'priority' },
                         { data: 'status', name: 'status', orderable: false, searchable: false },
                         { data: 'action', name: 'action', orderable: false, searchable: false }
                     ]
                 });
                 
-                initBulkDelete("{{ route('backend.feature.faq.bulk-destroy') }}");
+                initBulkDelete("{{ route('backend.banner-section.bulk-destroy') }}");
             });
         })(jQuery);
+
         $(document).on('shown.bs.collapse shown.bs.tab', function () {
             $($.fn.dataTable.tables(true)).DataTable()
                 .columns.adjust()
                 .responsive.recalc();
         });
-        function statusFaq(id) {
-            let url = "{{ route('backend.feature.faq.status', ':id') }}";
+
+        function statusBanner(id) {
+            let url = "{{ route('backend.banner-section.status', ':id') }}";
             $.ajax({
                 type: "POST",
                 url: url.replace(':id', id),
                 data: {
                     id: id,
-                    _token: "{{csrf_token()}}"
+                    _token: "{{ csrf_token() }}"
                 },
                 success: function (response) {
-                    console.log(response);
-                    // Reloade DataTable
-                    $('.datatable').DataTable().ajax.reload();
                     if (response.success) {
-                        $('.data-table').DataTable().ajax.reload();
+                        $('.data-table').DataTable().ajax.reload(null, false);
                         Swal.fire({
                             toast: true,
-                            position: "top-end",   // top-end, top-start, bottom-end, bottom-start
+                            position: "top-end",
                             icon: "success",
-                            title: response.message || "Faq Deleted successfully",
+                            title: response.message || "Status updated successfully",
                             showConfirmButton: false,
                             timer: 3000,
                             timerProgressBar: true
                         });
-                    }
-                    else {
+                    } else {
                         Swal.fire({
                             toast: true,
                             position: "top-end",
@@ -120,24 +105,14 @@
                             timerProgressBar: true
                         });
                     }
-                },
-                error: function (error) {
-                    // location.reload();
                 }
             });
-        }
-
-        function editFaq(id) {
-            let url = "{{ route('backend.feature.faq.edit', ':id') }}";
-            url = url.replace(':id', id);
-
-            window.location.href = url;
         }
 
         function deleteData(url) {
             Swal.fire({
                 title: 'Are you sure?',
-                text: "You want to delete this FAQ?",
+                text: "You want to delete this banner?",
                 icon: 'warning',
                 showCancelButton: true,
                 confirmButtonColor: '#3085d6',
@@ -148,26 +123,27 @@
                     $.ajax({
                         url: url,
                         type: 'DELETE',
-                        data: { _token: "{{ csrf_token() }}" },
+                        data: {
+                            _token: "{{ csrf_token() }}"
+                        },
                         success: function (response) {
                             if (response.success) {
-                                $('.data-table').DataTable().ajax.reload();
+                                $('.data-table').DataTable().ajax.reload(null, false);
                                 Swal.fire({
                                     toast: true,
-                                    position: "top-end",   // top-end, top-start, bottom-end, bottom-start
+                                    position: "top-end",
                                     icon: "success",
-                                    title: response.message || "Faq Deleted successfully",
+                                    title: response.message || "Banner deleted successfully",
                                     showConfirmButton: false,
                                     timer: 3000,
                                     timerProgressBar: true
                                 });
-                            }
-                            else {
+                            } else {
                                 Swal.fire({
                                     toast: true,
                                     position: "top-end",
                                     icon: "error",
-                                    title: response.message || "Something went wrong",
+                                    title: response.message || "Failed to delete banner",
                                     showConfirmButton: false,
                                     timer: 3000,
                                     timerProgressBar: true

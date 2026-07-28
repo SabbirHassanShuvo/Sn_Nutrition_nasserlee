@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\API\SocialLogin;
+namespace App\Http\Controllers\Web\Backend\Auth\SocialLogin;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;

@@ -136,6 +136,33 @@
                 </li>
                 @endcanany
 
+                <li class="nav-item">
+                    <a class="nav-link menu-link {{ request()->routeIs('backend.specialist.*') ? 'active' : '' }}"
+                        href="{{ route('backend.specialist.index') }}">
+                        <i class="ri-user-star-line"></i> <span>Specialists</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link menu-link {{ request()->routeIs('backend.consultation-booking.*') ? 'active' : '' }}"
+                        href="{{ route('backend.consultation-booking.index') }}">
+                        <i class="ri-video-chat-line"></i> <span>Consultation Bookings</span>
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link menu-link {{ request()->routeIs('backend.gym.*') ? 'active' : '' }}"
+                        href="{{ route('backend.gym.index') }}">
+                        <i class="ri-map-pin-user-line"></i> <span>Nearby Gyms</span>
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link menu-link {{ request()->routeIs('backend.pharmacies.*') ? 'active' : '' }}"
+                        href="{{ route('backend.pharmacies.index') }}">
+                        <i class="ri-capsule-line"></i> <span>Pharmacies</span>
+                    </a>
+                </li>
+
                 @canany(['onboarding_options_manage', 'onboarding_manage'])
                 <li class="nav-item">
                     <a class="nav-link menu-link {{ request()->routeIs('backend.onboarding-option.*') ? 'active' : '' }}"
@@ -169,6 +196,13 @@
                                     data-key="t-level-1.1"> System Settings </a>
                             </li>
                             @endcan
+                            @can('setting_system')
+                            <li class="nav-item">
+                                <a href="{{ route('backend.settings.web-setting.index') }}"
+                                    class="nav-link {{ getPageStatus('backend.settings.web-setting.*') }}"
+                                    data-key="t-level-1.2"> Web Settings </a>
+                            </li>
+                            @endcan
                             @can('setting_mail')
                             <li class="nav-item">
                                 <a href="{{ route('backend.settings.mail.index') }}"
@@ -181,6 +215,110 @@
                 </li>
                 @endcanany
 
+
+                {{-- Cms --}}
+                @canany(['cms_banner', 'cms_pages', 'cms_faq', 'cms_home_page', 'cms_about_page', 'cms_contact_page', 'cms_how_it_works'])
+                <li class="nav-item">
+                    <a class="nav-link menu-link {{ getPageStatus(['backend.banner-section.*', 'backend.page.*', 'backend.feature.faq.*', 'backend.home-page.*', 'backend.about-us.*', 'backend.how-it-works.*', 'backend.contact-us.*'], 'collapsed active') }}" href="#sidebarCMS"
+                        data-bs-toggle="collapse" role="button" aria-expanded="false"
+                        aria-controls="sidebarCMS">
+                        <i class="ri-pages-line"></i> <span data-key="t-cms">CMS</span>
+                    </a>
+                    <div class="collapse menu-dropdown {{ getPageStatus(['backend.banner-section.*', 'backend.page.*', 'backend.feature.faq.*', 'backend.home-page.*', 'backend.about-us.*', 'backend.how-it-works.*', 'backend.contact-us.*'], 'show') }}"
+                        id="sidebarCMS">
+                        <ul class="nav nav-sm flex-column">
+
+                            @can('cms_banner')
+                            <li class="nav-item">
+                                <a href="{{ route('backend.banner-section.index') }}"
+                                    class="nav-link {{ getPageStatus('backend.banner-section.*') }}"
+                                    data-key="t-banner-sections"> Banner Section </a>
+                            </li>
+                            @endcan
+
+                            @can('cms_home_page')
+                            <li class="nav-item">
+                                <a href="{{ route('backend.home-page.quality-control.edit') }}"
+                                    class="nav-link {{ getPageStatus('backend.home-page.*') }}"
+                                    data-key="t-home-page"> Quality Control </a>
+                            </li>
+                            @endcan
+
+                             @can('cms_about_page')
+                            <li class="nav-item">
+                                <a href="{{ route('backend.about-us.edit') }}"
+                                    class="nav-link {{ getPageStatus('backend.about-us.*') }}"
+                                    data-key="t-about-us"> About Us </a>
+                            </li>
+                            @endcan
+
+                             @can('cms_how_it_works')
+                            <li class="nav-item">
+                                <a href="{{ route('backend.how-it-works.edit') }}"
+                                    class="nav-link {{ getPageStatus('backend.how-it-works.*') }}"
+                                    data-key="t-how-it-works"> How It Works </a>
+                            </li>
+                            @endcan
+
+                            @can('cms_contact_page')
+                            <li class="nav-item">
+                                <a href="{{ route('backend.contact-us.edit') }}"
+                                    class="nav-link {{ getPageStatus('backend.contact-us.*') }}"
+                                    data-key="t-contact-us"> Contact Us </a>
+                            </li>
+                            @endcan
+
+                            @can('blog_manage')
+                            <li class="nav-item">
+                                <a href="{{ route('backend.blog.index') }}"
+                                    class="nav-link {{ getPageStatus('backend.blog.*') }}"
+                                    data-key="t-blogs"> Blogs </a>
+                            </li>
+                            @endcan
+
+                            @can('cms_pages')
+                            <li class="nav-item">
+                                <a href="{{ route('backend.page.index') }}"
+                                    class="nav-link {{ getPageStatus('backend.page.*') }}"
+                                    data-key="t-pages"> Pages </a>
+                            </li>
+                            @endcan
+                        </ul>
+                    </div>
+                </li>
+                @endcanany
+
+                {{-- Faq --}}
+                @canany(['cms_faq'])
+                <li class="nav-item">
+                    <a class="nav-link menu-link {{ getPageStatus(['backend.feature.faq.*'], 'collapsed active') }}" href="#sidebarFaq"
+                        data-bs-toggle="collapse" role="button" aria-expanded="false"
+                        aria-controls="sidebarFaq">
+                        <i class="ri-question-answer-line"></i> <span data-key="t-faq">FAQ</span>
+                    </a>
+                    <div class="collapse menu-dropdown {{ getPageStatus(['backend.feature.faq.*'], 'show') }}"
+                        id="sidebarFaq">
+                        <ul class="nav nav-sm flex-column">
+
+                            @can('cms_faq')
+                            <li class="nav-item">
+                                <a href="{{ route('backend.faq-category.index') }}"
+                                    class="nav-link {{ getPageStatus('backend.faq-category.*') }}"
+                                    data-key="t-faq-categories"> FAQ Categories </a>
+                            </li>
+                            @endcan
+
+                            @can('cms_faq')
+                            <li class="nav-item">
+                                <a href="{{ route('backend.feature.faq.index') }}"
+                                    class="nav-link {{ getPageStatus('backend.feature.faq.*') }}"
+                                    data-key="t-faqs"> FAQs </a>
+                            </li>
+                            @endcan
+                        </ul>
+                    </div>
+                </li>
+                @endcanany
             </ul>
         </div>
         <!-- Sidebar -->

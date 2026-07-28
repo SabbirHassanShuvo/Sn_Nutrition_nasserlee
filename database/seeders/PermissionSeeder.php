@@ -18,6 +18,10 @@ class PermissionSeeder extends Seeder
 
             'cms_faq',
             'cms_pages',
+            'cms_banner',
+            'cms_about_page',
+            'cms_contact_page',
+            'cms_how_it_works',
 
             'setting_profile',
             'setting_system',
@@ -25,6 +29,7 @@ class PermissionSeeder extends Seeder
 
             'role_management',
             'user_management',
+            'blog_manage',
         ];
 
         // Create permissions if not already exist
