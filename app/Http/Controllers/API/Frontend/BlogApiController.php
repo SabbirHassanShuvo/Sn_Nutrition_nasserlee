@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Http\Controllers\API\Frontend;
+namespace App\Http\Controllers\Api\Frontend;
 
-use App\Http\Controllers\API\BaseController;
+use App\Http\Controllers\Api\BaseController;
 use App\Models\Blog;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;

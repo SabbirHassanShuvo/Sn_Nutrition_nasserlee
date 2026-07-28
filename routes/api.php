@@ -2,14 +2,14 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\API\AuthController;
+use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\GoogleAuthController;
 
-use App\Http\Controllers\API\Frontend\Cms\HomePageController;
-use App\Http\Controllers\API\Frontend\Cms\CmsController;
-use App\Http\Controllers\API\Frontend\Cms\FaqApiController;
-use App\Http\Controllers\API\Frontend\Cms\WebSettingApiController;
-use App\Http\Controllers\API\Frontend\BlogApiController;
+use App\Http\Controllers\Api\Frontend\Cms\HomePageController;
+use App\Http\Controllers\Api\Frontend\Cms\CmsController;
+use App\Http\Controllers\Api\Frontend\Cms\FaqApiController;
+use App\Http\Controllers\Api\Frontend\Cms\WebSettingApiController;
+use App\Http\Controllers\Api\Frontend\BlogApiController;
 
 use App\Http\Controllers\Api\Frontend\MyInformationController;
 use App\Http\Controllers\Api\Frontend\UserAddressController;
