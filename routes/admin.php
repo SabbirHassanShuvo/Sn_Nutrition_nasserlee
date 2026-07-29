@@ -73,6 +73,14 @@ Route::group([ 'as'=>'backend.'], function () {
         Route::post('onboarding-option/status/{id}', [\App\Http\Controllers\Web\Backend\OnboardingOptionController::class,'status'])->name('onboarding-option.status');
         Route::resource('onboarding-option', \App\Http\Controllers\Web\Backend\OnboardingOptionController::class)->except(['show']);
     });
+
+    // Onboarding Questions & Card CMS
+    Route::group(['middleware' => 'permission:onboarding_options_manage|onboarding_manage'], function () {
+        Route::delete('onboarding-question/bulk-destroy', [\App\Http\Controllers\Web\Backend\OnboardingQuestionController::class,'bulkDestroy'])->name('onboarding-question.bulk-destroy');
+        Route::post('onboarding-question/status/{id}', [\App\Http\Controllers\Web\Backend\OnboardingQuestionController::class,'status'])->name('onboarding-question.status');
+        Route::post('onboarding-question/settings', [\App\Http\Controllers\Web\Backend\OnboardingQuestionController::class,'updateSettings'])->name('onboarding-question.settings.update');
+        Route::resource('onboarding-question', \App\Http\Controllers\Web\Backend\OnboardingQuestionController::class)->except(['show']);
+    });
     
     // Roles
     Route::resource('role', RoleController::class)->middleware('role:super_admin');

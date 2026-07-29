@@ -2,14 +2,14 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\API\AuthController;
+use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\GoogleAuthController;
 
-use App\Http\Controllers\API\Frontend\Cms\HomePageController;
-use App\Http\Controllers\API\Frontend\Cms\CmsController;
-use App\Http\Controllers\API\Frontend\Cms\FaqApiController;
-use App\Http\Controllers\API\Frontend\Cms\WebSettingApiController;
-use App\Http\Controllers\API\Frontend\BlogApiController;
+use App\Http\Controllers\Api\Frontend\Cms\HomePageController;
+use App\Http\Controllers\Api\Frontend\Cms\CmsController;
+use App\Http\Controllers\Api\Frontend\Cms\FaqApiController;
+use App\Http\Controllers\Api\Frontend\Cms\WebSettingApiController;
+use App\Http\Controllers\Api\Frontend\BlogApiController;
 
 use App\Http\Controllers\Api\Frontend\MyInformationController;
 use App\Http\Controllers\Api\Frontend\UserAddressController;
@@ -19,6 +19,7 @@ use App\Http\Controllers\Api\Frontend\ConsultationController;
 use App\Http\Controllers\Api\Frontend\GymApiController;
 use App\Http\Controllers\Api\Frontend\PharmacyApiController;
 use App\Http\Controllers\Api\Frontend\UserSettingsController;
+use App\Http\Controllers\Api\Frontend\OnboardingQuestionApiController;
 
 Route::group([
     'middleware' => 'api',
@@ -59,6 +60,10 @@ Route::group(['middleware' => 'api'], function($router){
     Route::get('/blogs', [BlogApiController::class, 'index']);
     Route::get('/blogs/{id}', [BlogApiController::class, 'show']);
 
+    // Onboarding Questions & CMS Card Text
+    Route::get('/onboarding/questions', [OnboardingQuestionApiController::class, 'getQuestions']);
+        // Onboarding Submit
+    Route::post('/onboarding/submit', [OnboardingQuestionApiController::class, 'submitAnswers']);
 });
 
 // Specialist & Consultation APIs
@@ -109,5 +114,4 @@ Route::group([
 
 
 
-    // sabbir test 
 });

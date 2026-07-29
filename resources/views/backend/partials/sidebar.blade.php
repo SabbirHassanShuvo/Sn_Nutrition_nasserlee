@@ -170,6 +170,12 @@
                         <i class="ri-user-settings-line"></i> <span>Onboarding Options</span>
                     </a>
                 </li>
+                <li class="nav-item">
+                    <a class="nav-link menu-link {{ request()->routeIs('backend.onboarding-question.*') ? 'active' : '' }}"
+                        href="{{ route('backend.onboarding-question.index') }}">
+                       <i class="ri-question-answer-line"></i> <span>Onboarding Questions</span>
+                    </a>
+                </li>
                 @endcanany
 
                 @canany(['setting_profile', 'setting_system', 'setting_mail'])
