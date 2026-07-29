@@ -35,7 +35,6 @@
             <div id="two-column-menu">
             </div>
             <ul class="navbar-nav" id="navbar-nav">
-                <li class="menu-title"><span data-key="t-menu">Menu</span></li>
                 <li class="nav-item">
                     <a class="nav-link menu-link {{ request()->routeIs('backend.dashboard.*') ? 'active' : '' }}"
                         href="{{ route('backend.dashboard.index') }}">
@@ -43,7 +42,7 @@
                     </a>
                 </li>
 
-                @role('super_admin')
+                <!-- @role('super_admin')
                     <li class="nav-item">
                         <a class="nav-link menu-link {{ getPageStatus(['backend.role.*', 'backend.system-user.*'], 'collapsed active') }}"
                             href="#sidebarLanding" data-bs-toggle="collapse" role="button" aria-expanded="false"
@@ -66,7 +65,7 @@
                             </ul>
                         </div>
                     </li>
-                @endrole
+                @endrole -->
 
                 @can('user_management')
                 <li class="nav-item">
@@ -163,16 +162,16 @@
                     </a>
                 </li>
 
-                @canany(['onboarding_options_manage', 'onboarding_manage'])
+                <!-- @canany(['onboarding_options_manage', 'onboarding_manage'])
                 <li class="nav-item">
                     <a class="nav-link menu-link {{ request()->routeIs('backend.onboarding-option.*') ? 'active' : '' }}"
                         href="{{ route('backend.onboarding-option.index') }}">
                         <i class="ri-user-settings-line"></i> <span>Onboarding Options</span>
                     </a>
                 </li>
-                @endcanany
+                @endcanany -->
 
-                @canany(['setting_profile', 'setting_system', 'setting_mail'])
+                <!-- @canany(['setting_profile', 'setting_system', 'setting_mail'])
                 <li class="nav-item">
                     <a class="nav-link menu-link {{ getPageStatus('backend.settings.*') }}" href="#sidebarMultilevel"
                         data-bs-toggle="collapse" role="button" aria-expanded="false"
@@ -213,7 +212,7 @@
                         </ul>
                     </div>
                 </li>
-                @endcanany
+                @endcanany -->
 
 
                 {{-- Cms --}}
@@ -260,7 +259,7 @@
                             </li>
                             @endcan
 
-                            @can('cms_contact_page')
+                            <!-- @can('cms_contact_page')
                             <li class="nav-item">
                                 <a href="{{ route('backend.contact-us.edit') }}"
                                     class="nav-link {{ getPageStatus('backend.contact-us.*') }}"
@@ -282,14 +281,14 @@
                                     class="nav-link {{ getPageStatus('backend.page.*') }}"
                                     data-key="t-pages"> Pages </a>
                             </li>
-                            @endcan
+                            @endcan -->
                         </ul>
                     </div>
                 </li>
                 @endcanany
 
                 {{-- Faq --}}
-                @canany(['cms_faq'])
+                <!-- @canany(['cms_faq'])
                 <li class="nav-item">
                     <a class="nav-link menu-link {{ getPageStatus(['backend.feature.faq.*'], 'collapsed active') }}" href="#sidebarFaq"
                         data-bs-toggle="collapse" role="button" aria-expanded="false"
@@ -318,7 +317,7 @@
                         </ul>
                     </div>
                 </li>
-                @endcanany
+                @endcanany -->
             </ul>
         </div>
         <!-- Sidebar -->
