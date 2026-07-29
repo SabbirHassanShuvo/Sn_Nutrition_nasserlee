@@ -18,6 +18,9 @@ return new class extends Migration
             $table->string('banner')->nullable();
             $table->string('phone')->nullable();
             $table->string('address')->nullable();
+            $table->boolean('payout_confirmations')->default(true)->after('allergy');
+            $table->boolean('product_launches_tips')->default(true)->after('payout_confirmations');
+            $table->boolean('push_notifications')->default(true)->after('product_launches_tips');
 
             $table->timestamps();
         });
