@@ -153,32 +153,32 @@
                         <div class="col-md-4 mb-3">
                             <label class="contact-label" for="contact_badge">Contact Badge Label</label>
                             <input type="text" name="contact_badge" id="contact_badge"
-                                   value="{{ old('contact_badge', $settings->contact_badge ?? '') }}"
+                                   value="{{ old('contact_badge', $data->contact_badge ?? '') }}"
                                    class="form-control contact-input @error('contact_badge') is-invalid @enderror"
                                    placeholder="e.g. We're here to help">
                             @error('contact_badge')<div class="text-danger small mt-1">{{ $message }}</div>@enderror
                         </div>
                         <div class="col-md-4 mb-3">
                             <label class="contact-label" for="contact_title">Contact Title (Regular Part)</label>
-                            <input type="text" name="contact_title" id="contact_title"
-                                   value="{{ old('contact_title', $settings->contact_title ?? '') }}"
+                            <input type="text" name="contact_title" id="data-contact_title"
+                                   value="{{ old('contact_title', $data->contact_title ?? '') }}"
                                    class="form-control contact-input @error('contact_title') is-invalid @enderror"
                                    placeholder="e.g. Get in">
                             @error('contact_title')<div class="text-danger small mt-1">{{ $message }}</div>@enderror
                         </div>
                         <div class="col-md-4 mb-3">
                             <label class="contact-label" for="contact_title_highlight">Contact Title (Highlighted Part)</label>
-                            <input type="text" name="contact_title_highlight" id="contact_title_highlight"
-                                   value="{{ old('contact_title_highlight', $settings->contact_title_highlight ?? '') }}"
+                            <input type="text" name="contact_title_highlight" id="data-contact_title_highlight"
+                                   value="{{ old('contact_title_highlight', $data->contact_title_highlight ?? '') }}"
                                    class="form-control contact-input @error('contact_title_highlight') is-invalid @enderror"
                                    placeholder="e.g. touch">
                             @error('contact_title_highlight')<div class="text-danger small mt-1">{{ $message }}</div>@enderror
                         </div>
                         <div class="col-md-12">
                             <label class="contact-label" for="contact_subtitle">Contact Subtitle / Description</label>
-                            <textarea name="contact_subtitle" id="contact_subtitle" rows="3"
+                            <textarea name="contact_subtitle" id="data-contact_subtitle" rows="3"
                                       class="form-control contact-textarea @error('contact_subtitle') is-invalid @enderror"
-                                      placeholder="Questions about product an order, or a partnership?...">{{ old('contact_subtitle', $settings->contact_subtitle ?? '') }}</textarea>
+                                      placeholder="Questions about product an order, or a partnership?...">{{ old('contact_subtitle', $data->contact_subtitle ?? '') }}</textarea>
                             @error('contact_subtitle')<div class="text-danger small mt-1">{{ $message }}</div>@enderror
                         </div>
                     </div>
@@ -202,7 +202,7 @@
                             <div class="mb-3">
                                 <label class="contact-label" for="footer_phone">Phone Number</label>
                                 <input type="text" name="footer_phone" id="footer_phone"
-                                       value="{{ old('footer_phone', $settings->footer_phone ?? '') }}"
+                                       value="{{ old('footer_phone', $data->footer_phone ?? '') }}"
                                        class="form-control contact-input @error('footer_phone') is-invalid @enderror"
                                        placeholder="e.g. +44 7824 7394520">
                                 @error('footer_phone')<div class="text-danger small mt-1">{{ $message }}</div>@enderror
@@ -210,7 +210,7 @@
                             <div>
                                 <label class="contact-label" for="contact_phone_hours">Working Hours</label>
                                 <input type="text" name="contact_phone_hours" id="contact_phone_hours"
-                                       value="{{ old('contact_phone_hours', $settings->contact_phone_hours ?? '') }}"
+                                       value="{{ old('contact_phone_hours', $data->contact_phone_hours ?? '') }}"
                                        class="form-control contact-input @error('contact_phone_hours') is-invalid @enderror"
                                        placeholder="e.g. Mon - Sat, 9:00 - 12:00">
                                 @error('contact_phone_hours')<div class="text-danger small mt-1">{{ $message }}</div>@enderror
@@ -223,7 +223,7 @@
                             <div class="mb-3">
                                 <label class="contact-label" for="footer_email">Email Address</label>
                                 <input type="email" name="footer_email" id="footer_email"
-                                       value="{{ old('footer_email', $settings->footer_email ?? '') }}"
+                                       value="{{ old('footer_email', $data->footer_email ?? '') }}"
                                        class="form-control contact-input @error('footer_email') is-invalid @enderror"
                                        placeholder="e.g. contact@snnutrition.com">
                                 @error('footer_email')<div class="text-danger small mt-1">{{ $message }}</div>@enderror
@@ -231,7 +231,7 @@
                             <div>
                                 <label class="contact-label" for="contact_email_response">Response Time / Subtext</label>
                                 <input type="text" name="contact_email_response" id="contact_email_response"
-                                       value="{{ old('contact_email_response', $settings->contact_email_response ?? '') }}"
+                                       value="{{ old('contact_email_response', $data->contact_email_response ?? '') }}"
                                        class="form-control contact-input @error('contact_email_response') is-invalid @enderror"
                                        placeholder="e.g. Replies within a few hours">
                                 @error('contact_email_response')<div class="text-danger small mt-1">{{ $message }}</div>@enderror
@@ -246,7 +246,7 @@
                                 <div class="col-md-6 mb-3">
                                     <label class="contact-label" for="footer_address">Address / City</label>
                                     <input type="text" name="footer_address" id="footer_address"
-                                           value="{{ old('footer_address', $settings->footer_address ?? '') }}"
+                                           value="{{ old('footer_address', $data->footer_address ?? '') }}"
                                            class="form-control contact-input @error('footer_address') is-invalid @enderror"
                                            placeholder="e.g. Casablanca, Morocco">
                                     @error('footer_address')<div class="text-danger small mt-1">{{ $message }}</div>@enderror
@@ -254,7 +254,7 @@
                                 <div class="col-md-6 mb-3">
                                     <label class="contact-label" for="contact_address_details">Address Details / Street</label>
                                     <input type="text" name="contact_address_details" id="contact_address_details"
-                                           value="{{ old('contact_address_details', $settings->contact_address_details ?? '') }}"
+                                           value="{{ old('contact_address_details', $data->contact_address_details ?? '') }}"
                                            class="form-control contact-input @error('contact_address_details') is-invalid @enderror"
                                            placeholder="e.g. Boulevard, 20000">
                                     @error('contact_address_details')<div class="text-danger small mt-1">{{ $message }}</div>@enderror
@@ -277,18 +277,26 @@
                 <div class="card-body">
                     <div class="row">
                         <div class="col-md-12 mb-4">
+                            <label class="contact-label" for="contact_map_iframe">Google Map link</label>
+                            <input type="text" name="contact_map_iframe" id="contact_map_iframe"
+                                   value="{{ old('contact_map_iframe', $data->contact_map_iframe ?? '') }}"
+                                   class="form-control contact-input @error('contact_map_iframe') is-invalid @enderror"
+                                   placeholder="e.g. Follow us">
+                            @error('contact_map_iframe')<div class="text-danger small mt-1">{{ $message }}</div>@enderror
+                        </div>
+                        {{-- <div class="col-md-12 mb-4">
                             <label class="contact-label" for="contact_map_iframe">Google Map Iframe Code</label>
                             <textarea name="contact_map_iframe" id="contact_map_iframe" rows="4"
                                       class="form-control contact-textarea @error('contact_map_iframe') is-invalid @enderror"
                                       placeholder="Paste <iframe> code here...">{{ old('contact_map_iframe', $settings->contact_map_iframe ?? '') }}</textarea>
                             <small class="text-muted mt-1 d-block">Ensure you paste the full <code>&lt;iframe&gt;</code> HTML code from Google Maps share options.</small>
                             @error('contact_map_iframe')<div class="text-danger small mt-1">{{ $message }}</div>@enderror
-                        </div>
+                        </div> --}}
 
                         <div class="col-md-6 mb-3">
                             <label class="contact-label" for="contact_follow_title">Follow Us Title</label>
                             <input type="text" name="contact_follow_title" id="contact_follow_title"
-                                   value="{{ old('contact_follow_title', $settings->contact_follow_title ?? '') }}"
+                                   value="{{ old('contact_follow_title', $data->contact_follow_title ?? '') }}"
                                    class="form-control contact-input @error('contact_follow_title') is-invalid @enderror"
                                    placeholder="e.g. Follow us">
                             @error('contact_follow_title')<div class="text-danger small mt-1">{{ $message }}</div>@enderror
@@ -296,7 +304,7 @@
                         <div class="col-md-6 mb-3">
                             <label class="contact-label" for="contact_follow_subtitle">Follow Us Subtitle</label>
                             <input type="text" name="contact_follow_subtitle" id="contact_follow_subtitle"
-                                   value="{{ old('contact_follow_subtitle', $settings->contact_follow_subtitle ?? '') }}"
+                                   value="{{ old('contact_follow_subtitle', $data->contact_follow_subtitle ?? '') }}"
                                    class="form-control contact-input @error('contact_follow_subtitle') is-invalid @enderror"
                                    placeholder="e.g. Tips, drops and behind the scenes.">
                             @error('contact_follow_subtitle')<div class="text-danger small mt-1">{{ $message }}</div>@enderror
@@ -307,7 +315,7 @@
 
             {{-- ── Submit Section ── --}}
             <div class="d-flex justify-content-end mb-4">
-                <button type="submit" class="btn btn-save">
+                <button type="submit" class="btn btn-save text-white">
                     <i class="ri-save-line me-1"></i> Save Contact Settings
                 </button>
             </div>
