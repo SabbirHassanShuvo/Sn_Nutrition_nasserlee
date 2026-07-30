@@ -27,7 +27,6 @@
                             <thead class="table-light">
                                 <tr>
                                     <th style="width: 40px; text-align: center;"><input type="checkbox" class="form-check-input" id="checkAll"></th>
-                                    <th class="ps-3" style="width: 60px;">ID</th>
                                     <th style="width: 80px;">Image</th>
                                     <th style="width: 60px;">Color</th>
                                     <th class="text-start">Category Name</th>
@@ -65,9 +64,18 @@
                             @enderror
                         </div>
                         <div class="mb-4">
-                            <label class="form-label fw-semibold" for="category_color">Background Color</label>
-                            <input type="color" name="color" id="category_color" class="form-control form-control-color w-100 @error('color') is-invalid @enderror" value="#FF8000">
-                            <small class="text-muted">Select a background color for the frontend card</small>
+                            <label class="form-label fw-semibold" for="category_color_text">Background Color</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-white border-end-0 p-1 position-relative" style="overflow: hidden;">
+                                    <div id="category_color_preview" style="width: 28px; height: 28px; background-color: #FF8000; border-radius: 6px; border: 1px solid rgba(0,0,0,0.15); transition: background-color 0.2s ease;"></div>
+                                    <input type="color" id="category_color" value="#FF8000" class="position-absolute top-0 start-0 opacity-0 w-100 h-100" style="cursor: pointer; z-index: 2;" title="Click to pick color">
+                                </span>
+                                <input type="text" name="color" id="category_color_text" class="form-control border-start-0 border-end-0 shadow-none @error('color') is-invalid @enderror" value="#FF8000" placeholder="#FF8000" maxlength="7" style="font-family: monospace; font-size: 15px; letter-spacing: 0.5px;">
+                                <button type="button" class="btn btn-outline-secondary border-start-0" id="copyColorBtn" title="Copy Color Code">
+                                    <i class="ri-file-copy-line"></i>
+                                </button>
+                            </div>
+                            <small class="text-muted d-block mt-1 fs-12">Click swatch to pick or paste hex code (e.g. #FF8000)</small>
                             @error('color')
                                 <div class="invalid-feedback d-block">{{ $message }}</div>
                             @enderror
@@ -135,7 +143,6 @@
                     ajax: "{{ route('backend.category.index') }}",
                     columns: [
                         { data: 'checkbox', name: 'checkbox', orderable: false, searchable: false, className: 'text-center' },
-                        { data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable: false, className: 'ps-3 text-muted fw-medium' },
                         { data: 'image', name: 'image', orderable: false, searchable: false, className: 'text-center' },
                         { data: 'color', name: 'color', orderable: false, searchable: false, className: 'text-center' },
                         { data: 'name', name: 'name', className: 'text-start fw-medium' },
@@ -200,17 +207,75 @@
             $('.dropify').dropify();
         }
 
+        function updateColorPreview(hex) {
+            if (hex) {
+                $('#category_color_preview').css('background-color', hex);
+            }
+        }
+
         function openCreateModal() {
             $('#categoryForm').trigger("reset");
             $('#categoryForm').attr('action', "{{ route('backend.category.store') }}");
             $('#formMethod').val('POST');
             $('#category_id').val('');
-            $('#category_color').val('#FF8000');
+            let defaultColor = '#FF8000';
+            $('#category_color').val(defaultColor);
+            $('#category_color_text').val(defaultColor);
+            updateColorPreview(defaultColor);
             $('#categoryModalLabel').text('Create Category');
             $('#saveBtn').text('Create Category');
             resetDropify();
             $('#categoryModal').modal('show');
         }
+
+        // Sync color picker input and text input
+        $(document).on('input change', '#category_color', function() {
+            let hex = $(this).val().toUpperCase();
+            $('#category_color_text').val(hex);
+            updateColorPreview(hex);
+        });
+
+        $(document).on('input paste keyup', '#category_color_text', function() {
+            let val = $(this).val().trim();
+            if (val && !val.startsWith('#')) {
+                val = '#' + val;
+            }
+            val = val.toUpperCase();
+            if (/^#[0-9A-F]{6}$/i.test(val)) {
+                $('#category_color').val(val);
+                updateColorPreview(val);
+            }
+        });
+
+        $(document).on('blur', '#category_color_text', function() {
+            let val = $(this).val().trim();
+            if (val && !val.startsWith('#')) {
+                val = '#' + val;
+                $(this).val(val.toUpperCase());
+            }
+            let current = $(this).val();
+            if (/^#[0-9A-F]{6}$/i.test(current)) {
+                $('#category_color').val(current);
+                updateColorPreview(current);
+            }
+        });
+
+        // Copy color button
+        $(document).on('click', '#copyColorBtn', function() {
+            let colorCode = $('#category_color_text').val();
+            if (navigator.clipboard && window.isSecureContext) {
+                navigator.clipboard.writeText(colorCode).then(() => {
+                    toastr.success('Color code ' + colorCode + ' copied!');
+                });
+            } else {
+                let tempInput = $('<input>');
+                $('body').append(tempInput);
+                tempInput.val(colorCode).select();
+                document.execCommand('copy');
+                tempInput.remove();
+                toastr.success('Color code ' + colorCode + ' copied!');
+            }
+        });
 
         // Intercept Edit Button
         $(document).on('click', '.data-table .btn-soft-info', function(e) {
@@ -229,7 +294,10 @@
                         $('#formMethod').val('PATCH');
                         $('#category_id').val(category.id);
                         $('#category_name').val(category.name);
-                        $('#category_color').val(category.color || '#FF8000');
+                        let col = category.color || '#FF8000';
+                        $('#category_color').val(col);
+                        $('#category_color_text').val(col);
+                        updateColorPreview(col);
                         $('#categoryModalLabel').text('Edit Category');
                         $('#saveBtn').text('Update Category');
                         
@@ -251,7 +319,10 @@
         @if ($errors->any())
             $(document).ready(function() {
                 $('#category_name').val("{{ old('name') }}");
-                $('#category_color').val("{{ old('color', '#FF8000') }}");
+                let oldColor = "{{ old('color', '#FF8000') }}";
+                $('#category_color').val(oldColor);
+                $('#category_color_text').val(oldColor);
+                updateColorPreview(oldColor);
                 
                 let oldMethod = "{{ old('_method') }}";
                 let oldId = "{{ old('category_id') }}";

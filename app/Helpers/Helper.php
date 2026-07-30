@@ -42,7 +42,8 @@ function isLinkedStorage(){
         // Generate clean unique filename
         $originalName = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
         $slugName     = Str::slug($originalName);
-        $imageName    = $slugName . '-' . uniqid() . '.' . $file->extension();
+        $extension    = strtolower($file->getClientOriginalExtension() ?: $file->extension());
+        $imageName    = $slugName . '-' . uniqid() . '.' . $extension;
 
         // Define storage path
         $uploadPath = public_path('public_uploads/' . $folder);
@@ -53,19 +54,25 @@ function isLinkedStorage(){
         // Full file path
         $filePath = $uploadPath . '/' . $imageName;
 
-        // Resize / process image
-        $img = Image::make($file)
-            ->resize(200, null, function ($constraint) {
-                $constraint->aspectRatio();
-                $constraint->upsize();
-            });
+        $isRasterImage = in_array($extension, ['jpg', 'jpeg', 'png', 'gif', 'webp']);
 
-        // Optionally apply other operations
-        if ($option === 'thumb') {
-            $img->resize(100, 100);
+        if ($isRasterImage) {
+            // Resize / process image
+            $img = Image::make($file)
+                ->resize(200, null, function ($constraint) {
+                    $constraint->aspectRatio();
+                    $constraint->upsize();
+                });
+
+            // Optionally apply other operations
+            if ($option === 'thumb') {
+                $img->resize(100, 100);
+            }
+
+            $img->save($filePath, 90);
+        } else {
+            $file->move($uploadPath, $imageName);
         }
-
-        $img->save($filePath, 90);
 
         // Return relative path (useful for DB & display)
         return 'public_uploads/' . $folder . '/' . $imageName;
@@ -94,17 +101,17 @@ function isLinkedStorage(){
         // Generate clean unique filename
         $originalName = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
         $slugName     = Str::slug($originalName);
-        $extension    = $file->extension();
+        $extension    = strtolower($file->getClientOriginalExtension() ?: $file->extension());
         $fileName     = $slugName . '-' . uniqid() . '.' . $extension;
 
-        // Detect if it's an image
-        $isImage = in_array(strtolower($extension), ['jpg', 'jpeg', 'png', 'gif', 'webp']);
+        // Detect if it's a raster image (Intervention Image cannot process vector SVG)
+        $isRasterImage = in_array($extension, ['jpg', 'jpeg', 'png', 'gif', 'webp']);
 
         // Check if storage is linked
         $isLinked = isLinkedStorage();
 
-        // For image files: process and re-wrap
-        if ($isImage) {
+        // For raster image files: process and re-wrap
+        if ($isRasterImage) {
             $tempPath = sys_get_temp_dir() . '/' . $fileName;
 
             // Resize / process via Intervention
