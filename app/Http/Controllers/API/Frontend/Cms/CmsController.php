@@ -1,19 +1,15 @@
 <?php
 
-namespace App\Http\Controllers\API\Frontend\Cms;
+namespace App\Http\Controllers\Api\Frontend\Cms;
 
-use App\Http\Controllers\API\BaseController;
+use App\Http\Controllers\Api\BaseController;
 use App\Models\AboutSection;
 use App\Models\WebSetting;
-use App\Models\BannerSection;
 use App\Models\HowItWorksSection;
 use Illuminate\Http\Request;
 
 class CmsController extends BaseController
 {
-    /**
-     * Build title HTML: wraps the highlight word with span and adds <br> after it.
-     */
     private function buildTitleHtml(?string $title, ?string $highlight): string
     {
         if (!$title) return '';
@@ -29,9 +25,6 @@ class CmsController extends BaseController
             . $after;
     }
 
-    /**
-     * Build description HTML: wraps the highlight phrase with span.
-     */
     private function buildDescriptionHtml(?string $description, ?string $highlight): string
     {
         if (!$description) return '';
@@ -59,12 +52,14 @@ class CmsController extends BaseController
             $data = [
                 'story' => [
                     'badge'       => $section->story_badge,
-                    'title'       => $this->buildTitleHtml($section->story_title, $section->story_title_highlight),
+                    'title_one'   => $section->story_title,
+                    'title_two'   => $section->story_title_highlight,
                     'description' => $section->story_description,
                     'image'       => $section->story_image ? asset($section->story_image) : null,
                 ],
                 'mission' => [
-                    'title'       => $this->buildTitleHtml($section->mission_title, $section->mission_title_highlight),
+                    'title_one'   => $section->mission_title,
+                    'title_two'   => $section->mission_title_highlight,
                     'description' => $section->mission_description,
                     'stats' => [
                         [
@@ -86,7 +81,8 @@ class CmsController extends BaseController
                     ]
                 ],
                 'standards' => [
-                    'title'       => $this->buildTitleHtml($section->standards_title, $section->standards_title_highlight),
+                    'title_one'   => $section->standards_title,
+                    'title_two'   => $section->standards_title_highlight,
                     'description' => $section->standards_description,
                     'items' => [
                         [
@@ -108,7 +104,8 @@ class CmsController extends BaseController
                     ]
                 ],
                 'stand_for' => [
-                    'title'       => $this->buildTitleHtml($section->stand_title, $section->stand_title_highlight),
+                    'title_one'   => $section->stand_title,
+                    'title_two'   => $section->stand_title_highlight,
                     'description' => $section->stand_description,
                     'items' => [
                         [
@@ -149,14 +146,10 @@ class CmsController extends BaseController
                 return $this->sendResponse(null, 'Contact Us section not configured yet.');
             }
 
-            $titleHtml = trim($settings->contact_title);
-            if ($settings->contact_title_highlight) {
-                $titleHtml .= " <span class='font-play-fair text-primary'>" . trim($settings->contact_title_highlight) . "</span>";
-            }
-
             $data = [
                 'badge'       => $settings->contact_badge,
-                'title'       => $titleHtml,
+                'title_one'   => $settings->contact_title,
+                'title_two'   => $settings->contact_title_highlight,
                 'description' => $settings->contact_subtitle,
                 'phone'       => $settings->footer_phone,
                 'hours'       => $settings->contact_phone_hours,
@@ -286,8 +279,9 @@ class CmsController extends BaseController
                     ],
                 ] : [],
                 'features' => $section ? [
-                    'title'       => $this->buildTitleHtml($section->features_title, $section->features_title_highlight),
-                    'description' => $section->features_description,
+                    'title_one'       => $section->features_title,
+                    'title_two'       => $section->features_title_highlight,
+                    'description'     => $section->features_description,
                     'items' => [
                         [
                             'title'       => $section->feature1_title,
@@ -322,8 +316,9 @@ class CmsController extends BaseController
                     ]
                 ] : null,
                 'steps' => $section ? [
-                    'title'       => $this->buildTitleHtml($section->steps_title, $section->steps_title_highlight),
-                    'description' => $section->steps_description,
+                    'title_one'       => $section->steps_title,
+                    'title_two'       => $section->steps_title_highlight,
+                    'description'     => $section->steps_description,
                     'items' => [
                         [
                             'step'        => 1,
@@ -348,8 +343,9 @@ class CmsController extends BaseController
                     ]
                 ] : null,
                 'tiers' => $section ? [
-                    'title'       => $this->buildTitleHtml($section->tiers_title, $section->tiers_title_highlight),
-                    'description' => $section->tiers_description,
+                    'title_one'       => $section->tiers_title,
+                    'title_two'       => $section->tiers_title_highlight,
+                    'description'     => $section->tiers_description,
                     'items' => [
                         [
                             'name'        => $section->tier1_name,

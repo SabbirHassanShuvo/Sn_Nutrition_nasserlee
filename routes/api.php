@@ -20,6 +20,7 @@ use App\Http\Controllers\Api\Frontend\GymApiController;
 use App\Http\Controllers\Api\Frontend\PharmacyApiController;
 use App\Http\Controllers\Api\Frontend\UserSettingsController;
 use App\Http\Controllers\Api\Frontend\OnboardingQuestionApiController;
+use App\Http\Controllers\Api\Frontend\Profile\ProfileController;
 
 Route::group([
     'middleware' => 'api',
@@ -45,6 +46,8 @@ Route::group([
     Route::post('/google', [GoogleAuthController::class, 'login']);
 });
 
+
+// Sandip added
 Route::group(['middleware' => 'api'], function($router){
     // Cms
     Route::get('/cms/banners', [HomePageController::class, 'getBanners']);
@@ -64,6 +67,11 @@ Route::group(['middleware' => 'api'], function($router){
     Route::get('/onboarding/questions', [OnboardingQuestionApiController::class, 'getQuestions']);
         // Onboarding Submit
     Route::post('/onboarding/submit', [OnboardingQuestionApiController::class, 'submitAnswers']);
+
+    Route::group(['middleware' => ['auth:api']], function () {
+        Route::get('/health-professional/profile', [ProfileController::class, 'detailsProfile']);
+        Route::post('/health-professional/profile/update', [ProfileController::class, 'updateProfile']);
+    });
 });
 
 // Specialist & Consultation APIs

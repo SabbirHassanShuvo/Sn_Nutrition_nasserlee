@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\API\Frontend\Cms;
+namespace App\Http\Controllers\Api\Frontend\Cms;
 
 use App\Http\Controllers\Api\BaseController;
 use App\Models\BannerSection;
@@ -71,8 +71,9 @@ class HomePageController extends BaseController
 
             $section = QualityControlSection::first();
             $qualityControl = [
-                'title'       => $this->buildTitleHtml($section->title, $section->title_highlight),
-                'description' => $section->description,
+                'title_one'       => $section->title,
+                'title_two'       => $section->title_highlight,
+                'description'     => $section->description,
                     'image'       => $section->image ? asset($section->image) : null,
                 'cards'       => [
                     [
