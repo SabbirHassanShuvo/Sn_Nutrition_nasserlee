@@ -58,7 +58,7 @@ class CategoryController extends Controller
         $request->validate([
             'name' => 'required|string|max:255',
             'color' => 'nullable|string|max:20',
-            'image' => 'nullable|image|max:2048',
+            'image' => 'nullable|mimes:jpeg,png,jpg,gif,svg,webp|max:2048',
         ]);
 
         $data = $request->only(['name', 'color']);
@@ -90,7 +90,7 @@ class CategoryController extends Controller
         $request->validate([
             'name' => 'required|string|max:255',
             'color' => 'nullable|string|max:20',
-            'image' => 'nullable|image|max:2048',
+            'image' => 'nullable|mimes:jpeg,png,jpg,gif,svg,webp|max:2048',
         ]);
 
         $data = $request->only(['name', 'color']);

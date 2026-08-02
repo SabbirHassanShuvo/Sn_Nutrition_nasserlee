@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Http\Controllers\API\Frontend\Cms;
+namespace App\Http\Controllers\Api\Frontend\Cms;
 
-use App\Http\Controllers\API\BaseController;
+use App\Http\Controllers\Api\BaseController;
 use App\Models\WebSetting;
 use Illuminate\Http\Request;
 

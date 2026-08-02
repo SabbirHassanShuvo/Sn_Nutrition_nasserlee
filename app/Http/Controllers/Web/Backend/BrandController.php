@@ -61,7 +61,7 @@ class BrandController extends Controller
             'name' => 'required|string|max:255',
             'specialty' => 'nullable|string|max:255',
             'rating' => 'nullable|numeric|min:0|max:5',
-            'image' => 'nullable|image|max:2048',
+            'image' => 'nullable|mimes:jpeg,png,jpg,gif,svg,webp|max:2048',
         ]);
 
         $data = $request->only(['name', 'specialty', 'rating']);
@@ -94,7 +94,7 @@ class BrandController extends Controller
             'name' => 'required|string|max:255',
             'specialty' => 'nullable|string|max:255',
             'rating' => 'nullable|numeric|min:0|max:5',
-            'image' => 'nullable|image|max:2048',
+            'image' => 'nullable|mimes:jpeg,png,jpg,gif,svg,webp|max:2048',
         ]);
 
         $data = $request->only(['name', 'specialty', 'rating']);

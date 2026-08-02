@@ -8,7 +8,7 @@ use App\Http\Controllers\Api\Frontend\WishlistController;
 use App\Http\Controllers\Api\Frontend\ComparisonController;
 use App\Http\Controllers\Api\Frontend\AffiliateController;
 use App\Http\Controllers\Api\PartnerOnboardingController;
-use App\Http\Controllers\API\CategoryController;
+use App\Http\Controllers\Api\CategoryController;
 use Illuminate\Support\Facades\Route;
 
 /*
