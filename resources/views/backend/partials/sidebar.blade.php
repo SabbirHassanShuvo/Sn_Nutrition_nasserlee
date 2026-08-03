@@ -162,6 +162,15 @@
                     </a>
                 </li>
 
+                <li class="nav-item">
+                    <a class="nav-link menu-link {{ request()->routeIs('backend.contact-submissions.*') ? 'active' : '' }}"
+                        href="{{ route('backend.contact-submissions.index') }}">
+                        <i class="ri-mail-line"></i> 
+                        <span>Contact Info</span>
+                        <span id="sidebar-contact-badge" class="badge badge-pill bg-danger ms-auto" style="{{ $unreadContactCount > 0 ? '' : 'display: none;' }}">{{ $unreadContactCount }}</span>
+                    </a>
+                </li>
+
                 <!-- @canany(['onboarding_options_manage', 'onboarding_manage'])
                 <li class="nav-item">
                     <a class="nav-link menu-link {{ request()->routeIs('backend.onboarding-option.*') ? 'active' : '' }}"
@@ -265,7 +274,7 @@
                             </li>
                             @endcan
 
-                            <!-- @can('cms_contact_page')
+                            @can('cms_contact_page')
                             <li class="nav-item">
                                 <a href="{{ route('backend.contact-us.edit') }}"
                                     class="nav-link {{ getPageStatus('backend.contact-us.*') }}"
@@ -287,14 +296,14 @@
                                     class="nav-link {{ getPageStatus('backend.page.*') }}"
                                     data-key="t-pages"> Pages </a>
                             </li>
-                            @endcan -->
+                            @endcan
                         </ul>
                     </div>
                 </li>
                 @endcanany
 
                 {{-- Faq --}}
-                <!-- @canany(['cms_faq'])
+                @canany(['cms_faq'])
                 <li class="nav-item">
                     <a class="nav-link menu-link {{ getPageStatus(['backend.feature.faq.*'], 'collapsed active') }}" href="#sidebarFaq"
                         data-bs-toggle="collapse" role="button" aria-expanded="false"
@@ -323,7 +332,7 @@
                         </ul>
                     </div>
                 </li>
-                @endcanany -->
+                @endcanany
             </ul>
         </div>
         <!-- Sidebar -->

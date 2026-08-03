@@ -12,6 +12,7 @@ use App\Http\Controllers\Web\Backend\Cms\HomePageController;
 use App\Http\Controllers\Web\Backend\Cms\FaqCategoryController;
 use App\Http\Controllers\Web\Backend\Cms\ContactPageController;
 use App\Http\Controllers\Web\Backend\BlogController;
+use App\Http\Controllers\Web\Backend\ContactSubmissionController;
 
 
 use Illuminate\Support\Facades\Mail;
@@ -188,6 +189,11 @@ Route::group([ 'as'=>'backend.'], function () {
         Route::post('blog/status/{id}', [BlogController::class,'status'])->name('blog.status');
         Route::resource('blog', BlogController::class);
     });
+
+    // Contact Submissions Management
+    Route::delete('contact-submissions/bulk-destroy', [ContactSubmissionController::class, 'bulkDestroy'])->name('contact-submissions.bulk-destroy');
+    Route::post('contact-submissions/read/{id}', [ContactSubmissionController::class, 'markAsRead'])->name('contact-submissions.read');
+    Route::resource('contact-submissions', ContactSubmissionController::class)->only(['index', 'destroy']);
 
     require_once __DIR__ .'/settings.php';
 

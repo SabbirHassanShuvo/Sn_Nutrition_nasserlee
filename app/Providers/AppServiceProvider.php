@@ -29,6 +29,17 @@ class AppServiceProvider extends ServiceProvider
                 'app_name' => 'Laravel',
                 'site_title' => 'Laravel Application'
             ]));
+
+            // Share contact submissions count if table exists
+            try {
+                if (\Schema::hasTable('contact_submissions')) {
+                    $view->with('unreadContactCount', \App\Models\ContactSubmission::where('is_read', false)->count());
+                } else {
+                    $view->with('unreadContactCount', 0);
+                }
+            } catch (\Exception $e) {
+                $view->with('unreadContactCount', 0);
+            }
         });
 
         // Register UserObserver

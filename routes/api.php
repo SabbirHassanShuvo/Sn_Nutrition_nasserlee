@@ -21,6 +21,7 @@ use App\Http\Controllers\Api\Frontend\PharmacyApiController;
 use App\Http\Controllers\Api\Frontend\UserSettingsController;
 use App\Http\Controllers\Api\Frontend\OnboardingQuestionApiController;
 use App\Http\Controllers\Api\Frontend\Profile\ProfileController;
+use App\Http\Controllers\Api\Frontend\ContactSubmissionApiController;
 
 Route::group([
     'middleware' => 'api',
@@ -55,6 +56,7 @@ Route::group(['middleware' => 'api'], function($router){
     Route::get('/cms/about-us', [CmsController::class, 'getAboutPage']);
     Route::get('/cms/how-it-works', [CmsController::class, 'getHowItWorksPage']);
     Route::get('/cms/contact-us', [CmsController::class, 'getContactPage']);
+    Route::post('/contact/submit', [ContactSubmissionApiController::class, 'submit']);
     Route::get('/cms/faqs', [FaqApiController::class, 'getFaqs']);
     Route::get('/cms/page/{slug}', [CmsController::class, 'getPageBySlug']);
     Route::get('/cms/web-settings', [WebSettingApiController::class, 'getWebSettings']);
