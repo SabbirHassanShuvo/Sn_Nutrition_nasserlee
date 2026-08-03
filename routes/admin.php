@@ -13,6 +13,9 @@ use App\Http\Controllers\Web\Backend\Cms\FaqCategoryController;
 use App\Http\Controllers\Web\Backend\Cms\ContactPageController;
 use App\Http\Controllers\Web\Backend\BlogController;
 use App\Http\Controllers\Web\Backend\ContactSubmissionController;
+use App\Http\Controllers\Web\Backend\SubscriberController;
+use App\Http\Controllers\Web\Backend\Cms\AboutPageController;
+use App\Http\Controllers\Web\Backend\Cms\HowItWorksController;
 
 
 use Illuminate\Support\Facades\Mail;
@@ -138,6 +141,10 @@ Route::group([ 'as'=>'backend.'], function () {
     Route::post('pharmacies/status/{id}', [\App\Http\Controllers\Web\Backend\PharmacyController::class, 'status'])->name('pharmacies.status');
     Route::resource('pharmacies', \App\Http\Controllers\Web\Backend\PharmacyController::class);
 
+
+
+
+    
     // Cms 
     Route::group(['middleware' => 'permission:cms_banner|banner_manage'], function () {
         Route::delete('banner-section/bulk-destroy', [BannerSectionController::class,'bulkDestroy'])->name('banner-section.bulk-destroy');
@@ -153,14 +160,14 @@ Route::group([ 'as'=>'backend.'], function () {
 
     // CMS — About Page sections
     Route::group(['middleware' => 'permission:cms_about_page'], function () {
-        Route::get('cms/about-us', [\App\Http\Controllers\Web\Backend\Cms\AboutPageController::class, 'edit'])->name('about-us.edit');
-        Route::put('cms/about-us', [\App\Http\Controllers\Web\Backend\Cms\AboutPageController::class, 'update'])->name('about-us.update');
+        Route::get('cms/about-us', [AboutPageController::class, 'edit'])->name('about-us.edit');
+        Route::put('cms/about-us', [AboutPageController::class, 'update'])->name('about-us.update');
     });
 
     // CMS — How It Works Page sections
     Route::group(['middleware' => 'permission:cms_how_it_works'], function () {
-        Route::get('cms/how-it-works', [\App\Http\Controllers\Web\Backend\Cms\HowItWorksController::class, 'edit'])->name('how-it-works.edit');
-        Route::put('cms/how-it-works', [\App\Http\Controllers\Web\Backend\Cms\HowItWorksController::class, 'update'])->name('how-it-works.update');
+        Route::get('cms/how-it-works', [HowItWorksController::class, 'edit'])->name('how-it-works.edit');
+        Route::put('cms/how-it-works', [HowItWorksController::class, 'update'])->name('how-it-works.update');
     });
 
     // CMS — Contact Page sections
@@ -194,6 +201,11 @@ Route::group([ 'as'=>'backend.'], function () {
     Route::delete('contact-submissions/bulk-destroy', [ContactSubmissionController::class, 'bulkDestroy'])->name('contact-submissions.bulk-destroy');
     Route::post('contact-submissions/read/{id}', [ContactSubmissionController::class, 'markAsRead'])->name('contact-submissions.read');
     Route::resource('contact-submissions', ContactSubmissionController::class)->only(['index', 'destroy']);
+
+    // Subscribers Management
+    Route::delete('subscribers/bulk-destroy', [SubscriberController::class, 'bulkDestroy'])->name('subscribers.bulk-destroy');
+    Route::post('subscribers/read/{id}', [SubscriberController::class, 'markAsRead'])->name('subscribers.read');
+    Route::resource('subscribers', SubscriberController::class)->only(['index', 'destroy']);
 
     require_once __DIR__ .'/settings.php';
 

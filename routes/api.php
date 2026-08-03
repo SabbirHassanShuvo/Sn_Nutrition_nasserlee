@@ -22,6 +22,7 @@ use App\Http\Controllers\Api\Frontend\UserSettingsController;
 use App\Http\Controllers\Api\Frontend\OnboardingQuestionApiController;
 use App\Http\Controllers\Api\Frontend\Profile\ProfileController;
 use App\Http\Controllers\Api\Frontend\ContactSubmissionApiController;
+use App\Http\Controllers\Api\Frontend\SubscriberApiController;
 
 Route::group([
     'middleware' => 'api',
@@ -57,6 +58,7 @@ Route::group(['middleware' => 'api'], function($router){
     Route::get('/cms/how-it-works', [CmsController::class, 'getHowItWorksPage']);
     Route::get('/cms/contact-us', [CmsController::class, 'getContactPage']);
     Route::post('/contact/submit', [ContactSubmissionApiController::class, 'submit']);
+    Route::post('/subscribe', [SubscriberApiController::class, 'subscribe']);
     Route::get('/cms/faqs', [FaqApiController::class, 'getFaqs']);
     Route::get('/cms/page/{slug}', [CmsController::class, 'getPageBySlug']);
     Route::get('/cms/web-settings', [WebSettingApiController::class, 'getWebSettings']);
@@ -121,7 +123,4 @@ Route::group([
     Route::post('/settings/password', [UserSettingsController::class, 'updatePassword']);
     Route::post('/settings/change-password', [UserSettingsController::class, 'updatePassword']);
     Route::post('/settings/delete-account', [UserSettingsController::class, 'deleteAccount']);
-
-
-
 });

@@ -35,6 +35,7 @@ class DatabaseSeeder extends Seeder
             BlogSeeder::class,
             OnboardingQuestionSeeder::class,
             ContactSubmissionSeeder::class,
+            SubscriberSeeder::class,
         ]);
     }
 }

@@ -171,6 +171,15 @@
                     </a>
                 </li>
 
+                <li class="nav-item">
+                    <a class="nav-link menu-link {{ request()->routeIs('backend.subscribers.*') ? 'active' : '' }}"
+                        href="{{ route('backend.subscribers.index') }}">
+                        <i class="ri-notification-badge-line"></i> 
+                        <span>Subscribers</span>
+                        <span id="sidebar-subscribers-badge" class="badge badge-pill bg-danger ms-auto" style="{{ $unreadSubscriberCount > 0 ? '' : 'display: none;' }}">{{ $unreadSubscriberCount }}</span>
+                    </a>
+                </li>
+
                 <!-- @canany(['onboarding_options_manage', 'onboarding_manage'])
                 <li class="nav-item">
                     <a class="nav-link menu-link {{ request()->routeIs('backend.onboarding-option.*') ? 'active' : '' }}"
