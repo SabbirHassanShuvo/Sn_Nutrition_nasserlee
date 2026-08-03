@@ -23,6 +23,7 @@ use App\Http\Controllers\Api\Frontend\OnboardingQuestionApiController;
 use App\Http\Controllers\Api\Frontend\Profile\ProfileController;
 use App\Http\Controllers\Api\Frontend\ContactSubmissionApiController;
 use App\Http\Controllers\Api\Frontend\SubscriberApiController;
+use App\Http\Controllers\Api\Frontend\BrandApiController;
 
 Route::group([
     'middleware' => 'api',
@@ -62,6 +63,8 @@ Route::group(['middleware' => 'api'], function($router){
     Route::get('/cms/faqs', [FaqApiController::class, 'getFaqs']);
     Route::get('/cms/page/{slug}', [CmsController::class, 'getPageBySlug']);
     Route::get('/cms/web-settings', [WebSettingApiController::class, 'getWebSettings']);
+
+    Route::get('/brands', [BrandApiController::class, 'index']);
 
     // Blogs
     Route::get('/blogs', [BlogApiController::class, 'index']);

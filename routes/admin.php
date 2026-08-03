@@ -16,6 +16,8 @@ use App\Http\Controllers\Web\Backend\ContactSubmissionController;
 use App\Http\Controllers\Web\Backend\SubscriberController;
 use App\Http\Controllers\Web\Backend\Cms\AboutPageController;
 use App\Http\Controllers\Web\Backend\Cms\HowItWorksController;
+use App\Http\Controllers\Web\Backend\OnboardingQuestionController;
+use App\Http\Controllers\Web\Backend\OnboardingOptionController;
 
 
 use Illuminate\Support\Facades\Mail;
@@ -73,17 +75,17 @@ Route::group([ 'as'=>'backend.'], function () {
 
     // Onboarding Options
     Route::group(['middleware' => 'permission:onboarding_options_manage|onboarding_manage'], function () {
-        Route::delete('onboarding-option/bulk-destroy', [\App\Http\Controllers\Web\Backend\OnboardingOptionController::class,'bulkDestroy'])->name('onboarding-option.bulk-destroy');
-        Route::post('onboarding-option/status/{id}', [\App\Http\Controllers\Web\Backend\OnboardingOptionController::class,'status'])->name('onboarding-option.status');
-        Route::resource('onboarding-option', \App\Http\Controllers\Web\Backend\OnboardingOptionController::class)->except(['show']);
+        Route::delete('onboarding-option/bulk-destroy', [OnboardingOptionController::class,'bulkDestroy'])->name('onboarding-option.bulk-destroy');
+        Route::post('onboarding-option/status/{id}', [OnboardingOptionController::class,'status'])->name('onboarding-option.status');
+        Route::resource('onboarding-option', OnboardingOptionController::class)->except(['show']);
     });
 
     // Onboarding Questions & Card CMS
     Route::group(['middleware' => 'permission:onboarding_options_manage|onboarding_manage'], function () {
-        Route::delete('onboarding-question/bulk-destroy', [\App\Http\Controllers\Web\Backend\OnboardingQuestionController::class,'bulkDestroy'])->name('onboarding-question.bulk-destroy');
-        Route::post('onboarding-question/status/{id}', [\App\Http\Controllers\Web\Backend\OnboardingQuestionController::class,'status'])->name('onboarding-question.status');
-        Route::post('onboarding-question/settings', [\App\Http\Controllers\Web\Backend\OnboardingQuestionController::class,'updateSettings'])->name('onboarding-question.settings.update');
-        Route::resource('onboarding-question', \App\Http\Controllers\Web\Backend\OnboardingQuestionController::class)->except(['show']);
+        Route::delete('onboarding-question/bulk-destroy', [OnboardingQuestionController::class,'bulkDestroy'])->name('onboarding-question.bulk-destroy');
+        Route::post('onboarding-question/status/{id}', [OnboardingQuestionController::class,'status'])->name('onboarding-question.status');
+        Route::post('onboarding-question/settings', [OnboardingQuestionController::class,'updateSettings'])->name('onboarding-question.settings.update');
+        Route::resource('onboarding-question', OnboardingQuestionController::class)->except(['show']);
     });
     
     // Roles
