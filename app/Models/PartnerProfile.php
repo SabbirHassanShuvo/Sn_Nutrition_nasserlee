@@ -24,6 +24,7 @@ class PartnerProfile extends Model
         'pending_payout',
         'last_paid_amount',
         'current_tier',
+        'avatar',
     ];
 
     protected $casts = [

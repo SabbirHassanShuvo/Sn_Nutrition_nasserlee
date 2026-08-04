@@ -13,11 +13,17 @@ return new class extends Migration
     {
         Schema::create('promo_codes', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('category_id')->nullable()->constrained()->nullOnDelete();
+            $table->foreignId('product_id')->nullable()->constrained()->nullOnDelete();
+            $table->foreignId('brand_id')->nullable()->constrained()->nullOnDelete();
+            $table->foreignId('health_professional_id')->nullable()->constrained('users')->nullOnDelete();
             $table->string('code')->unique();
+            $table->enum('type', ['global', 'category', 'product', 'health_professional'])->default('global');
             $table->decimal('discount_percent', 5, 2);
-            $table->date('expiry_date')->nullable();
+            $table->datetime('expiry_date')->nullable();
             $table->integer('usage_limit')->nullable();
             $table->integer('used_count')->default(0);
+            $table->integer('per_user_limit')->nullable();
             $table->boolean('status')->default(true);
             $table->timestamps();
         });

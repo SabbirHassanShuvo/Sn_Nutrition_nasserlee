@@ -21,6 +21,7 @@ return new class extends Migration
             $table->string('transfer_reference')->nullable();
             $table->string('receipt_image');
             $table->enum('status', ['pending', 'approved', 'rejected'])->default('pending');
+
             $table->timestamps();
         });
     }

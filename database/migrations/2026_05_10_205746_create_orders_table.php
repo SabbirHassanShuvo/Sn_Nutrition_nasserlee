@@ -14,13 +14,15 @@ return new class extends Migration
         Schema::create('orders', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->nullable()->constrained()->nullOnDelete();
+            $table->foreignId('bank_transfer_id')->nullable()->constrained()->nullOnDelete();
+            $table->foreignId('affiliate_link_id')->nullable()->constrained('affiliate_links')->nullOnDelete();
             $table->string('order_number')->unique();
             $table->decimal('subtotal', 10, 2);
             $table->decimal('delivery_fee', 10, 2)->default(0);
             $table->decimal('discount', 10, 2)->default(0);
             $table->decimal('total', 10, 2);
+            $table->decimal('commission_amount', 10, 2)->default(0);
             $table->enum('status', ['pending', 'processing', 'shipping', 'delivered', 'cancelled'])->default('pending');
-            
             // Contact & Shipping
             $table->string('phone')->nullable();
             $table->string('full_name')->nullable();

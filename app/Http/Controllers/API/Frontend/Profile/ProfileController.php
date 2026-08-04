@@ -50,12 +50,23 @@ class ProfileController extends Controller
             'phone'             => 'nullable|string|max:50',
             'location'          => 'nullable|string|max:255',
             'website'           => 'nullable|string|max:255',
+            'avatar'            => 'sometimes|nullable|image|mimes:jpg,jpeg,png,gif,svg,webp,ico,bmp,tiff|max:2048',
         ]);
 
         $user->update([
             'name'  => $request->name,
             'email' => $request->email,
         ]);
+
+        $partnerProfile = $user->partnerProfile;
+        $avatarPath = $partnerProfile ? $partnerProfile->avatar : null;
+
+        if ($request->hasFile('avatar')) {
+            if ($avatarPath) {
+                fileDelete($avatarPath);
+            }
+            $avatarPath = fileUpload($request->file('avatar'), 'partner/avatar');
+        }
 
         $user->partnerProfile()->updateOrCreate(
             ['user_id' => $user->id],
@@ -64,6 +75,7 @@ class ProfileController extends Controller
                 'phone'             => $request->phone,
                 'location'          => $request->location,
                 'website'           => $request->website,
+                'avatar'            => $avatarPath,
             ]
         );
 

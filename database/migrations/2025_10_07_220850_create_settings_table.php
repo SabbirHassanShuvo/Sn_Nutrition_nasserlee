@@ -27,11 +27,14 @@ return new class extends Migration
             $table->string('copyright', 255)->nullable();
             $table->string('contact', 20)->nullable();
             $table->string('email', 255)->nullable();
+            $table->decimal('delivery_charge', 8, 2)->default(50.00)->nullable();
             
             $table->string('time_zone', 50)->nullable();
 
             // About section (longer text)
             $table->text('about')->nullable();
+
+       
 
             $table->timestamps();
         });
