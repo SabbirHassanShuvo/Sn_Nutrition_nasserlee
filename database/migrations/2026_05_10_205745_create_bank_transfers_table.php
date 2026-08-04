@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('bank_transfers', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('order_id')->constrained()->cascadeOnDelete();
+            $table->unsignedBigInteger('order_id')->nullable();
             $table->string('sender_full_name');
             $table->string('sender_bank');
             $table->string('account_last_4');

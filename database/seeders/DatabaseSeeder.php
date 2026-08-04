@@ -39,6 +39,7 @@ class DatabaseSeeder extends Seeder
             OnboardingQuestionSeeder::class,
             ContactSubmissionSeeder::class,
             SubscriberSeeder::class,
+            OfferSeeder::class,
         ]);
     }
 }

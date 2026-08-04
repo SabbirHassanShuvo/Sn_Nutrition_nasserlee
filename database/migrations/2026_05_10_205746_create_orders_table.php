@@ -39,6 +39,10 @@ return new class extends Migration
             
             $table->timestamps();
         });
+
+        Schema::table('bank_transfers', function (Blueprint $table) {
+            $table->foreign('order_id')->references('id')->on('orders')->nullOnDelete();
+        });
     }
 
     /**
@@ -46,6 +50,10 @@ return new class extends Migration
      */
     public function down(): void
     {
+        Schema::table('bank_transfers', function (Blueprint $table) {
+            $table->dropForeign(['order_id']);
+        });
+
         Schema::dropIfExists('orders');
     }
 };

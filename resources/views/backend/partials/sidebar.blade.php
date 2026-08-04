@@ -135,6 +135,15 @@
                 </li>
                 @endcanany
 
+                @canany(['offers_manage', 'offer_manage'])
+                <li class="nav-item">
+                    <a class="nav-link menu-link {{ request()->routeIs('backend.offer.*') ? 'active' : '' }}"
+                        href="{{ route('backend.offer.index') }}">
+                        <i class="ri-percent-line"></i> <span>Offers & Campaigns</span>
+                    </a>
+                </li>
+                @endcanany
+
                 <li class="nav-item">
                     <a class="nav-link menu-link {{ request()->routeIs('backend.specialist.*') ? 'active' : '' }}"
                         href="{{ route('backend.specialist.index') }}">

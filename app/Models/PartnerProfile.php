@@ -36,4 +36,13 @@ class PartnerProfile extends Model
     {
         return $this->belongsTo(User::class);
     }
+
+    public function getAvatarAttribute($value): string | null
+    {
+        if (request()->is('api/*') && !empty($value)) {
+            return url($value);
+        }
+        return $value;
+    }
+    
 }

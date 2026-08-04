@@ -28,7 +28,7 @@ return new class extends Migration
             $table->string('activity_level')->nullable(); // Sedentary, Moderate, Active, etc.
             $table->string('gym_place')->nullable(); // Gym, Home, Outdoor, etc.
             $table->string('diet')->nullable(); // Omnivore, Vegan, Keto, etc.
-            $table->string('allergy')->nullable()->after('diet'); // None, Lactose, Nuts, etc.
+            $table->string('allergy')->nullable(); // None, Lactose, Nuts, etc.
             $table->timestamps();
         });
     }   

@@ -122,6 +122,13 @@ Route::group([ 'as'=>'backend.'], function () {
         Route::resource('promo-code', \App\Http\Controllers\Web\Backend\PromoCodeController::class);
     });
 
+    // Offer & Campaign Management
+    Route::group(['middleware' => 'permission:offers_manage|offer_manage'], function () {
+        Route::delete('offer/bulk-destroy', [\App\Http\Controllers\Web\Backend\OfferController::class,'bulkDestroy'])->name('offer.bulk-destroy');
+        Route::post('offer/status/{id}', [\App\Http\Controllers\Web\Backend\OfferController::class,'status'])->name('offer.status');
+        Route::resource('offer', \App\Http\Controllers\Web\Backend\OfferController::class);
+    });
+
     // Specialist Management
     Route::delete('specialist/bulk-destroy', [\App\Http\Controllers\Web\Backend\SpecialistController::class, 'bulkDestroy'])->name('specialist.bulk-destroy');
     Route::post('specialist/status/{id}', [\App\Http\Controllers\Web\Backend\SpecialistController::class, 'status'])->name('specialist.status');

@@ -9,6 +9,7 @@ use App\Http\Controllers\Api\Frontend\Cms\HomePageController;
 use App\Http\Controllers\Api\Frontend\Cms\CmsController;
 use App\Http\Controllers\Api\Frontend\Cms\FaqApiController;
 use App\Http\Controllers\Api\Frontend\Cms\WebSettingApiController;
+use App\Http\Controllers\Api\Frontend\Cms\OfferApiController;
 use App\Http\Controllers\Api\Frontend\BlogApiController;
 
 use App\Http\Controllers\Api\Frontend\MyInformationController;
@@ -63,6 +64,7 @@ Route::group(['middleware' => 'api'], function($router){
     Route::get('/cms/faqs', [FaqApiController::class, 'getFaqs']);
     Route::get('/cms/page/{slug}', [CmsController::class, 'getPageBySlug']);
     Route::get('/cms/web-settings', [WebSettingApiController::class, 'getWebSettings']);
+    Route::get('/offers', [OfferApiController::class, 'index']);
 
     Route::get('/brands', [BrandApiController::class, 'index']);
 

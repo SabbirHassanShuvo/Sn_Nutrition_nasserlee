@@ -13,8 +13,8 @@ return new class extends Migration
     {
         Schema::create('products', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('brand_id')->nullable()->constrained('brands')->nullOnDelete();
-            $table->foreignId('category_id')->nullable()->constrained()->onDelete('set null');
+            $table->foreignId('brand_id')->nullable()->constrained('brands')->cascadeOnDelete()->cascadeOnUpdate();
+            $table->foreignId('category_id')->nullable()->constrained()->cascadeOnDelete()->cascadeOnUpdate();
             $table->string('name');
             $table->string('slug')->unique();
             $table->text('short_description')->nullable();
@@ -35,7 +35,7 @@ return new class extends Migration
             $table->string('main_image')->nullable();
             $table->json('gallery_images')->nullable();
             $table->string('status')->default('active');
-            $table->boolean('is_popular')->default(false)->after('status');
+            $table->boolean('is_popular')->default(false);
             $table->timestamps();
             $table->softDeletes();
         });

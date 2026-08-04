@@ -30,6 +30,7 @@ class PermissionSeeder extends Seeder
             'role_management',
             'user_management',
             'blog_manage',
+            'offers_manage',
         ];
 
         // Create permissions if not already exist

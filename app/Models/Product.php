@@ -19,6 +19,80 @@ class Product extends Model
         'is_popular' => 'boolean',
     ];
 
+    protected $appends = [
+        'offer_expiry',
+    ];
+
+    public function offers()
+    {
+        return $this->belongsToMany(Offer::class, 'offer_product');
+    }
+
+    public function getPriceAttribute($value)
+    {
+        // Try to fetch active campaign/offer
+        $activeOffer = $this->offers()
+            ->where('status', true)
+            ->where(function ($q) {
+                $q->whereNull('expire_date')
+                  ->orWhere('expire_date', '>', now());
+            })
+            ->first();
+
+        if ($activeOffer && $activeOffer->discount_percent > 0) {
+            return round($value - ($value * $activeOffer->discount_percent / 100), 2);
+        }
+
+        return $value;
+    }
+
+    public function getOldPriceAttribute($value)
+    {
+        $activeOffer = $this->offers()
+            ->where('status', true)
+            ->where(function ($q) {
+                $q->whereNull('expire_date')
+                  ->orWhere('expire_date', '>', now());
+            })
+            ->first();
+
+        if ($activeOffer && $activeOffer->discount_percent > 0) {
+            return isset($this->attributes['price']) ? (float) $this->attributes['price'] : null;
+        }
+
+        return $value ? (float) $value : null;
+    }
+
+    public function getDiscountPercentAttribute($value)
+    {
+        $activeOffer = $this->offers()
+            ->where('status', true)
+            ->where(function ($q) {
+                $q->whereNull('expire_date')
+                  ->orWhere('expire_date', '>', now());
+            })
+            ->first();
+
+        if ($activeOffer && $activeOffer->discount_percent > 0) {
+            return (float) $activeOffer->discount_percent;
+        }
+
+        return $value ? (float) $value : 0;
+    }
+
+    public function getOfferExpiryAttribute()
+    {
+        $activeOffer = $this->offers()
+            ->where('status', true)
+            ->where(function ($q) {
+                $q->whereNull('expire_date')
+                  ->orWhere('expire_date', '>', now());
+            })
+            ->first();
+
+        return $activeOffer && $activeOffer->expire_date ? $activeOffer->expire_date->toIso8601String() : null;
+    }
+
     public function category()
     {
         return $this->belongsTo(Category::class);
