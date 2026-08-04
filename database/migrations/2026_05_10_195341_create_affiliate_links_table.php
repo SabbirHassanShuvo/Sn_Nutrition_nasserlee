@@ -11,16 +11,18 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('affiliate_links', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('user_id')->constrained()->onDelete('cascade');
-            $table->foreignId('product_id')->constrained()->onDelete('cascade');
-            $table->string('tracking_code')->unique();
-            $table->integer('clicks_count')->default(0);
-            $table->integer('conversions_count')->default(0);
-            $table->enum('status', ['active', 'paused'])->default('active');
-            $table->timestamps();
-        });
+        if (!Schema::hasTable('affiliate_links')) {
+            Schema::create('affiliate_links', function (Blueprint $table) {
+                $table->id();
+                $table->foreignId('user_id')->constrained()->onDelete('cascade');
+                $table->foreignId('product_id')->constrained()->onDelete('cascade');
+                $table->string('tracking_code')->unique();
+                $table->integer('clicks_count')->default(0);
+                $table->integer('conversions_count')->default(0);
+                $table->enum('status', ['active', 'paused'])->default('active');
+                $table->timestamps();
+            });
+        }
     }
 
     /**

@@ -11,19 +11,21 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('bank_transfers', function (Blueprint $table) {
-            $table->id();
-            $table->unsignedBigInteger('order_id')->nullable();
-            $table->string('sender_full_name');
-            $table->string('sender_bank');
-            $table->string('account_last_4');
-            $table->decimal('amount_paid', 10, 2);
-            $table->string('transfer_reference')->nullable();
-            $table->string('receipt_image');
-            $table->enum('status', ['pending', 'approved', 'rejected'])->default('pending');
+        if (!Schema::hasTable('bank_transfers')) {
+            Schema::create('bank_transfers', function (Blueprint $table) {
+                $table->id();
+                $table->unsignedBigInteger('order_id')->nullable();
+                $table->string('sender_full_name');
+                $table->string('sender_bank');
+                $table->string('account_last_4');
+                $table->decimal('amount_paid', 10, 2);
+                $table->string('transfer_reference')->nullable();
+                $table->string('receipt_image');
+                $table->enum('status', ['pending', 'approved', 'rejected'])->default('pending');
 
-            $table->timestamps();
-        });
+                $table->timestamps();
+            });
+        }
     }
 
     /**
