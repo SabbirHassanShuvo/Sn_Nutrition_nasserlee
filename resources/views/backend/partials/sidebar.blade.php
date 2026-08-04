@@ -35,7 +35,6 @@
             <div id="two-column-menu">
             </div>
             <ul class="navbar-nav" id="navbar-nav">
-                <li class="menu-title"><span data-key="t-menu">Menu</span></li>
                 <li class="nav-item">
                     <a class="nav-link menu-link {{ request()->routeIs('backend.dashboard.*') ? 'active' : '' }}"
                         href="{{ route('backend.dashboard.index') }}">
@@ -43,7 +42,7 @@
                     </a>
                 </li>
 
-                @role('super_admin')
+                <!-- @role('super_admin')
                     <li class="nav-item">
                         <a class="nav-link menu-link {{ getPageStatus(['backend.role.*', 'backend.system-user.*'], 'collapsed active') }}"
                             href="#sidebarLanding" data-bs-toggle="collapse" role="button" aria-expanded="false"
@@ -66,7 +65,7 @@
                             </ul>
                         </div>
                     </li>
-                @endrole
+                @endrole -->
 
                 @can('user_management')
                 <li class="nav-item">
@@ -136,6 +135,15 @@
                 </li>
                 @endcanany
 
+                @canany(['offers_manage', 'offer_manage'])
+                <li class="nav-item">
+                    <a class="nav-link menu-link {{ request()->routeIs('backend.offer.*') ? 'active' : '' }}"
+                        href="{{ route('backend.offer.index') }}">
+                        <i class="ri-percent-line"></i> <span>Offers & Campaigns</span>
+                    </a>
+                </li>
+                @endcanany
+
                 <li class="nav-item">
                     <a class="nav-link menu-link {{ request()->routeIs('backend.specialist.*') ? 'active' : '' }}"
                         href="{{ route('backend.specialist.index') }}">
@@ -163,16 +171,40 @@
                     </a>
                 </li>
 
-                @canany(['onboarding_options_manage', 'onboarding_manage'])
+                <li class="nav-item">
+                    <a class="nav-link menu-link {{ request()->routeIs('backend.contact-submissions.*') ? 'active' : '' }}"
+                        href="{{ route('backend.contact-submissions.index') }}">
+                        <i class="ri-mail-line"></i> 
+                        <span>Contact Info</span>
+                        <span id="sidebar-contact-badge" class="badge badge-pill bg-danger ms-auto" style="{{ $unreadContactCount > 0 ? '' : 'display: none;' }}">{{ $unreadContactCount }}</span>
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link menu-link {{ request()->routeIs('backend.subscribers.*') ? 'active' : '' }}"
+                        href="{{ route('backend.subscribers.index') }}">
+                        <i class="ri-notification-badge-line"></i> 
+                        <span>Subscribers</span>
+                        <span id="sidebar-subscribers-badge" class="badge badge-pill bg-danger ms-auto" style="{{ $unreadSubscriberCount > 0 ? '' : 'display: none;' }}">{{ $unreadSubscriberCount }}</span>
+                    </a>
+                </li>
+
+                <!-- @canany(['onboarding_options_manage', 'onboarding_manage'])
                 <li class="nav-item">
                     <a class="nav-link menu-link {{ request()->routeIs('backend.onboarding-option.*') ? 'active' : '' }}"
                         href="{{ route('backend.onboarding-option.index') }}">
                         <i class="ri-user-settings-line"></i> <span>Onboarding Options</span>
                     </a>
                 </li>
+                <li class="nav-item">
+                    <a class="nav-link menu-link {{ request()->routeIs('backend.onboarding-question.*') ? 'active' : '' }}"
+                        href="{{ route('backend.onboarding-question.index') }}">
+                       <i class="ri-question-answer-line"></i> <span>Onboarding Questions</span>
+                    </a>
+                </li>
                 @endcanany
 
-                @canany(['setting_profile', 'setting_system', 'setting_mail'])
+                <!-- @canany(['setting_profile', 'setting_system', 'setting_mail'])
                 <li class="nav-item">
                     <a class="nav-link menu-link {{ getPageStatus('backend.settings.*') }}" href="#sidebarMultilevel"
                         data-bs-toggle="collapse" role="button" aria-expanded="false"
@@ -213,7 +245,7 @@
                         </ul>
                     </div>
                 </li>
-                @endcanany
+                @endcanany -->
 
 
                 {{-- Cms --}}

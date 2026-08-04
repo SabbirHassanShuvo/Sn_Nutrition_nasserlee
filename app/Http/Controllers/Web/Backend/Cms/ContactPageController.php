@@ -13,8 +13,8 @@ class ContactPageController extends Controller
      */
     public function edit()
     {
-        $settings = WebSetting::firstOrCreate([]);
-        return view('backend.layout.cms.contact_page', compact('settings'));
+        $data = WebSetting::firstOrCreate([]);
+        return view('backend.layout.cms.contact_page', compact('data'));
     }
 
     /**

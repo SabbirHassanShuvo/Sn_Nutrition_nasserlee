@@ -42,6 +42,9 @@
 <script src="https://cdn.datatables.net/responsive/2.5.0/js/dataTables.responsive.min.js"></script>
 <script src="https://cdn.datatables.net/responsive/2.5.0/js/responsive.bootstrap5.min.js"></script>
 
+{{-- Select 2 --}}
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0/dist/js/select2.min.js"></script>
+
 <!-- App js -->
 <script src="{{asset('assets/js/app.js')}}"></script>
 
@@ -208,4 +211,10 @@
             toggleBulkDeleteBtn();
         });
     }
+</script>
+
+<script>
+    $(document).ready(function() {
+        $('.select2').select2();
+    });
 </script>

@@ -9,6 +9,7 @@ use App\Http\Controllers\Api\Frontend\Cms\HomePageController;
 use App\Http\Controllers\Api\Frontend\Cms\CmsController;
 use App\Http\Controllers\Api\Frontend\Cms\FaqApiController;
 use App\Http\Controllers\Api\Frontend\Cms\WebSettingApiController;
+use App\Http\Controllers\Api\Frontend\Cms\OfferApiController;
 use App\Http\Controllers\Api\Frontend\BlogApiController;
 
 use App\Http\Controllers\Api\Frontend\MyInformationController;
@@ -19,6 +20,11 @@ use App\Http\Controllers\Api\Frontend\ConsultationController;
 use App\Http\Controllers\Api\Frontend\GymApiController;
 use App\Http\Controllers\Api\Frontend\PharmacyApiController;
 use App\Http\Controllers\Api\Frontend\UserSettingsController;
+use App\Http\Controllers\Api\Frontend\OnboardingQuestionApiController;
+use App\Http\Controllers\Api\Frontend\Profile\ProfileController;
+use App\Http\Controllers\Api\Frontend\ContactSubmissionApiController;
+use App\Http\Controllers\Api\Frontend\SubscriberApiController;
+use App\Http\Controllers\Api\Frontend\BrandApiController;
 
 Route::group([
     'middleware' => 'api',
@@ -44,6 +50,8 @@ Route::group([
     Route::post('/google', [GoogleAuthController::class, 'login']);
 });
 
+
+// Sandip added
 Route::group(['middleware' => 'api'], function($router){
     // Cms
     Route::get('/cms/banners', [HomePageController::class, 'getBanners']);
@@ -51,14 +59,28 @@ Route::group(['middleware' => 'api'], function($router){
     Route::get('/cms/about-us', [CmsController::class, 'getAboutPage']);
     Route::get('/cms/how-it-works', [CmsController::class, 'getHowItWorksPage']);
     Route::get('/cms/contact-us', [CmsController::class, 'getContactPage']);
+    Route::post('/contact/submit', [ContactSubmissionApiController::class, 'submit']);
+    Route::post('/subscribe', [SubscriberApiController::class, 'subscribe']);
     Route::get('/cms/faqs', [FaqApiController::class, 'getFaqs']);
     Route::get('/cms/page/{slug}', [CmsController::class, 'getPageBySlug']);
     Route::get('/cms/web-settings', [WebSettingApiController::class, 'getWebSettings']);
+    Route::get('/offers', [OfferApiController::class, 'index']);
+
+    Route::get('/brands', [BrandApiController::class, 'index']);
 
     // Blogs
     Route::get('/blogs', [BlogApiController::class, 'index']);
     Route::get('/blogs/{id}', [BlogApiController::class, 'show']);
 
+    // Onboarding Questions & CMS Card Text
+    Route::get('/onboarding/questions', [OnboardingQuestionApiController::class, 'getQuestions']);
+        // Onboarding Submit
+    Route::post('/onboarding/submit', [OnboardingQuestionApiController::class, 'submitAnswers']);
+
+    Route::group(['middleware' => ['auth:api']], function () {
+        Route::get('/health-professional/profile', [ProfileController::class, 'detailsProfile']);
+        Route::post('/health-professional/profile/update', [ProfileController::class, 'updateProfile']);
+    });
 });
 
 // Specialist & Consultation APIs
@@ -106,8 +128,4 @@ Route::group([
     Route::post('/settings/password', [UserSettingsController::class, 'updatePassword']);
     Route::post('/settings/change-password', [UserSettingsController::class, 'updatePassword']);
     Route::post('/settings/delete-account', [UserSettingsController::class, 'deleteAccount']);
-
-
-
-    // sabbir test 
 });

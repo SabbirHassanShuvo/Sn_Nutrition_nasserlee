@@ -351,7 +351,7 @@
                     </div>
 
                     {{-- Highlight Phrase --}}
-                    <div class="mb-0">
+                    {{-- <div class="mb-0">
                         <label class="qc-label" for="card{{ $n }}-hl">
                             Highlight Phrase &nbsp;<span class="hl-badge"><i class="ri-paint-brush-line"></i> Green</span>
                         </label>
@@ -365,7 +365,7 @@
                             <span class="text-success fw-semibold">green</span>.
                         </small>
                         @error('card'.$n.'_description_highlight')<div class="text-danger small mt-1">{{ $message }}</div>@enderror
-                    </div>
+                    </div> --}}
 
                 </div>
             </div>

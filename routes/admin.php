@@ -12,6 +12,12 @@ use App\Http\Controllers\Web\Backend\Cms\HomePageController;
 use App\Http\Controllers\Web\Backend\Cms\FaqCategoryController;
 use App\Http\Controllers\Web\Backend\Cms\ContactPageController;
 use App\Http\Controllers\Web\Backend\BlogController;
+use App\Http\Controllers\Web\Backend\ContactSubmissionController;
+use App\Http\Controllers\Web\Backend\SubscriberController;
+use App\Http\Controllers\Web\Backend\Cms\AboutPageController;
+use App\Http\Controllers\Web\Backend\Cms\HowItWorksController;
+use App\Http\Controllers\Web\Backend\OnboardingQuestionController;
+use App\Http\Controllers\Web\Backend\OnboardingOptionController;
 
 
 use Illuminate\Support\Facades\Mail;
@@ -69,9 +75,17 @@ Route::group([ 'as'=>'backend.'], function () {
 
     // Onboarding Options
     Route::group(['middleware' => 'permission:onboarding_options_manage|onboarding_manage'], function () {
-        Route::delete('onboarding-option/bulk-destroy', [\App\Http\Controllers\Web\Backend\OnboardingOptionController::class,'bulkDestroy'])->name('onboarding-option.bulk-destroy');
-        Route::post('onboarding-option/status/{id}', [\App\Http\Controllers\Web\Backend\OnboardingOptionController::class,'status'])->name('onboarding-option.status');
-        Route::resource('onboarding-option', \App\Http\Controllers\Web\Backend\OnboardingOptionController::class)->except(['show']);
+        Route::delete('onboarding-option/bulk-destroy', [OnboardingOptionController::class,'bulkDestroy'])->name('onboarding-option.bulk-destroy');
+        Route::post('onboarding-option/status/{id}', [OnboardingOptionController::class,'status'])->name('onboarding-option.status');
+        Route::resource('onboarding-option', OnboardingOptionController::class)->except(['show']);
+    });
+
+    // Onboarding Questions & Card CMS
+    Route::group(['middleware' => 'permission:onboarding_options_manage|onboarding_manage'], function () {
+        Route::delete('onboarding-question/bulk-destroy', [OnboardingQuestionController::class,'bulkDestroy'])->name('onboarding-question.bulk-destroy');
+        Route::post('onboarding-question/status/{id}', [OnboardingQuestionController::class,'status'])->name('onboarding-question.status');
+        Route::post('onboarding-question/settings', [OnboardingQuestionController::class,'updateSettings'])->name('onboarding-question.settings.update');
+        Route::resource('onboarding-question', OnboardingQuestionController::class)->except(['show']);
     });
     
     // Roles
@@ -108,6 +122,13 @@ Route::group([ 'as'=>'backend.'], function () {
         Route::resource('promo-code', \App\Http\Controllers\Web\Backend\PromoCodeController::class);
     });
 
+    // Offer & Campaign Management
+    Route::group(['middleware' => 'permission:offers_manage|offer_manage'], function () {
+        Route::delete('offer/bulk-destroy', [\App\Http\Controllers\Web\Backend\OfferController::class,'bulkDestroy'])->name('offer.bulk-destroy');
+        Route::post('offer/status/{id}', [\App\Http\Controllers\Web\Backend\OfferController::class,'status'])->name('offer.status');
+        Route::resource('offer', \App\Http\Controllers\Web\Backend\OfferController::class);
+    });
+
     // Specialist Management
     Route::delete('specialist/bulk-destroy', [\App\Http\Controllers\Web\Backend\SpecialistController::class, 'bulkDestroy'])->name('specialist.bulk-destroy');
     Route::post('specialist/status/{id}', [\App\Http\Controllers\Web\Backend\SpecialistController::class, 'status'])->name('specialist.status');
@@ -129,6 +150,10 @@ Route::group([ 'as'=>'backend.'], function () {
     Route::post('pharmacies/status/{id}', [\App\Http\Controllers\Web\Backend\PharmacyController::class, 'status'])->name('pharmacies.status');
     Route::resource('pharmacies', \App\Http\Controllers\Web\Backend\PharmacyController::class);
 
+
+
+
+    
     // Cms 
     Route::group(['middleware' => 'permission:cms_banner|banner_manage'], function () {
         Route::delete('banner-section/bulk-destroy', [BannerSectionController::class,'bulkDestroy'])->name('banner-section.bulk-destroy');
@@ -144,14 +169,14 @@ Route::group([ 'as'=>'backend.'], function () {
 
     // CMS — About Page sections
     Route::group(['middleware' => 'permission:cms_about_page'], function () {
-        Route::get('cms/about-us', [\App\Http\Controllers\Web\Backend\Cms\AboutPageController::class, 'edit'])->name('about-us.edit');
-        Route::put('cms/about-us', [\App\Http\Controllers\Web\Backend\Cms\AboutPageController::class, 'update'])->name('about-us.update');
+        Route::get('cms/about-us', [AboutPageController::class, 'edit'])->name('about-us.edit');
+        Route::put('cms/about-us', [AboutPageController::class, 'update'])->name('about-us.update');
     });
 
     // CMS — How It Works Page sections
     Route::group(['middleware' => 'permission:cms_how_it_works'], function () {
-        Route::get('cms/how-it-works', [\App\Http\Controllers\Web\Backend\Cms\HowItWorksController::class, 'edit'])->name('how-it-works.edit');
-        Route::put('cms/how-it-works', [\App\Http\Controllers\Web\Backend\Cms\HowItWorksController::class, 'update'])->name('how-it-works.update');
+        Route::get('cms/how-it-works', [HowItWorksController::class, 'edit'])->name('how-it-works.edit');
+        Route::put('cms/how-it-works', [HowItWorksController::class, 'update'])->name('how-it-works.update');
     });
 
     // CMS — Contact Page sections
@@ -180,6 +205,16 @@ Route::group([ 'as'=>'backend.'], function () {
         Route::post('blog/status/{id}', [BlogController::class,'status'])->name('blog.status');
         Route::resource('blog', BlogController::class);
     });
+
+    // Contact Submissions Management
+    Route::delete('contact-submissions/bulk-destroy', [ContactSubmissionController::class, 'bulkDestroy'])->name('contact-submissions.bulk-destroy');
+    Route::post('contact-submissions/read/{id}', [ContactSubmissionController::class, 'markAsRead'])->name('contact-submissions.read');
+    Route::resource('contact-submissions', ContactSubmissionController::class)->only(['index', 'destroy']);
+
+    // Subscribers Management
+    Route::delete('subscribers/bulk-destroy', [SubscriberController::class, 'bulkDestroy'])->name('subscribers.bulk-destroy');
+    Route::post('subscribers/read/{id}', [SubscriberController::class, 'markAsRead'])->name('subscribers.read');
+    Route::resource('subscribers', SubscriberController::class)->only(['index', 'destroy']);
 
     require_once __DIR__ .'/settings.php';
 

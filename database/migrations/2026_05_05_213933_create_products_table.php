@@ -13,12 +13,16 @@ return new class extends Migration
     {
         Schema::create('products', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('brand_id')->nullable()->constrained('brands')->cascadeOnDelete()->cascadeOnUpdate();
+            $table->foreignId('category_id')->nullable()->constrained()->cascadeOnDelete()->cascadeOnUpdate();
             $table->string('name');
             $table->string('slug')->unique();
             $table->text('short_description')->nullable();
             $table->longText('full_description')->nullable();
             $table->decimal('price', 10, 2)->default(0);
+            $table->decimal('commission_percent', 5, 2)->default(0);
             $table->decimal('old_price', 10, 2)->nullable();
+            $table->decimal('discount_percent', 5, 2)->default(0);
             $table->string('brand')->nullable();
             $table->string('category')->nullable();
             $table->string('form')->nullable(); // Capsule, Tablet, etc.
@@ -27,10 +31,13 @@ return new class extends Migration
             $table->integer('reviews_count')->default(0);
             $table->boolean('is_vegan')->default(false);
             $table->boolean('in_stock')->default(true);
+            $table->integer('quantity')->default(0);
             $table->string('main_image')->nullable();
             $table->json('gallery_images')->nullable();
             $table->string('status')->default('active');
+            $table->boolean('is_popular')->default(false);
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

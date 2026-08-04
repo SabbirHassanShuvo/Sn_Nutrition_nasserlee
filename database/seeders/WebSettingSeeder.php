@@ -39,7 +39,7 @@ class WebSettingSeeder extends Seeder
                 'contact_phone_hours'=> 'Mon - Sat, 9:00 - 12:00',
                 'contact_email_response'=> 'Replies within a few hours',
                 'contact_address_details'=> 'Boulevard, 20000',
-                'contact_map_iframe'=> '<iframe src="https://www.google.com/maps/embed?pb=!1m14!1m8!1m3!1d261786.41811593325!2d-7.586992!3d33.572287!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0xda7cd4778aa113b%3A0xb06c1d84f310fd3!2sCasablanca%2C%20Morocco!5e1!3m2!1sen!2sbd!4v1785033037818!5m2!1sen!2sbd" width="600" height="450" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="strict-origin-when-cross-origin"></iframe>',
+                'contact_map_iframe'=> 'https://www.google.com/maps/embed?pb=!1m14!1m8!1m3!1d261786.41811593325!2d-7.586992!3d33.572287!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0xda7cd4778aa113b%3A0xb06c1d84f310fd3!2sCasablanca%2C%20Morocco!5e1!3m2!1sen!2sbd!4v1785033037818!5m2!1sen!2sbd',
                 'contact_follow_title'=> 'Follow us',
                 'contact_follow_subtitle'=> 'Tips, drops and behind the scenes.',
 

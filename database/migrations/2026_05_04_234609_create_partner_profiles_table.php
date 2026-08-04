@@ -19,10 +19,15 @@ return new class extends Migration
             $table->text('bio')->nullable();
             $table->string('location')->nullable();
             $table->string('phone')->nullable();
+            $table->string('avatar')->nullable();
             $table->string('website')->nullable();
             $table->json('specialties')->nullable();
             $table->json('certifications')->nullable();
             $table->integer('onboarding_step')->default(1);
+            $table->decimal('lifetime_earnings', 12, 2)->default(0);
+            $table->decimal('pending_payout', 12, 2)->default(0);
+            $table->decimal('last_paid_amount', 12, 2)->default(0);
+            $table->enum('current_tier', ['bronze', 'silver', 'gold', 'platinum'])->default('bronze');
             $table->timestamps();
         });
     }

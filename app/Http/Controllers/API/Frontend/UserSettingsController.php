@@ -19,16 +19,21 @@ class UserSettingsController extends BaseController
     {
         // Ensure notification preference columns exist in profiles table
         if (Schema::hasTable('profiles')) {
-            if (!Schema::hasColumn('profiles', 'order_updates')) {
-                Schema::table('profiles', function (Blueprint $table) {
-                    $table->boolean('order_updates')->default(true);
-                });
-            }
-            if (!Schema::hasColumn('profiles', 'promotions_offers')) {
-                Schema::table('profiles', function (Blueprint $table) {
-                    $table->boolean('promotions_offers')->default(true);
-                });
-            }
+            $columns = [
+                'order_updates' => true,
+                'promotions_offers' => true,
+                'payout_confirmations' => true,
+                'product_launches_tips' => true,
+                'push_notifications' => true,
+            ];
+
+            Schema::table('profiles', function (Blueprint $table) use ($columns) {
+                foreach ($columns as $column => $default) {
+                    if (!Schema::hasColumn('profiles', $column)) {
+                        $table->boolean($column)->default($default);
+                    }
+                }
+            });
         }
     }
 
@@ -68,6 +73,9 @@ class UserSettingsController extends BaseController
                 'notifications' => [
                     'order_updates' => (bool) ($profile->order_updates ?? true),
                     'promotions_offers' => (bool) ($profile->promotions_offers ?? true),
+                    'payout_confirmations' => (bool) ($profile->payout_confirmations ?? true),
+                    'product_launches_tips' => (bool) ($profile->product_launches_tips ?? true),
+                    'push_notifications' => (bool) ($profile->push_notifications ?? true),
                 ]
             ];
 
@@ -171,6 +179,9 @@ class UserSettingsController extends BaseController
                 'data' => [
                     'order_updates' => (bool) ($profile->order_updates ?? true),
                     'promotions_offers' => (bool) ($profile->promotions_offers ?? true),
+                    'payout_confirmations' => (bool) ($profile->payout_confirmations ?? true),
+                    'product_launches_tips' => (bool) ($profile->product_launches_tips ?? true),
+                    'push_notifications' => (bool) ($profile->push_notifications ?? true),
                 ]
             ], 200);
         } catch (Exception $e) {
@@ -186,7 +197,9 @@ class UserSettingsController extends BaseController
         $validator = Validator::make($request->all(), [
             'order_updates' => 'nullable|boolean',
             'promotions_offers' => 'nullable|boolean',
-            'promo_offers' => 'nullable|boolean',
+            'payout_confirmations' => 'nullable|boolean',
+            'product_launches_tips' => 'nullable|boolean',
+            'push_notifications' => 'nullable|boolean',
         ]);
 
         if ($validator->fails()) {
@@ -217,8 +230,18 @@ class UserSettingsController extends BaseController
 
             if ($request->has('promotions_offers')) {
                 $profile->promotions_offers = filter_var($request->promotions_offers, FILTER_VALIDATE_BOOLEAN);
-            } elseif ($request->has('promo_offers')) {
-                $profile->promotions_offers = filter_var($request->promo_offers, FILTER_VALIDATE_BOOLEAN);
+            }
+
+            if ($request->has('payout_confirmations')) {
+                $profile->payout_confirmations = filter_var($request->payout_confirmations, FILTER_VALIDATE_BOOLEAN);
+            }
+
+            if ($request->has('product_launches_tips')) {
+                $profile->product_launches_tips = filter_var($request->product_launches_tips, FILTER_VALIDATE_BOOLEAN);
+            }
+
+            if ($request->has('push_notifications')) {
+                $profile->push_notifications = filter_var($request->push_notifications, FILTER_VALIDATE_BOOLEAN);
             }
 
             $profile->save();
@@ -229,6 +252,9 @@ class UserSettingsController extends BaseController
                 'data' => [
                     'order_updates' => (bool) $profile->order_updates,
                     'promotions_offers' => (bool) $profile->promotions_offers,
+                    'payout_confirmations' => (bool) $profile->payout_confirmations,
+                    'product_launches_tips' => (bool) $profile->product_launches_tips,
+                    'push_notifications' => (bool) $profile->push_notifications,
                 ]
             ], 200);
         } catch (Exception $e) {

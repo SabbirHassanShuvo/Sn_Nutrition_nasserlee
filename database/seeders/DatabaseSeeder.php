@@ -29,10 +29,17 @@ class DatabaseSeeder extends Seeder
             QualityControlSectionSeeder::class,
             AboutSectionSeeder::class,
             HowItWorksSectionSeeder::class,
+            BrandSeeder::class,
+            CategorySeeder::class,
+            ProductSeeder::class,
             FaqCategorySeeder::class,
             FaqSeeder::class,
             WebSettingSeeder::class,
             BlogSeeder::class,
+            OnboardingQuestionSeeder::class,
+            ContactSubmissionSeeder::class,
+            SubscriberSeeder::class,
+            OfferSeeder::class,
         ]);
     }
 }
