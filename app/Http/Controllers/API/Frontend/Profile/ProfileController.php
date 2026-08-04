@@ -41,11 +41,12 @@ class ProfileController extends Controller
     }
     public function updateProfile(Request $request)
     {
+       
         $user = auth()->user();
 
         $request->validate([
-            'name'              => 'required|string|max:255',
-            'email'             => 'required|email|unique:users,email,' . $user->id,
+            'name'              => 'nullable|string|max:255',
+            'email'             => 'nullable|email|unique:users,email,' . $user->id,
             'professional_role' => 'nullable|string|max:255',
             'phone'             => 'nullable|string|max:50',
             'location'          => 'nullable|string|max:255',
@@ -53,15 +54,19 @@ class ProfileController extends Controller
             'avatar'            => 'sometimes|nullable|image|mimes:jpg,jpeg,png,gif,svg,webp,ico,bmp,tiff|max:2048',
         ]);
 
+        
         $user->update([
-            'name'  => $request->name,
-            'email' => $request->email,
+            'name'  => $request->name ?? $user->name,
+            'email' => $request->email ?? $user->email,
         ]);
 
-        $partnerProfile = $user->partnerProfile;
-        $avatarPath = $partnerProfile ? $partnerProfile->avatar : null;
 
+        $partnerProfile = $user->partnerProfile;
+        $avatarPath = $partnerProfile ? $partnerProfile->getRawOriginal('avatar') : null;
+
+         
         if ($request->hasFile('avatar')) {
+            
             if ($avatarPath) {
                 fileDelete($avatarPath);
             }

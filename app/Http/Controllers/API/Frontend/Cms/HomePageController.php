@@ -74,19 +74,19 @@ class HomePageController extends BaseController
                 'title_one'       => $section->title,
                 'title_two'       => $section->title_highlight,
                 'description'     => $section->description,
-                    'image'       => $section->image ? asset($section->image) : null,
+                'image'       => $section->image ? asset($section->image) : null,
                 'cards'       => [
                     [
                         'title'       => $section->card1_title,
-                        'description' => $this->buildDescriptionHtml($section->card1_description, $section->card1_description_highlight),
+                        'description' => $section->card1_description,
                     ],
                     [
                         'title'       => $section->card2_title,
-                        'description' => $this->buildDescriptionHtml($section->card2_description, $section->card2_description_highlight),
+                        'description' => $section->card2_description,
                     ],
                     [
                         'title'       => $section->card3_title,
-                        'description' => $this->buildDescriptionHtml($section->card3_description, $section->card3_description_highlight),
+                        'description' => $section->card3_description,
                     ],
                 ],
             ];
