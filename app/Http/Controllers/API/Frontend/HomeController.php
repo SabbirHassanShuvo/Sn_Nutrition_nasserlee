@@ -7,10 +7,31 @@ use App\Http\Controllers\Controller;
 use App\Models\Brand;
 use App\Models\Category;
 use App\Models\Product;
+use App\Models\Wishlist;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class HomeController extends BaseController
 {
+    /**
+     * Helper to get wishlisted product IDs for current user.
+     */
+    private function getWishlistProductIds(Request $request)
+    {
+        $user = null;
+        try {
+            $user = auth('api')->user() ?: Auth::user();
+        } catch (\Exception $e) {
+            $user = null;
+        }
+
+        if ($user) {
+            return Wishlist::where('user_id', $user->id)->pluck('product_id')->toArray();
+        }
+
+        return [];
+    }
+
     /**
      * Get all active products for the home page.
      */
@@ -22,12 +43,14 @@ class HomeController extends BaseController
                 $limit = 12;
             }
 
-            $products = Product::with(['category', 'brandData'])
+            $wishlistProductIds = $this->getWishlistProductIds($request);
+
+            $products = Product::with(['category', 'brandData', 'batch'])
                 ->where('status', 'active')
                 ->latest()
                 ->paginate($limit);
 
-            $products->getCollection()->transform(function ($product) {
+            $products->getCollection()->transform(function ($product) use ($wishlistProductIds) {
                 return [
                     'id' => $product->id,
                     'name' => $product->name,
@@ -36,8 +59,8 @@ class HomeController extends BaseController
                     'price' => (float) $product->price,
                     'old_price' => $product->old_price ? (float) $product->old_price : null,
                     'image' => $product->main_image ? asset($product->main_image) : null,
-                    'is_popular' => (bool) $product->is_popular,
                     'in_stock' => (bool) $product->in_stock,
+                    'is_wishlist' => in_array($product->id, $wishlistProductIds),
                     'quantity' => (int) $product->quantity,
                     'rating' => (float) $product->rating,
                     'category' => $product->category ? $product->category->name : null,
@@ -45,6 +68,11 @@ class HomeController extends BaseController
                         'name' => $product->brandData->name,
                         'specialty' => $product->brandData->specialty,
                         'rating' => (float) $product->brandData->rating,
+                    ] : null,
+                    'batch' => $product->batch ? [
+                        'id' => (int) $product->batch->id,
+                        'name' => $product->batch->name,
+                        'color' => $product->batch->color,
                     ] : null,
                 ];
             });
@@ -54,13 +82,16 @@ class HomeController extends BaseController
             return $this->sendError('Failed to fetch products.', $e->getMessage());
         }
     }
+
     /**
      * Filter products based on search query, category, brand, and price.
      */
     public function filterProducts(Request $request)
     {
         try {
-            $query = Product::with(['category', 'brandData'])->where('status', 'active');
+            $wishlistProductIds = $this->getWishlistProductIds($request);
+
+            $query = Product::with(['category', 'brandData', 'batch'])->where('status', 'active');
 
             // Search by name or description
             if ($request->filled('search')) {
@@ -109,11 +140,6 @@ class HomeController extends BaseController
                 $query->where('price', '<=', (float) $maxPrice);
             }
 
-            // Filter by popularity
-            if ($request->has('is_popular')) {
-                $query->where('is_popular', $request->boolean('is_popular'));
-            }
-
             // Sorting
             $sort = $request->get('sort', 'latest');
             switch ($sort) {
@@ -138,7 +164,7 @@ class HomeController extends BaseController
 
             $products = $query->paginate($limit);
 
-            $products->getCollection()->transform(function ($product) {
+            $products->getCollection()->transform(function ($product) use ($wishlistProductIds) {
                 return [
                     'id' => $product->id,
                     'name' => $product->name,
@@ -147,8 +173,8 @@ class HomeController extends BaseController
                     'price' => (float) $product->price,
                     'old_price' => $product->old_price ? (float) $product->old_price : null,
                     'image' => $product->main_image ? asset($product->main_image) : null,
-                    'is_popular' => (bool) $product->is_popular,
                     'in_stock' => (bool) $product->in_stock,
+                    'is_wishlist' => in_array($product->id, $wishlistProductIds),
                     'quantity' => (int) $product->quantity,
                     'rating' => (float) $product->rating,
                     'category' => $product->category ? $product->category->name : null,
@@ -156,6 +182,11 @@ class HomeController extends BaseController
                         'name' => $product->brandData->name,
                         'specialty' => $product->brandData->specialty,
                         'rating' => (float) $product->brandData->rating,
+                    ] : null,
+                    'batch' => $product->batch ? [
+                        'id' => (int) $product->batch->id,
+                        'name' => $product->batch->name,
+                        'color' => $product->batch->color,
                     ] : null,
                 ];
             });
@@ -191,12 +222,13 @@ class HomeController extends BaseController
     /**
      * Get detailed information for a single product by id.
      */
-    public function getProductDetails($id)
+    public function getProductDetails(Request $request, $id)
     {
         try {
             $product = Product::with([
                 'category', 
                 'brandData', 
+                'batch',
                 'features', 
                 'ingredients', 
                 'usages', 
@@ -209,6 +241,8 @@ class HomeController extends BaseController
             if (!$product) {
                 return $this->sendError('Product not found.', [], 404);
             }
+
+            $wishlistProductIds = $this->getWishlistProductIds($request);
 
             // Format gallery images
             $galleryImages = [];
@@ -228,8 +262,8 @@ class HomeController extends BaseController
                 'old_price' => $product->old_price ? (float) $product->old_price : null,
                 'image' => $product->main_image ? asset($product->main_image) : null,
                 'gallery_images' => $galleryImages,
-                'is_popular' => (bool) $product->is_popular,
                 'in_stock' => (bool) $product->in_stock,
+                'is_wishlist' => in_array($product->id, $wishlistProductIds),
                 'quantity' => (int) $product->quantity,
                 'rating' => (float) $product->rating,
                 'reviews_count' => (int) $product->reviews_count,
@@ -241,6 +275,11 @@ class HomeController extends BaseController
                     'name' => $product->brandData->name,
                     'specialty' => $product->brandData->specialty,
                     'rating' => (float) $product->brandData->rating,
+                ] : null,
+                'batch' => $product->batch ? [
+                    'id' => (int) $product->batch->id,
+                    'name' => $product->batch->name,
+                    'color' => $product->batch->color,
                 ] : null,
                 'features' => $product->features->map(function ($feature) {
                     return [

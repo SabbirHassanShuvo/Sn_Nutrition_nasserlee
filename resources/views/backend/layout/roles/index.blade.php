@@ -6,15 +6,15 @@
     <div class="row">
         <div class="col-lg-12">
             <!-- Nav tabs -->
-            <ul class="nav nav-tabs nav-tabs-custom nav-primary mb-3 shadow-sm bg-white rounded-3 p-1" role="tablist">
+            <ul class="nav nav-pills nav-custom nav-primary mb-3 shadow-sm bg-white rounded-3 p-2" role="tablist">
                 <li class="nav-item">
-                    <a class="nav-link active fw-bold border-0" data-bs-toggle="tab" href="#roles-tab" role="tab">
-                        <i class="ri-shield-user-line me-1 align-bottom"></i> User Roles
+                    <a class="nav-link active fw-bold border-0 px-4 py-2" data-bs-toggle="tab" href="#roles-tab" role="tab">
+                        <i class="ri-shield-user-line me-2 align-bottom"></i> User Roles
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link fw-bold border-0" data-bs-toggle="tab" href="#permissions-tab" role="tab">
-                        <i class="ri-key-2-line me-1 align-bottom"></i> Permissions Manager
+                    <a class="nav-link fw-bold border-0 px-4 py-2" data-bs-toggle="tab" href="#permissions-tab" role="tab">
+                        <i class="ri-key-2-line me-2 align-bottom"></i> Permissions Manager
                     </a>
                 </li>
             </ul>
@@ -23,28 +23,28 @@
             <div class="tab-content text-muted">
                 <!-- Roles Tab -->
                 <div class="tab-pane active" id="roles-tab" role="tabpanel">
-                    <div class="card shadow-sm border-0">
+                    <div class="card shadow-sm border-0 rounded-3">
                         <div class="card-header border-0 bg-white py-3 d-flex align-items-center justify-content-between">
                             <div>
                                 <h5 class="card-title mb-0 fw-bold text-primary">User Roles</h5>
                                 <p class="text-muted mb-0 fs-12">Manage access levels and assign permissions to roles</p>
                             </div>
                             <div class="flex-shrink-0">
-                                <a href="{{ route('backend.role.create') }}" class="btn btn-primary btn-sm add-btn shadow-sm d-flex align-items-center">
-                                    <i class="ri-add-line align-bottom me-1"></i> Add New Role
+                                <a href="{{ route('backend.role.create') }}" class="btn btn-primary btn-sm add-btn shadow-sm d-flex align-items-center px-3 py-2">
+                                    <i class="ri-add-line align-bottom me-1 fs-16"></i> Add New Role
                                 </a>
                             </div>
                         </div>
 
                         <div class="card-body p-0">
                             <div class="table-responsive">
-                                <table class="table align-middle table-nowrap table-hover mb-0 data-table custom-table w-100">
-                                    <thead class="table-light">
+                                <table class="table align-middle table-hover mb-0 data-table custom-table w-100">
+                                    <thead class="table-light text-uppercase fs-11 fw-bold text-muted">
                                         <tr>
-                                            <th class="ps-3" style="width: 60px;">ID</th>
-                                            <th class="text-start" style="width: 200px;">Role Name</th>
+                                            <th class="ps-4 text-center" style="width: 70px;">ID</th>
+                                            <th class="text-start" style="width: 220px;">Role Name</th>
                                             <th class="text-start">Permissions</th>
-                                            <th class="text-center" style="width: 150px;">Actions</th>
+                                            <th class="text-center" style="width: 140px;">Actions</th>
                                         </tr>
                                     </thead>
                                     <tbody class="list"></tbody>
@@ -59,7 +59,7 @@
                     <div class="row">
                         <!-- Add Permission form column -->
                         <div class="col-md-4">
-                            <div class="card shadow-sm border-0 mb-4">
+                            <div class="card shadow-sm border-0 rounded-3 mb-4">
                                 <div class="card-header bg-white py-3 border-0">
                                     <h5 class="card-title mb-0 fw-bold text-primary">Create Permission</h5>
                                     <p class="text-muted mb-0 fs-12">Add a new action privilege to the system</p>
@@ -69,10 +69,13 @@
                                         @csrf
                                         <div class="mb-3">
                                             <label for="permission_name" class="form-label fw-bold">Permission Name</label>
-                                            <input type="text" class="form-control" id="permission_name" name="name" placeholder="e.g. products_manage" required>
-                                            <div class="text-muted fs-11 mt-1">Use lowercase and underscores (e.g., <code>product_create</code>). It will automatically group by its prefix.</div>
+                                            <div class="input-group">
+                                                <span class="input-group-text bg-light border-end-0"><i class="ri-key-line text-muted"></i></span>
+                                                <input type="text" class="form-control border-start-0" id="permission_name" name="name" placeholder="e.g. products_manage" required>
+                                            </div>
+                                            <div class="text-muted fs-11 mt-2">Use lowercase with underscores (e.g. <code>product_create</code>). Prefix is used as module group.</div>
                                         </div>
-                                        <button type="submit" class="btn btn-primary btn-sm w-100 shadow-sm">
+                                        <button type="submit" class="btn btn-primary btn-sm w-100 shadow-sm py-2">
                                             <i class="ri-save-line me-1 align-bottom"></i> Save Permission
                                         </button>
                                     </form>
@@ -82,17 +85,17 @@
 
                         <!-- Permissions list column -->
                         <div class="col-md-8">
-                            <div class="card shadow-sm border-0">
+                            <div class="card shadow-sm border-0 rounded-3">
                                 <div class="card-header bg-white py-3 border-0">
                                     <h5 class="card-title mb-0 fw-bold text-primary">All Permissions</h5>
                                     <p class="text-muted mb-0 fs-12">List of customizable action privileges</p>
                                 </div>
                                 <div class="card-body p-0">
                                     <div class="table-responsive">
-                                        <table class="table align-middle table-nowrap table-hover mb-0 permission-table custom-table w-100">
-                                            <thead class="table-light">
+                                        <table class="table align-middle table-hover mb-0 permission-table custom-table w-100">
+                                            <thead class="table-light text-uppercase fs-11 fw-bold text-muted">
                                                 <tr>
-                                                    <th class="ps-3" style="width: 60px;">ID</th>
+                                                    <th class="ps-4 text-center" style="width: 70px;">ID</th>
                                                     <th class="text-start">Permission Name</th>
                                                     <th class="text-start" style="width: 180px;">Group / Module</th>
                                                     <th class="text-center" style="width: 140px;">Actions</th>
@@ -113,27 +116,27 @@
     <!-- Preview Permission Modal -->
     <div class="modal fade" id="previewPermissionModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content border-0 shadow-lg">
+            <div class="modal-content border-0 shadow-lg rounded-3">
                 <div class="modal-header bg-primary py-3">
-                    <h5 class="modal-title text-white fw-bold"><i class="ri-eye-line me-1"></i> Permission Details</h5>
+                    <h5 class="modal-title text-white fw-bold"><i class="ri-eye-line me-2"></i> Permission Details</h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body p-4">
-                    <div class="mb-4">
-                        <label class="form-label fw-bold text-muted text-uppercase fs-11">Permission Identifier</label>
-                        <h4 class="fw-bold text-dark mb-0" id="previewPermissionName">-</h4>
+                    <div class="mb-4 p-3 bg-light rounded-3 border">
+                        <label class="form-label fw-bold text-muted text-uppercase fs-11 mb-1">Permission Identifier</label>
+                        <h4 class="fw-bold text-dark mb-0 font-monospace" id="previewPermissionName">-</h4>
                     </div>
 
                     <div class="mb-4">
-                        <label class="form-label fw-bold text-muted text-uppercase fs-11">Assigned to Roles</label>
-                        <div id="previewPermissionRoles" class="d-flex flex-wrap gap-1 mt-1">
+                        <label class="form-label fw-bold text-muted text-uppercase fs-11 mb-2">Assigned to Roles</label>
+                        <div id="previewPermissionRoles" class="d-flex flex-wrap gap-1">
                             <!-- Roles listed here -->
                         </div>
                     </div>
 
                     <div>
-                        <label class="form-label fw-bold text-muted text-uppercase fs-11">Users with this Access</label>
-                        <div id="previewPermissionUsers" class="mt-2" style="max-height: 200px; overflow-y: auto;">
+                        <label class="form-label fw-bold text-muted text-uppercase fs-11 mb-2">Users with this Access</label>
+                        <div id="previewPermissionUsers" class="mt-1" style="max-height: 220px; overflow-y: auto;">
                             <!-- Users listed here -->
                         </div>
                     </div>
@@ -148,9 +151,9 @@
     <!-- Edit Permission Modal -->
     <div class="modal fade" id="editPermissionModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content border-0 shadow-lg">
+            <div class="modal-content border-0 shadow-lg rounded-3">
                 <div class="modal-header bg-primary py-3">
-                    <h5 class="modal-title text-white fw-bold"><i class="ri-pencil-line me-1"></i> Edit Permission</h5>
+                    <h5 class="modal-title text-white fw-bold"><i class="ri-pencil-line me-2"></i> Edit Permission</h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <form id="editPermissionForm">
@@ -160,7 +163,7 @@
                         <div class="mb-3">
                             <label for="edit_permission_name" class="form-label fw-bold">Permission Identifier</label>
                             <input type="text" class="form-control" id="edit_permission_name" name="name" required placeholder="e.g. products_manage">
-                            <small class="text-muted">Rename the key identifier inside the database tables.</small>
+                            <small class="text-muted fs-11 mt-1 d-block">Rename the key identifier inside the permissions table.</small>
                         </div>
                     </div>
                     <div class="modal-footer bg-light border-0 py-2">
@@ -175,27 +178,41 @@
 
 @push('styles-top')
     <style>
+        .nav-pills.nav-custom .nav-link {
+            color: #495057;
+            border-radius: 6px;
+            transition: all 0.2s ease;
+        }
+        .nav-pills.nav-custom .nav-link.active {
+            background-color: var(--vz-primary, #405189);
+            color: #fff;
+            box-shadow: 0 4px 10px rgba(64, 81, 137, 0.25);
+        }
         .custom-table thead th {
-            font-size: 11px;
+            font-size: 11.5px;
             text-transform: uppercase;
             font-weight: 700;
-            padding: 12px 15px;
+            padding: 14px 16px;
             letter-spacing: 0.5px;
+            border-bottom: 2px solid #eff2f7;
         }
         .custom-table tbody td {
-            padding: 12px 15px;
+            padding: 14px 16px;
             font-size: 13.5px;
+            vertical-align: middle;
         }
         .dataTables_wrapper .dataTables_filter input {
-            border: 1px solid #e9ebec;
+            border: 1px solid #ced4da;
             padding: 0.4rem 0.8rem;
             border-radius: 6px;
-            background-color: #f3f6f9;
+            background-color: #fff;
+            outline: none;
         }
         .dataTables_wrapper .dataTables_length select {
-            border: 1px solid #e9ebec;
+            border: 1px solid #ced4da;
             border-radius: 6px;
-            padding: 0.3rem 1.5rem 0.3rem 0.7rem;
+            padding: 0.35rem 1.8rem 0.35rem 0.8rem;
+            background-color: #fff;
         }
         .btn-soft-info { background-color: rgba(41, 156, 219, 0.1); color: #299cdb; border: none; }
         .btn-soft-success { background-color: rgba(10, 179, 156, 0.1); color: #0ab39c; border: none; }
@@ -203,7 +220,9 @@
         .btn-soft-info:hover { background-color: #299cdb; color: #fff; }
         .btn-soft-success:hover { background-color: #0ab39c; color: #fff; }
         .btn-soft-danger:hover { background-color: #f06548; color: #fff; }
-        .badge-soft-info { background-color: rgba(41, 156, 219, 0.1); color: #299cdb; }
+        .bg-soft-info { background-color: rgba(41, 156, 219, 0.1); color: #299cdb; }
+        .bg-soft-primary { background-color: rgba(64, 81, 137, 0.1); color: #405189; }
+        .bg-soft-secondary { background-color: #f3f6f9; color: #878a99; }
     </style>
 @endpush
 
@@ -215,12 +234,13 @@
                 $('.data-table').DataTable({
                     processing: true,
                     serverSide: true,
-                    responsive: { details: true },
+                    responsive: false,
+                    autoWidth: false,
                     dom: '<"row mb-3 px-3 mt-3"<"col-md-6"l><"col-md-6 d-flex justify-content-end"f>>rt<"row align-items-center mt-3 px-3 pb-3"<"col-md-6"i><"col-md-6 d-flex justify-content-end"p>>',
                     ajax: "{{ route('backend.role.index') }}",
                     columns: [
-                        { data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable: false, className: 'ps-3 text-muted fw-medium' },
-                        { data: 'name', name: 'name', className: 'text-start fw-bold text-dark' },
+                        { data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable: false, className: 'text-center text-muted fw-bold' },
+                        { data: 'name', name: 'name', className: 'text-start' },
                         { data: 'permissions', name: 'permissions', className: 'text-start' },
                         { data: 'action', name: 'action', orderable: false, searchable: false, className: 'text-center' }
                     ]
@@ -230,34 +250,15 @@
                 $('.permission-table').DataTable({
                     processing: true,
                     serverSide: true,
-                    responsive: { details: true },
+                    responsive: false,
+                    autoWidth: false,
                     dom: '<"row mb-3 px-3 mt-3"<"col-md-6"l><"col-md-6 d-flex justify-content-end"f>>rt<"row align-items-center mt-3 px-3 pb-3"<"col-md-6"i><"col-md-6 d-flex justify-content-end"p>>',
                     ajax: "{{ route('backend.permission.index') }}",
                     columns: [
-                        { data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable: false, className: 'ps-3 text-muted fw-medium' },
-                        { data: 'name', name: 'name', className: 'text-start fw-bold text-dark' },
-                        { data: 'group', name: 'group', className: 'text-start text-capitalize text-muted fw-semibold' },
-                        { 
-                            data: null, 
-                            orderable: false, 
-                            searchable: false, 
-                            className: 'text-center',
-                            render: function(data, type, row) {
-                                return `
-                                    <div class="d-flex gap-1 justify-content-center">
-                                        <button type="button" onclick="previewPermission(${row.id})" class="btn btn-soft-success btn-sm" data-bs-toggle="tooltip" title="Preview">
-                                            <i class="ri-eye-line fs-14"></i>
-                                        </button>
-                                        <button type="button" onclick="editPermission(${row.id}, '${row.name}')" class="btn btn-soft-info btn-sm" data-bs-toggle="tooltip" title="Edit">
-                                            <i class="ri-pencil-line fs-14"></i>
-                                        </button>
-                                        <button type="button" onclick="deletePermission('${"{{ route('backend.permission.destroy', ':id') }}".replace(':id', row.id)}')" class="btn btn-soft-danger btn-sm" data-bs-toggle="tooltip" title="Delete">
-                                            <i class="ri-delete-bin-line fs-14"></i>
-                                        </button>
-                                    </div>
-                                `;
-                            }
-                        }
+                        { data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable: false, className: 'text-center text-muted fw-bold' },
+                        { data: 'name', name: 'name', className: 'text-start' },
+                        { data: 'group', name: 'group', className: 'text-start' },
+                        { data: 'action', name: 'action', orderable: false, searchable: false, className: 'text-center' }
                     ]
                 });
 
@@ -395,7 +396,7 @@
                         let rolesHtml = '';
                         if (data.roles && data.roles.length > 0) {
                             data.roles.forEach(role => {
-                                rolesHtml += `<span class="badge bg-soft-primary text-primary me-1 fs-12 text-capitalize">${role.replace('_', ' ')}</span>`;
+                                rolesHtml += `<span class="badge bg-soft-primary text-primary me-1 fs-12 text-capitalize px-2 py-1">${role.replace('_', ' ')}</span>`;
                             });
                         } else {
                             rolesHtml = '<span class="text-muted fs-12">Not assigned to any roles.</span>';
@@ -407,7 +408,7 @@
                         if (data.users && data.users.length > 0) {
                             data.users.forEach(user => {
                                 usersHtml += `
-                                    <div class="d-flex align-items-center mb-3 p-2 bg-light rounded-3">
+                                    <div class="d-flex align-items-center mb-2 p-2 bg-light rounded-3 border">
                                         <div class="avatar-xs me-3">
                                             <div class="avatar-title rounded-circle bg-soft-success text-success fs-12 text-uppercase fw-bold">
                                                 ${user.name.charAt(0)}

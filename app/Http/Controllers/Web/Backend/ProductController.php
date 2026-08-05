@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Web\Backend;
 use App\Models\Product;
 use App\Models\Category;
 use App\Models\Brand;
+use App\Models\Batch;
 use App\Models\ProductFeature;
 use App\Models\ProductIngredient;
 use App\Models\ProductUsage;
@@ -80,7 +81,7 @@ class ProductController extends Controller
 
     public function show(Product $product)
     {
-        $product->load(['category', 'brandData', 'features', 'ingredients', 'nutrition', 'usages']);
+        $product->load(['category', 'brandData', 'batch', 'features', 'ingredients', 'nutrition', 'usages']);
         return response()->json([
             'success' => true,
             'data' => $product
@@ -91,7 +92,8 @@ class ProductController extends Controller
     {
         $categories = Category::where('status', 'active')->get();
         $brands = Brand::where('status', 'active')->get();
-        return view("backend.layout.products.form", compact('categories', 'brands'));
+        $batches = Batch::where('status', 'active')->get();
+        return view("backend.layout.products.form", compact('categories', 'brands', 'batches'));
     }
 
     public function store(Request $request)
@@ -105,8 +107,17 @@ class ProductController extends Controller
         try {
             $data = $request->only([
                 'name', 'short_description', 'full_description', 'price', 'old_price', 'discount_percent',
-                'brand_id', 'category_id', 'form', 'servings', 'quantity'
+                'brand_id', 'category_id', 'batch_id', 'form', 'servings', 'quantity'
             ]);
+
+            if ($request->filled('new_batch_name')) {
+                $newBatch = Batch::create([
+                    'name' => $request->new_batch_name,
+                    'color' => $request->new_batch_color ?? '#3b82f6',
+                    'status' => 'active',
+                ]);
+                $data['batch_id'] = $newBatch->id;
+            }
 
             // Logic to calculate price based on discount_percent if provided
             if ($request->filled('old_price') && $request->filled('discount_percent')) {
@@ -117,7 +128,6 @@ class ProductController extends Controller
             $data['slug'] = makeSlug(Product::class, $request->name);
             $data['is_vegan'] = $request->has('is_vegan');
             $data['in_stock'] = $request->has('in_stock');
-            $data['is_popular'] = $request->has('is_popular');
             $data['status'] = 'active';
 
             if ($request->hasFile('main_image')) {
@@ -176,10 +186,11 @@ class ProductController extends Controller
 
     public function edit(Product $product)
     {
-        $product->load(['features', 'ingredients', 'nutrition', 'usages']);
+        $product->load(['features', 'ingredients', 'nutrition', 'usages', 'batch']);
         $categories = Category::where('status', 'active')->get();
         $brands = Brand::where('status', 'active')->get();
-        return view('backend.layout.products.form', compact('product', 'categories', 'brands'));
+        $batches = Batch::where('status', 'active')->get();
+        return view('backend.layout.products.form', compact('product', 'categories', 'brands', 'batches'));
     }
 
     public function update(Request $request, Product $product)
@@ -193,8 +204,17 @@ class ProductController extends Controller
         try {
             $data = $request->only([
                 'name', 'short_description', 'full_description', 'price', 'old_price', 'discount_percent',
-                'brand_id', 'category_id', 'form', 'servings', 'quantity'
+                'brand_id', 'category_id', 'batch_id', 'form', 'servings', 'quantity'
             ]);
+
+            if ($request->filled('new_batch_name')) {
+                $newBatch = Batch::create([
+                    'name' => $request->new_batch_name,
+                    'color' => $request->new_batch_color ?? '#3b82f6',
+                    'status' => 'active',
+                ]);
+                $data['batch_id'] = $newBatch->id;
+            }
 
             // Logic to calculate price based on discount_percent if provided
             if ($request->filled('old_price') && $request->filled('discount_percent')) {
@@ -208,7 +228,6 @@ class ProductController extends Controller
             
             $data['is_vegan'] = $request->has('is_vegan');
             $data['in_stock'] = $request->has('in_stock');
-            $data['is_popular'] = $request->has('is_popular');
 
             if ($request->hasFile('main_image')) {
                 $data['main_image'] = fileUpdate($request->file('main_image'), 'products', $product->main_image);

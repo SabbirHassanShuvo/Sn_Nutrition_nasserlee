@@ -130,6 +130,27 @@
                                         </select>
                                     </div>
                                     <div class="col-lg-6 mb-4">
+                                        <div class="d-flex justify-content-between align-items-center mb-1">
+                                            <label class="form-label fw-semibold mb-0">Batch</label>
+                                            <button type="button" class="btn btn-link btn-sm p-0 text-primary fw-medium text-decoration-none" data-bs-toggle="modal" data-bs-target="#addBatchModal">
+                                                <i class="ri-add-line align-middle"></i> Add / Manage Batches
+                                            </button>
+                                        </div>
+                                        <div class="input-group">
+                                            <select name="batch_id" id="batch_id" class="form-select bg-light border-0 shadow-none">
+                                                <option value="">Select Batch</option>
+                                                @foreach($batches as $batch)
+                                                    <option value="{{ $batch->id }}" {{ old('batch_id', @$product->batch_id) == $batch->id ? 'selected' : '' }}>
+                                                        {{ $batch->name }} ({{ $batch->color }})
+                                                    </option>
+                                                @endforeach
+                                            </select>
+                                            <button type="button" class="btn btn-soft-danger border-0" id="btnDeleteSelectedBatch" title="Delete Selected Batch" style="{{ old('batch_id', @$product->batch_id) ? '' : 'display: none;' }}">
+                                                <i class="ri-delete-bin-line"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-6 mb-4">
                                         <label class="form-label fw-semibold">Form (e.g. Capsule)</label>
                                         <input type="text" name="form" value="{{old('form', @$product->form)}}" class="form-control bg-light border-0 shadow-none" placeholder="e.g. Capsule, Powder">
                                     </div>
@@ -299,13 +320,9 @@
                             <input class="form-check-input" type="checkbox" role="switch" id="is_vegan" name="is_vegan" {{ old('is_vegan', @$product->is_vegan) ? 'checked' : '' }}>
                             <label class="form-check-label fw-medium ms-2" for="is_vegan">Is Vegan Product?</label>
                         </div>
-                        <div class="form-check form-switch form-switch-lg mb-4">
+                        <div class="form-check form-switch form-switch-lg mb-0">
                             <input class="form-check-input" type="checkbox" role="switch" id="in_stock" name="in_stock" {{ old('in_stock', @$product ? $product->in_stock : true) ? 'checked' : '' }}>
                             <label class="form-check-label fw-medium ms-2" for="in_stock">Currently In Stock?</label>
-                        </div>
-                        <div class="form-check form-switch form-switch-lg mb-0">
-                            <input class="form-check-input" type="checkbox" role="switch" id="is_popular" name="is_popular" {{ old('is_popular', @$product->is_popular) ? 'checked' : '' }}>
-                            <label class="form-check-label fw-medium ms-2" for="is_popular">Mark as Popular?</label>
                         </div>
                     </div>
                 </div>
@@ -435,5 +452,216 @@
             </div>`;
             $('#usages-container').append(html);
         }
+
+        $(document).ready(function() {
+            // Toggle delete button based on selection
+            $('#batch_id').on('change', function() {
+                if ($(this).val()) {
+                    $('#btnDeleteSelectedBatch').show();
+                } else {
+                    $('#btnDeleteSelectedBatch').hide();
+                }
+            });
+
+            // Delete currently selected batch button click
+            $('#btnDeleteSelectedBatch').on('click', function() {
+                let batchId = $('#batch_id').val();
+                let batchName = $('#batch_id option:selected').text();
+                if (!batchId) return;
+
+                if (confirm('Are you sure you want to delete ' + batchName.trim() + '?')) {
+                    deleteBatch(batchId);
+                }
+            });
+
+            $('#quick_batch_color_picker').on('input change', function() {
+                $('#quick_batch_color').val($(this).val());
+            });
+            $('#quick_batch_color').on('input change', function() {
+                $('#quick_batch_color_picker').val($(this).val());
+            });
+
+            $('#quickAddBatchForm').on('submit', function(e) {
+                e.preventDefault();
+                let name = $('#quick_batch_name').val().trim();
+                let color = $('#quick_batch_color').val().trim();
+
+                if(!name) return;
+
+                let btn = $('#btnSaveBatch');
+                btn.prop('disabled', true).html('<i class="spinner-border spinner-border-sm me-1"></i> Saving...');
+
+                $.ajax({
+                    url: "{{ route('backend.batch.quick-store') }}",
+                    type: "POST",
+                    data: {
+                        _token: "{{ csrf_token() }}",
+                        name: name,
+                        color: color
+                    },
+                    success: function(response) {
+                        btn.prop('disabled', false).text('Save Batch');
+                        if (response.success) {
+                            let batch = response.data;
+                            let optionText = batch.name + (batch.color ? ' (' + batch.color + ')' : '');
+                            let newOption = new Option(optionText, batch.id, true, true);
+                            $('#batch_id').append(newOption).trigger('change');
+                            
+                            var modalEl = document.getElementById('addBatchModal');
+                            var modal = bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl);
+                            modal.hide();
+
+                            $('#quickAddBatchForm')[0].reset();
+                            $('#quick_batch_color_picker').val('#3b82f6');
+                            
+                            if (typeof Swal !== 'undefined') {
+                                Swal.fire({
+                                    icon: 'success',
+                                    title: 'Batch Created',
+                                    text: response.message,
+                                    timer: 1500,
+                                    showConfirmButton: false
+                                });
+                            }
+                        } else {
+                            alert(response.message || 'Failed to create batch');
+                        }
+                    },
+                    error: function(xhr) {
+                        btn.prop('disabled', false).text('Save Batch');
+                        let msg = 'Failed to create batch';
+                        if(xhr.responseJSON && xhr.responseJSON.message) {
+                            msg = xhr.responseJSON.message;
+                        }
+                        alert(msg);
+                    }
+                });
+            });
+        });
+
+        function loadBatchesList() {
+            let container = $('#batchesListContainer');
+            container.html('<div class="text-center py-3 text-muted"><i class="spinner-border spinner-border-sm me-1"></i> Loading batches...</div>');
+
+            $.ajax({
+                url: "{{ route('backend.batch.list') }}",
+                type: "GET",
+                success: function(response) {
+                    if (response.success && response.data.length > 0) {
+                        let html = '<div class="list-group list-group-flush">';
+                        response.data.forEach(function(batch) {
+                            html += `
+                                <div class="list-group-item d-flex justify-content-between align-items-center px-0 py-2">
+                                    <div class="d-flex align-items-center gap-2">
+                                        <span class="rounded-circle d-inline-block" style="width: 14px; height: 14px; background-color: ${batch.color || '#3b82f6'}; border: 1px solid #ddd;"></span>
+                                        <span class="fw-medium text-dark">${batch.name}</span>
+                                        <small class="text-muted">(${batch.color || '#3b82f6'})</small>
+                                    </div>
+                                    <button type="button" class="btn btn-soft-danger btn-sm px-2 py-1" onclick="deleteBatch(${batch.id})" title="Delete Batch">
+                                        <i class="ri-delete-bin-line align-middle"></i> Delete
+                                    </button>
+                                </div>
+                            `;
+                        });
+                        html += '</div>';
+                        container.html(html);
+                    } else {
+                        container.html('<div class="text-center py-3 text-muted">No batches found</div>');
+                    }
+                },
+                error: function() {
+                    container.html('<div class="text-center py-3 text-danger">Failed to load batches</div>');
+                }
+            });
+        }
+
+        function deleteBatch(batchId) {
+            $.ajax({
+                url: "{{ url('admin/batch') }}/" + batchId,
+                type: "DELETE",
+                data: {
+                    _token: "{{ csrf_token() }}"
+                },
+                success: function(response) {
+                    if (response.success) {
+                        $(`#batch_id option[value="${batchId}"]`).remove();
+                        if ($('#batch_id').val() == batchId || $('#batch_id').val() == null) {
+                            $('#batch_id').val('').trigger('change');
+                        }
+                        loadBatchesList();
+                        if (typeof Swal !== 'undefined') {
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Deleted',
+                                text: response.message,
+                                timer: 1500,
+                                showConfirmButton: false
+                            });
+                        }
+                    } else {
+                        alert(response.message || 'Failed to delete batch');
+                    }
+                },
+                error: function(xhr) {
+                    let msg = 'Failed to delete batch';
+                    if(xhr.responseJSON && xhr.responseJSON.message) {
+                        msg = xhr.responseJSON.message;
+                    }
+                    alert(msg);
+                }
+            });
+        }
     </script>
 @endpush
+
+<!-- Modal for Adding & Managing Batches -->
+<div class="modal fade" id="addBatchModal" tabindex="-1" aria-labelledby="addBatchModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header bg-light">
+                <h5 class="modal-title fw-bold" id="addBatchModalLabel"><i class="ri-stack-line text-primary me-2"></i>Manage Batches</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4">
+                <ul class="nav nav-pills nav-justified mb-3 bg-light p-1 rounded" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active fw-medium py-2" data-bs-toggle="pill" data-bs-target="#tab-add-batch" type="button" role="tab">Add New Batch</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link fw-medium py-2" data-bs-toggle="pill" data-bs-target="#tab-manage-batches" type="button" role="tab" onclick="loadBatchesList()">Batch List & Delete</button>
+                    </li>
+                </ul>
+
+                <div class="tab-content pt-2">
+                    <div class="tab-pane fade show active" id="tab-add-batch" role="tabpanel">
+                        <form id="quickAddBatchForm">
+                            @csrf
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold">Batch Name <span class="text-danger">*</span></label>
+                                <input type="text" id="quick_batch_name" name="name" class="form-control bg-light border-0 shadow-none" placeholder="e.g. Batch #2026-A" required>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold">Batch Color</label>
+                                <div class="d-flex align-items-center gap-2">
+                                    <input type="color" id="quick_batch_color_picker" class="form-control form-control-color border-0 p-1" value="#3b82f6" title="Choose batch color">
+                                    <input type="text" id="quick_batch_color" name="color" class="form-control bg-light border-0 shadow-none" value="#3b82f6" placeholder="#3b82f6">
+                                </div>
+                            </div>
+                            <div class="text-end">
+                                <button type="button" class="btn btn-light me-2" data-bs-dismiss="modal">Cancel</button>
+                                <button type="submit" class="btn btn-primary" id="btnSaveBatch">Save Batch</button>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="tab-pane fade" id="tab-manage-batches" role="tabpanel">
+                        <div id="batchesListContainer" style="max-height: 250px; overflow-y: auto;">
+                            <div class="text-center py-3 text-muted">Loading batches...</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
