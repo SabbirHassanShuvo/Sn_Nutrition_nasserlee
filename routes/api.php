@@ -25,6 +25,8 @@ use App\Http\Controllers\Api\Frontend\Profile\ProfileController;
 use App\Http\Controllers\Api\Frontend\ContactSubmissionApiController;
 use App\Http\Controllers\Api\Frontend\SubscriberApiController;
 use App\Http\Controllers\Api\Frontend\BrandApiController;
+use App\Http\Controllers\Api\Frontend\ReviewApiController;
+
 
 Route::group([
     'middleware' => 'api',
@@ -61,6 +63,8 @@ Route::group(['middleware' => 'api'], function($router){
     Route::get('/cms/contact-us', [CmsController::class, 'getContactPage']);
     Route::post('/contact/submit', [ContactSubmissionApiController::class, 'submit']);
     Route::post('/subscribe', [SubscriberApiController::class, 'subscribe']);
+    Route::get('/get-reviews', [ReviewApiController::class, 'getReviews']);
+
     Route::get('/cms/faqs', [FaqApiController::class, 'getFaqs']);
     Route::get('/cms/page/{slug}', [CmsController::class, 'getPageBySlug']);
     Route::get('/cms/web-settings', [WebSettingApiController::class, 'getWebSettings']);
@@ -80,6 +84,8 @@ Route::group(['middleware' => 'api'], function($router){
     Route::group(['middleware' => ['auth:api']], function () {
         Route::get('/health-professional/profile', [ProfileController::class, 'detailsProfile']);
         Route::post('/health-professional/profile/update', [ProfileController::class, 'updateProfile']);
+
+        Route::post('/submit-review', [ReviewApiController::class, 'submitReview']);
     });
 });
 

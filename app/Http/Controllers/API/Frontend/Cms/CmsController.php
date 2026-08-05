@@ -88,18 +88,22 @@ class CmsController extends BaseController
                         [
                             'title'       => $section->standard1_title,
                             'description' => $section->standard1_description,
+                            'icon'        => 'halal-certified',
                         ],
                         [
                             'title'       => $section->standard2_title,
                             'description' => $section->standard2_description,
+                            'icon'        => 'non-gmo'
                         ],
                         [
                             'title'       => $section->standard3_title,
                             'description' => $section->standard3_description,
+                            'icon'        => 'gluten-free'
                         ],
                         [
                             'title'       => $section->standard4_title,
                             'description' => $section->standard4_description,
+                            'icon'        => 'no-additives'
                         ],
                     ]
                 ],
@@ -111,18 +115,22 @@ class CmsController extends BaseController
                         [
                             'title'       => $section->stand1_title,
                             'description' => $section->stand1_description,
+                            'icon'        => 'FlaskConical'
                         ],
                         [
                             'title'       => $section->stand2_title,
                             'description' => $section->stand2_description,
+                            'icon'        => 'Leaf'
                         ],
                         [
                             'title'       => $section->stand3_title,
                             'description' => $section->stand3_description,
+                            'icon'        => 'Shield'
                         ],
                         [
                             'title'       => $section->stand4_title,
                             'description' => $section->stand4_description,
+                            'icon'        => 'Heart'
                         ],
                     ]
                 ]
@@ -286,32 +294,32 @@ class CmsController extends BaseController
                         [
                             'title'       => $section->feature1_title,
                             'description' => $section->feature1_description,
-                            'icon'        => 'ri-link-m',
+                            'icon'        => 'Link2',
                         ],
                         [
                             'title'       => $section->feature2_title,
                             'description' => $section->feature2_description,
-                            'icon'        => 'ri-bar-chart-line',
+                            'icon'        => 'BarChart3',
                         ],
                         [
                             'title'       => $section->feature3_title,
                             'description' => $section->feature3_description,
-                            'icon'        => 'ri-wallet-3-line',
+                            'icon'        => 'Wallet',
                         ],
                         [
                             'title'       => $section->feature4_title,
                             'description' => $section->feature4_description,
-                            'icon'        => 'ri-medal-line',
+                            'icon'        => 'Award',
                         ],
                         [
                             'title'       => $section->feature5_title,
                             'description' => $section->feature5_description,
-                            'icon'        => 'ri-shield-check-line',
+                            'icon'        => 'ShieldCheck',
                         ],
                         [
                             'title'       => $section->feature6_title,
                             'description' => $section->feature6_description,
-                            'icon'        => 'ri-shopping-bag-line',
+                            'icon'        => 'ShoppingBag',
                         ],
                     ]
                 ] : null,

@@ -40,6 +40,7 @@ class DatabaseSeeder extends Seeder
             ContactSubmissionSeeder::class,
             SubscriberSeeder::class,
             OfferSeeder::class,
+            ReviewSeeder::class,
         ]);
     }
 }
