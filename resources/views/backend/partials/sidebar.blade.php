@@ -202,7 +202,7 @@
                 </li>
                 @endcanany
 
-                <!-- @canany(['onboarding_options_manage', 'onboarding_manage'])
+                @canany(['onboarding_options_manage', 'onboarding_manage'])
                 <li class="nav-item">
                     <a class="nav-link menu-link {{ request()->routeIs('backend.onboarding-option.*') ? 'active' : '' }}"
                         href="{{ route('backend.onboarding-option.index') }}">
