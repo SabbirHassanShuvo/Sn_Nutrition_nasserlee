@@ -13,13 +13,16 @@ class ComparisonController extends BaseController
     /**
      * Get comparison list for current user.
      */
-    public function index()
+    public function index(Request $request)
     {
         try {
             $user = Auth::user();
+            $wishlistProductIds = \App\Models\Wishlist::where('user_id', $user->id)->pluck('product_id')->toArray();
+
             $comparisons = Comparison::with([
                 'product.category', 
                 'product.brandData', 
+                'product.batch', 
                 'product.features', 
                 'product.nutrition', 
                 'product.ingredients'
@@ -27,7 +30,7 @@ class ComparisonController extends BaseController
             ->where('user_id', $user->id)
             ->get();
 
-            $products = $comparisons->map(function ($comp) {
+            $products = $comparisons->map(function ($comp) use ($wishlistProductIds) {
                 $product = $comp->product;
                 return [
                     'id' => $product->id,
@@ -37,8 +40,14 @@ class ComparisonController extends BaseController
                     'category' => $product->category->name ?? null,
                     'brand' => $product->brandData->name ?? null,
                     'short_description' => $product->short_description,
-                    'is_vegan' => $product->is_vegan,
-                    'in_stock' => $product->in_stock,
+                    'is_vegan' => (bool) $product->is_vegan,
+                    'in_stock' => (bool) $product->in_stock,
+                    'is_wishlist' => in_array($product->id, $wishlistProductIds),
+                    'batch' => $product->batch ? [
+                        'id' => (int) $product->batch->id,
+                        'name' => $product->batch->name,
+                        'color' => $product->batch->color,
+                    ] : null,
                     'nutrition' => $product->nutrition,
                     'features' => $product->features,
                     'ingredients' => $product->ingredients,

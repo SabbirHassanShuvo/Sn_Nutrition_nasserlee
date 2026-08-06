@@ -7,6 +7,7 @@ use App\Rules\PasswordRule;
 use Illuminate\Http\Request;
 use App\Http\Requests\UserRequest;
 use Spatie\Permission\Models\Role;
+use Spatie\Permission\PermissionRegistrar;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use Yajra\DataTables\Facades\DataTables;
@@ -29,9 +30,19 @@ class SystemUserController extends Controller
                     return $user->email;
                 })
                 ->addColumn('roles', function ($user) {
-                    return $user->getRoleNames()
-                        ->map(fn($role) => "<span class='badge bg-primary'>" . str_replace('_', ' ', $role) . "</span>")
+                    $rolesBadges = $user->getRoleNames()
+                        ->map(fn($role) => "<span class='badge bg-primary text-uppercase me-1'>" . str_replace('_', ' ', $role) . "</span>")
                         ->implode(' ');
+
+                    if (empty($rolesBadges)) {
+                        $rolesBadges = "<span class='badge bg-secondary text-uppercase me-1'>NO ROLE</span>";
+                    }
+
+                    $directPermissions = $user->getDirectPermissions()->pluck('name')->toArray();
+                    if (count($directPermissions) > 0) {
+                        $rolesBadges .= "<br><span class='badge bg-soft-warning text-warning fs-10 text-uppercase mt-1'>" . count($directPermissions) . " Direct Overrides</span>";
+                    }
+                    return $rolesBadges;
                 })
                 ->addColumn('status', function ($data) {
                     $backgroundColor  = $data->status ? '#4CAF50' : '#ccc';
@@ -82,6 +93,7 @@ class SystemUserController extends Controller
             if ($request->has('role')) {
                 $user->syncRoles($request->role);
             }
+            app()[PermissionRegistrar::class]->forgetCachedPermissions();
             return response()->json(['success' => true, 'message' => 'System User created successfully']);
         } catch (\Exception $e) {
             return response()->json(['success' => false, 'message' => $e->getMessage()]);
@@ -121,6 +133,7 @@ class SystemUserController extends Controller
             $system_user->save();
 
             $system_user->syncRoles($request->input('role', []));
+            app()[PermissionRegistrar::class]->forgetCachedPermissions();
             
             return response()->json(['success' => true, 'message' => 'System User updated successfully']);
         } catch (\Exception $e) {
@@ -262,6 +275,8 @@ class SystemUserController extends Controller
             
             $user->syncPermissions($directPermissions);
             
+            app()[PermissionRegistrar::class]->forgetCachedPermissions();
+
             return response()->json(['success' => true, 'message' => 'Access permissions updated successfully.']);
         } catch (\Exception $e) {
             return response()->json(['success' => false, 'message' => 'Failed to sync permissions: ' . $e->getMessage()]);

@@ -143,34 +143,40 @@
                 </li>
                 @endcanany
 
+                @canany(['specialists_manage', 'specialist_manage'])
                 <li class="nav-item">
                     <a class="nav-link menu-link {{ request()->routeIs('backend.specialist.*') ? 'active' : '' }}"
                         href="{{ route('backend.specialist.index') }}">
                         <i class="ri-user-star-line"></i> <span>Specialists</span>
                     </a>
                 </li>
-
                 <li class="nav-item">
                     <a class="nav-link menu-link {{ request()->routeIs('backend.consultation-booking.*') ? 'active' : '' }}"
                         href="{{ route('backend.consultation-booking.index') }}">
                         <i class="ri-video-chat-line"></i> <span>Consultation Bookings</span>
                     </a>
                 </li>
+                @endcanany
 
+                @canany(['gyms_manage', 'gym_manage'])
                 <li class="nav-item">
                     <a class="nav-link menu-link {{ request()->routeIs('backend.gym.*') ? 'active' : '' }}"
                         href="{{ route('backend.gym.index') }}">
                         <i class="ri-map-pin-user-line"></i> <span>Nearby Gyms</span>
                     </a>
                 </li>
+                @endcanany
 
+                @canany(['pharmacies_manage', 'pharmacy_manage'])
                 <li class="nav-item">
                     <a class="nav-link menu-link {{ request()->routeIs('backend.pharmacies.*') ? 'active' : '' }}"
                         href="{{ route('backend.pharmacies.index') }}">
                         <i class="ri-capsule-line"></i> <span>Pharmacies</span>
                     </a>
                 </li>
+                @endcanany
 
+                @canany(['contact_submissions_manage', 'contact_manage'])
                 <li class="nav-item">
                     <a class="nav-link menu-link {{ request()->routeIs('backend.contact-submissions.*') ? 'active' : '' }}"
                         href="{{ route('backend.contact-submissions.index') }}">
@@ -179,7 +185,9 @@
                         <span id="sidebar-contact-badge" class="badge badge-pill bg-danger ms-auto" style="{{ $unreadContactCount > 0 ? '' : 'display: none;' }}">{{ $unreadContactCount }}</span>
                     </a>
                 </li>
+                @endcanany
 
+                @canany(['subscribers_manage', 'subscriber_manage'])
                 <li class="nav-item">
                     <a class="nav-link menu-link {{ request()->routeIs('backend.subscribers.*') ? 'active' : '' }}"
                         href="{{ route('backend.subscribers.index') }}">
@@ -188,6 +196,7 @@
                         <span id="sidebar-subscribers-badge" class="badge badge-pill bg-danger ms-auto" style="{{ $unreadSubscriberCount > 0 ? '' : 'display: none;' }}">{{ $unreadSubscriberCount }}</span>
                     </a>
                 </li>
+                @endcanany
 
                 @canany(['onboarding_options_manage', 'onboarding_manage'])
                 <li class="nav-item">

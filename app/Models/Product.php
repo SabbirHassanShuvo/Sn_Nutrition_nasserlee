@@ -15,8 +15,8 @@ class Product extends Model
         'in_stock' => 'boolean',
         'category_id' => 'integer',
         'brand_id' => 'integer',
+        'batch_id' => 'integer',
         'quantity' => 'integer',
-        'is_popular' => 'boolean',
     ];
 
     protected $appends = [
@@ -101,6 +101,11 @@ class Product extends Model
     public function brandData()
     {
         return $this->belongsTo(Brand::class, 'brand_id');
+    }
+
+    public function batch()
+    {
+        return $this->belongsTo(Batch::class, 'batch_id');
     }
 
     public function features()

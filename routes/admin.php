@@ -34,6 +34,9 @@ Route::group([ 'as'=>'backend.'], function () {
 
     // Product Management
     Route::group(['middleware' => 'permission:products_manage|product_manage'], function () {
+        Route::get('batch/list', [\App\Http\Controllers\Web\Backend\BatchController::class, 'index'])->name('batch.list');
+        Route::post('batch/quick-store', [\App\Http\Controllers\Web\Backend\BatchController::class, 'storeAjax'])->name('batch.quick-store');
+        Route::delete('batch/{id}', [\App\Http\Controllers\Web\Backend\BatchController::class, 'destroy'])->name('batch.destroy');
         Route::delete('product/bulk-destroy', [\App\Http\Controllers\Web\Backend\ProductController::class,'bulkDestroy'])->name('product.bulk-destroy');
         Route::post('product/status/{id}', [\App\Http\Controllers\Web\Backend\ProductController::class,'status'])->name('product.status');
         Route::resource('product', \App\Http\Controllers\Web\Backend\ProductController::class);
@@ -130,25 +133,33 @@ Route::group([ 'as'=>'backend.'], function () {
     });
 
     // Specialist Management
-    Route::delete('specialist/bulk-destroy', [\App\Http\Controllers\Web\Backend\SpecialistController::class, 'bulkDestroy'])->name('specialist.bulk-destroy');
-    Route::post('specialist/status/{id}', [\App\Http\Controllers\Web\Backend\SpecialistController::class, 'status'])->name('specialist.status');
-    Route::post('specialist/store-specialty', [\App\Http\Controllers\Web\Backend\SpecialistController::class, 'storeSpecialty'])->name('specialist.store-specialty');
-    Route::resource('specialist', \App\Http\Controllers\Web\Backend\SpecialistController::class);
+    Route::group(['middleware' => 'permission:specialists_manage|specialist_manage'], function () {
+        Route::delete('specialist/bulk-destroy', [\App\Http\Controllers\Web\Backend\SpecialistController::class, 'bulkDestroy'])->name('specialist.bulk-destroy');
+        Route::post('specialist/status/{id}', [\App\Http\Controllers\Web\Backend\SpecialistController::class, 'status'])->name('specialist.status');
+        Route::post('specialist/store-specialty', [\App\Http\Controllers\Web\Backend\SpecialistController::class, 'storeSpecialty'])->name('specialist.store-specialty');
+        Route::resource('specialist', \App\Http\Controllers\Web\Backend\SpecialistController::class);
+    });
 
     // Consultation Bookings & Zoom Meeting Generation
-    Route::get('consultation-booking', [\App\Http\Controllers\Web\Backend\ConsultationBookingController::class, 'index'])->name('consultation-booking.index');
-    Route::post('consultation-booking/{id}/approve-zoom', [\App\Http\Controllers\Web\Backend\ConsultationBookingController::class, 'approveAndGenerateZoom'])->name('consultation-booking.approve-zoom');
-    Route::post('consultation-booking/{id}/status', [\App\Http\Controllers\Web\Backend\ConsultationBookingController::class, 'updateStatus'])->name('consultation-booking.status');
+    Route::group(['middleware' => 'permission:consultations_manage|consultation_manage'], function () {
+        Route::get('consultation-booking', [\App\Http\Controllers\Web\Backend\ConsultationBookingController::class, 'index'])->name('consultation-booking.index');
+        Route::post('consultation-booking/{id}/approve-zoom', [\App\Http\Controllers\Web\Backend\ConsultationBookingController::class, 'approveAndGenerateZoom'])->name('consultation-booking.approve-zoom');
+        Route::post('consultation-booking/{id}/status', [\App\Http\Controllers\Web\Backend\ConsultationBookingController::class, 'updateStatus'])->name('consultation-booking.status');
+    });
 
     // Nearby Gyms Management
-    Route::delete('gym/bulk-destroy', [\App\Http\Controllers\Web\Backend\GymController::class, 'bulkDestroy'])->name('gym.bulk-destroy');
-    Route::post('gym/status/{id}', [\App\Http\Controllers\Web\Backend\GymController::class, 'status'])->name('gym.status');
-    Route::resource('gym', \App\Http\Controllers\Web\Backend\GymController::class);
+    Route::group(['middleware' => 'permission:gyms_manage|gym_manage'], function () {
+        Route::delete('gym/bulk-destroy', [\App\Http\Controllers\Web\Backend\GymController::class, 'bulkDestroy'])->name('gym.bulk-destroy');
+        Route::post('gym/status/{id}', [\App\Http\Controllers\Web\Backend\GymController::class, 'status'])->name('gym.status');
+        Route::resource('gym', \App\Http\Controllers\Web\Backend\GymController::class);
+    });
 
     // Nearby Pharmacies Management
-    Route::delete('pharmacies/bulk-destroy', [\App\Http\Controllers\Web\Backend\PharmacyController::class, 'bulkDestroy'])->name('pharmacies.bulk-destroy');
-    Route::post('pharmacies/status/{id}', [\App\Http\Controllers\Web\Backend\PharmacyController::class, 'status'])->name('pharmacies.status');
-    Route::resource('pharmacies', \App\Http\Controllers\Web\Backend\PharmacyController::class);
+    Route::group(['middleware' => 'permission:pharmacies_manage|pharmacy_manage'], function () {
+        Route::delete('pharmacies/bulk-destroy', [\App\Http\Controllers\Web\Backend\PharmacyController::class, 'bulkDestroy'])->name('pharmacies.bulk-destroy');
+        Route::post('pharmacies/status/{id}', [\App\Http\Controllers\Web\Backend\PharmacyController::class, 'status'])->name('pharmacies.status');
+        Route::resource('pharmacies', \App\Http\Controllers\Web\Backend\PharmacyController::class);
+    });
 
 
 
@@ -162,9 +173,11 @@ Route::group([ 'as'=>'backend.'], function () {
     });
 
     // CMS — Home Page sections
-    Route::prefix('cms/home-page')->name('home-page.')->group(function () {
-        Route::get('quality-control', [HomePageController::class, 'qualityControlEdit'])->name('quality-control.edit');
-        Route::put('quality-control', [HomePageController::class, 'qualityControlUpdate'])->name('quality-control.update');
+    Route::group(['middleware' => 'permission:cms_home_page|home_page_manage'], function () {
+        Route::prefix('cms/home-page')->name('home-page.')->group(function () {
+            Route::get('quality-control', [HomePageController::class, 'qualityControlEdit'])->name('quality-control.edit');
+            Route::put('quality-control', [HomePageController::class, 'qualityControlUpdate'])->name('quality-control.update');
+        });
     });
 
     // CMS — About Page sections
@@ -207,14 +220,18 @@ Route::group([ 'as'=>'backend.'], function () {
     });
 
     // Contact Submissions Management
-    Route::delete('contact-submissions/bulk-destroy', [ContactSubmissionController::class, 'bulkDestroy'])->name('contact-submissions.bulk-destroy');
-    Route::post('contact-submissions/read/{id}', [ContactSubmissionController::class, 'markAsRead'])->name('contact-submissions.read');
-    Route::resource('contact-submissions', ContactSubmissionController::class)->only(['index', 'destroy']);
+    Route::group(['middleware' => 'permission:contact_submissions_manage|contact_manage'], function () {
+        Route::delete('contact-submissions/bulk-destroy', [ContactSubmissionController::class, 'bulkDestroy'])->name('contact-submissions.bulk-destroy');
+        Route::post('contact-submissions/read/{id}', [ContactSubmissionController::class, 'markAsRead'])->name('contact-submissions.read');
+        Route::resource('contact-submissions', ContactSubmissionController::class)->only(['index', 'destroy']);
+    });
 
     // Subscribers Management
-    Route::delete('subscribers/bulk-destroy', [SubscriberController::class, 'bulkDestroy'])->name('subscribers.bulk-destroy');
-    Route::post('subscribers/read/{id}', [SubscriberController::class, 'markAsRead'])->name('subscribers.read');
-    Route::resource('subscribers', SubscriberController::class)->only(['index', 'destroy']);
+    Route::group(['middleware' => 'permission:subscribers_manage|subscriber_manage'], function () {
+        Route::delete('subscribers/bulk-destroy', [SubscriberController::class, 'bulkDestroy'])->name('subscribers.bulk-destroy');
+        Route::post('subscribers/read/{id}', [SubscriberController::class, 'markAsRead'])->name('subscribers.read');
+        Route::resource('subscribers', SubscriberController::class)->only(['index', 'destroy']);
+    });
 
     require_once __DIR__ .'/settings.php';
 
