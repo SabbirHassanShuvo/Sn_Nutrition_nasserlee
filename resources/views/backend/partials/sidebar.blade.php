@@ -189,7 +189,7 @@
                     </a>
                 </li>
 
-                <!-- @canany(['onboarding_options_manage', 'onboarding_manage'])
+                @canany(['onboarding_options_manage', 'onboarding_manage'])
                 <li class="nav-item">
                     <a class="nav-link menu-link {{ request()->routeIs('backend.onboarding-option.*') ? 'active' : '' }}"
                         href="{{ route('backend.onboarding-option.index') }}">
@@ -204,7 +204,7 @@
                 </li>
                 @endcanany
 
-                <!-- @canany(['setting_profile', 'setting_system', 'setting_mail'])
+                @canany(['setting_profile', 'setting_system', 'setting_mail'])
                 <li class="nav-item">
                     <a class="nav-link menu-link {{ getPageStatus('backend.settings.*') }}" href="#sidebarMultilevel"
                         data-bs-toggle="collapse" role="button" aria-expanded="false"
@@ -245,7 +245,7 @@
                         </ul>
                     </div>
                 </li>
-                @endcanany -->
+                @endcanany 
 
 
                 {{-- Cms --}}
