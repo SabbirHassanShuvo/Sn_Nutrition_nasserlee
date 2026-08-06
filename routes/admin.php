@@ -18,6 +18,7 @@ use App\Http\Controllers\Web\Backend\Cms\AboutPageController;
 use App\Http\Controllers\Web\Backend\Cms\HowItWorksController;
 use App\Http\Controllers\Web\Backend\OnboardingQuestionController;
 use App\Http\Controllers\Web\Backend\OnboardingOptionController;
+use App\Http\Controllers\Web\Backend\AffiliateTierSettingController;
 
 
 use Illuminate\Support\Facades\Mail;
@@ -232,6 +233,15 @@ Route::group([ 'as'=>'backend.'], function () {
         Route::post('subscribers/read/{id}', [SubscriberController::class, 'markAsRead'])->name('subscribers.read');
         Route::resource('subscribers', SubscriberController::class)->only(['index', 'destroy']);
     });
+
+    // Affiliate Tier Settings & Payouts
+    Route::get('affiliate-settings', [AffiliateTierSettingController::class, 'index'])->name('affiliate-setting.index');
+    Route::put('affiliate-settings', [AffiliateTierSettingController::class, 'update'])->name('affiliate-setting.update');
+
+    Route::get('affiliate-payouts', [\App\Http\Controllers\Web\Backend\AffiliatePayoutController::class, 'index'])->name('affiliate-payout.index');
+    Route::put('affiliate-payouts/{id}/process', [\App\Http\Controllers\Web\Backend\AffiliatePayoutController::class, 'process'])->name('affiliate-payout.process');
+    Route::delete('affiliate-payouts/bulk-destroy', [\App\Http\Controllers\Web\Backend\AffiliatePayoutController::class, 'bulkDestroy'])->name('affiliate-payout.bulk-destroy');
+    Route::delete('affiliate-payouts/{id}', [\App\Http\Controllers\Web\Backend\AffiliatePayoutController::class, 'destroy'])->name('affiliate-payout.destroy');
 
     require_once __DIR__ .'/settings.php';
 

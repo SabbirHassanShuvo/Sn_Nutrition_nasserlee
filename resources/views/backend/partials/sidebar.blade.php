@@ -217,6 +217,20 @@
                 </li>
                 @endcanany
 
+                <li class="nav-item">
+                    <a class="nav-link menu-link {{ request()->routeIs('backend.affiliate-setting.*') ? 'active' : '' }}"
+                        href="{{ route('backend.affiliate-setting.index') }}">
+                        <i class="ri-coin-line"></i> <span>Affiliate Tier Settings</span>
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link menu-link {{ request()->routeIs('backend.affiliate-payout.*') ? 'active' : '' }}"
+                        href="{{ route('backend.affiliate-payout.index') }}">
+                        <i class="ri-bank-card-line"></i> <span>Payout Requests</span>
+                    </a>
+                </li>
+
                 <!-- @canany(['setting_profile', 'setting_system', 'setting_mail'])
                 <li class="nav-item">
                     <a class="nav-link menu-link {{ getPageStatus('backend.settings.*') }}" href="#sidebarMultilevel"
