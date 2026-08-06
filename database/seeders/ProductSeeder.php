@@ -44,7 +44,6 @@ class ProductSeeder extends Seeder
                 'is_vegan' => false,
                 'in_stock' => true,
                 'quantity' => 120,
-                'is_popular' => true,
                 'status' => 'active',
             ],
             [
@@ -63,7 +62,6 @@ class ProductSeeder extends Seeder
                 'is_vegan' => false,
                 'in_stock' => true,
                 'quantity' => 85,
-                'is_popular' => true,
                 'status' => 'active',
             ],
             [
@@ -82,7 +80,6 @@ class ProductSeeder extends Seeder
                 'is_vegan' => true,
                 'in_stock' => true,
                 'quantity' => 200,
-                'is_popular' => true,
                 'status' => 'active',
             ],
             [
@@ -101,7 +98,6 @@ class ProductSeeder extends Seeder
                 'is_vegan' => false,
                 'in_stock' => true,
                 'quantity' => 90,
-                'is_popular' => false,
                 'status' => 'active',
             ],
             [
@@ -120,7 +116,6 @@ class ProductSeeder extends Seeder
                 'is_vegan' => false,
                 'in_stock' => true,
                 'quantity' => 150,
-                'is_popular' => false,
                 'status' => 'active',
             ],
             [
@@ -139,7 +134,6 @@ class ProductSeeder extends Seeder
                 'is_vegan' => true,
                 'in_stock' => true,
                 'quantity' => 300,
-                'is_popular' => true,
                 'status' => 'active',
             ],
             [
@@ -158,7 +152,6 @@ class ProductSeeder extends Seeder
                 'is_vegan' => true,
                 'in_stock' => true,
                 'quantity' => 180,
-                'is_popular' => false,
                 'status' => 'active',
             ],
             [
@@ -177,7 +170,6 @@ class ProductSeeder extends Seeder
                 'is_vegan' => false,
                 'in_stock' => false,
                 'quantity' => 0,
-                'is_popular' => false,
                 'status' => 'active',
             ]
         ];

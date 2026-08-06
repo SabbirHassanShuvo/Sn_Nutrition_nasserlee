@@ -1,6 +1,8 @@
 @extends('backend.master')
 @section('title', 'Contact Submissions')
 @section('content')
+
+
     <div class="row">
         <div class="col-lg-12">
             <div class="card" id="contactSubmissionsList">
@@ -36,6 +38,8 @@
             </div>
         </div>
     </div>
+
+    {{-- @dd('hi') --}}
 
     <!-- Details Modal -->
     <div class="modal fade" id="submissionDetailsModal" tabindex="-1" aria-labelledby="submissionDetailsModalLabel" aria-hidden="true">

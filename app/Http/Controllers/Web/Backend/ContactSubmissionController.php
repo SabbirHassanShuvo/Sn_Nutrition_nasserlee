@@ -14,6 +14,8 @@ class ContactSubmissionController extends Controller
      */
     public function index(Request $request)
     {
+
+        
         if ($request->ajax()) {
             $submissions = ContactSubmission::latest()->get();
             return DataTables::of($submissions)
