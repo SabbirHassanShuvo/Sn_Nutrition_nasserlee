@@ -33,7 +33,6 @@
         <div class="container-fluid">
 
             <div id="two-column-menu">
-            </div>
             <ul class="navbar-nav" id="navbar-nav">
                 <li class="nav-item">
                     <a class="nav-link menu-link {{ request()->routeIs('backend.dashboard.*') ? 'active' : '' }}"
@@ -150,6 +149,7 @@
                         <i class="ri-user-star-line"></i> <span>Specialists</span>
                     </a>
                 </li>
+
                 <li class="nav-item">
                     <a class="nav-link menu-link {{ request()->routeIs('backend.consultation-booking.*') ? 'active' : '' }}"
                         href="{{ route('backend.consultation-booking.index') }}">
@@ -246,7 +246,6 @@
                     </div>
                 </li>
                 @endcanany 
-
 
                 {{-- Cms --}}
                 @canany(['cms_banner', 'cms_pages', 'cms_faq', 'cms_home_page', 'cms_about_page', 'cms_contact_page', 'cms_how_it_works'])
