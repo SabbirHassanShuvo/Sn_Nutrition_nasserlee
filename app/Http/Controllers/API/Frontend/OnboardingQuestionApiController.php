@@ -10,9 +10,26 @@ use App\Models\UserOnboardingAnswer;
 use App\Models\Product;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use App\Models\Wishlist;
 
 class OnboardingQuestionApiController extends Controller
 {
+
+    private function getWishlistProductIds(Request $request)
+    {
+        $user = null;
+        try {
+            $user = auth()->user();
+        } catch (\Exception $e) {
+            $user = null;
+        }
+
+        if ($user) {
+            return Wishlist::where('user_id', $user->id)->pluck('product_id')->toArray();
+        }
+
+        return [];
+    }
     public function getQuestions()
     {
         $cmsSettings = OnboardingSetting::first() ?? new OnboardingSetting([
@@ -51,7 +68,7 @@ class OnboardingQuestionApiController extends Controller
             'answers.*.answer_id' => 'required|exists:onboarding_answers,id',
         ]);
 
-        $user = Auth::user();
+        $user = auth('api')->user();
 
         if ($user) {
             // Delete old answers
@@ -123,7 +140,7 @@ class OnboardingQuestionApiController extends Controller
 
         // Search for matching products
         $productsQuery = Product::query()
-            ->with(['category', 'brandData', 'batch'])
+            ->with(['category', 'brandData', 'batch', 'wishlists'])
             ->where('status', 'active')
             ->where('in_stock', true);
 
@@ -163,11 +180,8 @@ class OnboardingQuestionApiController extends Controller
                 ->paginate(8);
         }
 
-        $wishlistProductIds = [];
-        if ($user) {
-            $wishlistProductIds = \App\Models\Wishlist::where('user_id', $user->id)->pluck('product_id')->toArray();
-        }
-
+        $wishlistProductIds = $this->getWishlistProductIds($request);
+        // dd($wishlistProductIds);
         $products->getCollection()->transform(function ($product) use ($wishlistProductIds) {
             return [
                 'id' => $product->id,
@@ -198,7 +212,9 @@ class OnboardingQuestionApiController extends Controller
         return response()->json([
             'success' => true,
             'data' => $products,
-            'message' => 'Onboarding answers submitted successfully.'
+            'message' => 'Onboarding answers submitted successfully.',
+            'debug_user' => $user ? $user->id : null,
+            'debug_wishlist_ids' => $wishlistProductIds,
         ], 200, [], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
     }
 }

@@ -78,8 +78,7 @@ Route::group(['middleware' => 'api'], function($router){
 
     // Onboarding Questions & CMS Card Text
     Route::get('/onboarding/questions', [OnboardingQuestionApiController::class, 'getQuestions']);
-        // Onboarding Submit
-    Route::post('/onboarding/submit', [OnboardingQuestionApiController::class, 'submitAnswers']);
+
 
 
     Route::group(['middleware' => ['auth:api']], function () {
@@ -87,6 +86,8 @@ Route::group(['middleware' => 'api'], function($router){
         Route::post('/health-professional/profile/update', [ProfileController::class, 'updateProfile']);
 
         Route::post('/submit-review', [ReviewApiController::class, 'submitReview']);
+        // Onboarding Submit
+        Route::post('/onboarding/submit', [OnboardingQuestionApiController::class, 'submitAnswers']);
     });
 });
 

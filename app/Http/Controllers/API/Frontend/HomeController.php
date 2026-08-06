@@ -8,13 +8,31 @@ use App\Models\Brand;
 use App\Models\Category;
 use App\Models\Product;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use App\Models\Wishlist;
 
 class HomeController extends BaseController
 {
+
+    private function getWishlistProductIds(Request $request)
+    {
+        $user = null;
+        try {
+            $user = auth('api')->user() ?: Auth::user();
+        } catch (\Exception $e) {
+            $user = null;
+        }
+
+        if ($user) {
+            return Wishlist::where('user_id', $user->id)->pluck('product_id')->toArray();
+        }
+
+        return [];
+    }
     /**
      * Get all active products for the home page.
      */
-    public function getAllProducts(Request $request)
+   public function getAllProducts(Request $request)
     {
         try {
             $limit = (int) $request->input('limit', $request->input('per_page', 12));
@@ -22,12 +40,14 @@ class HomeController extends BaseController
                 $limit = 12;
             }
 
-            $products = Product::with(['category', 'brandData'])
+            $wishlistProductIds = $this->getWishlistProductIds($request);
+
+            $products = Product::with(['category', 'brandData', 'batch'])
                 ->where('status', 'active')
                 ->latest()
                 ->paginate($limit);
 
-            $products->getCollection()->transform(function ($product) {
+            $products->getCollection()->transform(function ($product) use ($wishlistProductIds) {
                 return [
                     'id' => $product->id,
                     'name' => $product->name,
@@ -36,8 +56,8 @@ class HomeController extends BaseController
                     'price' => (float) $product->price,
                     'old_price' => $product->old_price ? (float) $product->old_price : null,
                     'image' => $product->main_image ? asset($product->main_image) : null,
-                    'is_popular' => (bool) $product->is_popular,
                     'in_stock' => (bool) $product->in_stock,
+                    'is_wishlist' => in_array($product->id, $wishlistProductIds),
                     'quantity' => (int) $product->quantity,
                     'rating' => (float) $product->rating,
                     'category' => $product->category ? $product->category->name : null,
@@ -45,6 +65,11 @@ class HomeController extends BaseController
                         'name' => $product->brandData->name,
                         'specialty' => $product->brandData->specialty,
                         'rating' => (float) $product->brandData->rating,
+                    ] : null,
+                    'batch' => $product->batch ? [
+                        'id' => (int) $product->batch->id,
+                        'name' => $product->batch->name,
+                        'color' => $product->batch->color,
                     ] : null,
                 ];
             });
