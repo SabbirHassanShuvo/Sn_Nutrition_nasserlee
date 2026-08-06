@@ -123,7 +123,7 @@ class OnboardingQuestionApiController extends Controller
 
         // Search for matching products
         $productsQuery = Product::query()
-            ->with(['category', 'brandData'])
+            ->with(['category', 'brandData', 'batch'])
             ->where('status', 'active')
             ->where('in_stock', true);
 
@@ -152,24 +152,53 @@ class OnboardingQuestionApiController extends Controller
         }
 
         // Get up to 8 suggested products
-        $suggestedProducts = $productsQuery->limit(8)->get();
+        $products = $productsQuery->paginate(8);
 
         // If no products match recommendations, return a default list of active products
-        if ($suggestedProducts->isEmpty()) {
-            $suggestedProducts = Product::query()
-                ->with(['category', 'brandData'])
+        if ($products->isEmpty()) {
+            $products = Product::query()
+                ->with(['category', 'brandData', 'batch'])
                 ->where('status', 'active')
                 ->where('in_stock', true)
-                ->limit(8)
-                ->get();
+                ->paginate(8);
         }
+
+        $wishlistProductIds = [];
+        if ($user) {
+            $wishlistProductIds = \App\Models\Wishlist::where('user_id', $user->id)->pluck('product_id')->toArray();
+        }
+
+        $products->getCollection()->transform(function ($product) use ($wishlistProductIds) {
+            return [
+                'id' => $product->id,
+                'name' => $product->name,
+                'slug' => $product->slug,
+                'short_description' => $product->short_description,
+                'price' => (float) $product->price,
+                'old_price' => $product->old_price ? (float) $product->old_price : null,
+                'image' => $product->main_image ? asset($product->main_image) : null,
+                'in_stock' => (bool) $product->in_stock,
+                'is_wishlist' => in_array($product->id, $wishlistProductIds),
+                'quantity' => (int) $product->quantity,
+                'rating' => (float) $product->rating,
+                'category' => $product->category ? $product->category->name : null,
+                'brand' => $product->brandData ? [
+                    'name' => $product->brandData->name,
+                    'specialty' => $product->brandData->specialty,
+                    'rating' => (float) $product->brandData->rating,
+                ] : null,
+                'batch' => $product->batch ? [
+                    'id' => $product->batch->id,
+                    'name' => $product->batch->name,
+                    'color' => $product->batch->color,
+                ] : null,
+            ];
+        });
 
         return response()->json([
             'success' => true,
-            'message' => 'Onboarding answers submitted successfully.',
-            'data' => [
-                'suggested_products' => $suggestedProducts
-            ]
-        ], 200);
+            'data' => $products,
+            'message' => 'Onboarding answers submitted successfully.'
+        ], 200, [], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
     }
 }

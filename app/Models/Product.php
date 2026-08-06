@@ -103,6 +103,11 @@ class Product extends Model
         return $this->belongsTo(Brand::class, 'brand_id');
     }
 
+    public function batch()
+    {
+        return $this->belongsTo(Batch::class);
+    }
+
     public function features()
     {
         return $this->hasMany(ProductFeature::class);

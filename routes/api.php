@@ -81,6 +81,7 @@ Route::group(['middleware' => 'api'], function($router){
         // Onboarding Submit
     Route::post('/onboarding/submit', [OnboardingQuestionApiController::class, 'submitAnswers']);
 
+
     Route::group(['middleware' => ['auth:api']], function () {
         Route::get('/health-professional/profile', [ProfileController::class, 'detailsProfile']);
         Route::post('/health-professional/profile/update', [ProfileController::class, 'updateProfile']);
