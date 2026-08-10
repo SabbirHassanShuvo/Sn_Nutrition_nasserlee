@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Spatie\Permission\Models\Role;
 use App\Http\Controllers\Controller;
 use Spatie\Permission\Models\Permission;
+use Spatie\Permission\PermissionRegistrar;
 use Yajra\DataTables\Facades\DataTables;
 
 class RoleController extends Controller
@@ -16,24 +17,30 @@ class RoleController extends Controller
             $roles = Role::where('name', '!=', 'super_admin')->get();
             return DataTables::of($roles)
                 ->addIndexColumn()
+                ->addColumn('name', function ($role) {
+                    return '<div class="d-flex align-items-center"><i class="ri-shield-user-fill text-primary me-2 fs-16"></i> <span class="fw-bold text-dark fs-14">' . str_replace('_', ' ', ucwords($role->name)) . '</span></div>';
+                })
                 ->addColumn('permissions', function ($role) {
-                    return $role->permissions->map(function($permission) {
-                        return '<span class="badge bg-soft-info text-info me-1">' . $permission->name . '</span>';
-                    })->implode(' ');
+                    if ($role->permissions->count() == 0) {
+                        return '<span class="badge bg-soft-secondary text-muted fs-11">No permissions assigned</span>';
+                    }
+                    return '<div class="d-flex flex-wrap gap-1" style="max-height: 80px; overflow-y: auto;">' . $role->permissions->map(function($permission) {
+                        return '<span class="badge bg-soft-info text-info fs-11 py-1 px-2 text-lowercase fw-normal">' . $permission->name . '</span>';
+                    })->implode(' ') . '</div>';
                 })
                 ->addColumn('action', function ($role) {
                     return '
                         <div class="d-flex gap-2 justify-content-center">
-                            <a href="' . route('backend.role.edit', $role->id) . '" class="btn btn-soft-info btn-sm" data-bs-toggle="tooltip" title="Edit">
-                                <i class="mdi mdi-pencil fs-14"></i>
+                            <a href="' . route('backend.role.edit', $role->id) . '" class="btn btn-soft-info btn-sm px-2 py-1" data-bs-toggle="tooltip" title="Edit Role & Permissions">
+                                <i class="ri-pencil-line fs-14 me-1"></i> Edit
                             </a>
-                            <button type="button" onclick="deleteData(\'' . route('backend.role.destroy', $role->id) . '\')" class="btn btn-soft-danger btn-sm" data-bs-toggle="tooltip" title="Delete">
-                                <i class="mdi mdi-delete fs-14"></i>
+                            <button type="button" onclick="deleteData(\'' . route('backend.role.destroy', $role->id) . '\')" class="btn btn-soft-danger btn-sm px-2 py-1" data-bs-toggle="tooltip" title="Delete Role">
+                                <i class="ri-delete-bin-line fs-14"></i>
                             </button>
                         </div>
                     ';
                 })
-                ->rawColumns(['permissions', 'action'])
+                ->rawColumns(['name', 'permissions', 'action'])
                 ->make(true);
         }
         return view("backend.layout.roles.index");
@@ -42,7 +49,6 @@ class RoleController extends Controller
     public function create()
     {
         $permissions = Permission::all()->groupBy(function($item) {
-            // Group by the first word of the permission name (e.g. 'user_management' -> 'user')
             return explode('_', $item->name)[0];
         });
         return view('backend.layout.roles.form', compact('permissions'));
@@ -52,11 +58,15 @@ class RoleController extends Controller
     {
         $request->validate([
             'name' => 'required|unique:roles,name',
-            'permissions' => 'required|array',
+            'permissions' => 'nullable|array',
         ]);
 
         $role = Role::create(['name' => $request->name, 'guard_name' => 'web']);
-        $role->syncPermissions($request->permissions);
+        if ($request->has('permissions')) {
+            $role->syncPermissions($request->permissions);
+        }
+
+        app()[PermissionRegistrar::class]->forgetCachedPermissions();
 
         return redirect()->route('backend.role.index')->with('success', 'Role created successfully');
     }
@@ -78,11 +88,13 @@ class RoleController extends Controller
     {
         $request->validate([
             'name' => 'required|unique:roles,name,' . $role->id,
-            'permissions' => 'required|array',
+            'permissions' => 'nullable|array',
         ]);
 
         $role->update(['name' => $request->name]);
-        $role->syncPermissions($request->permissions);
+        $role->syncPermissions($request->input('permissions', []));
+
+        app()[PermissionRegistrar::class]->forgetCachedPermissions();
 
         return redirect()->route('backend.role.index')->with('success', 'Role updated successfully');
     }
@@ -94,6 +106,9 @@ class RoleController extends Controller
                 return response()->json(['success' => false, 'message' => 'Super Admin cannot be deleted.']);
             }
             $role->delete();
+
+            app()[PermissionRegistrar::class]->forgetCachedPermissions();
+
             return response()->json(['success' => true, 'message' => 'Role deleted successfully.']);
         } catch (\Exception $e) {
             return response()->json(['success' => false, 'message' => 'Failed to delete role.']);
@@ -106,19 +121,28 @@ class RoleController extends Controller
             $permissions = Permission::all();
             return DataTables::of($permissions)
                 ->addIndexColumn()
+                ->addColumn('name', function ($permission) {
+                    return '<div class="d-flex align-items-center"><i class="ri-key-2-line text-warning me-2 fs-15"></i> <span class="fw-medium text-dark">' . $permission->name . '</span></div>';
+                })
                 ->addColumn('group', function ($permission) {
-                    return explode('_', $permission->name)[0];
+                    return '<span class="badge bg-soft-primary text-primary text-uppercase fs-11 py-1 px-2">' . explode('_', $permission->name)[0] . '</span>';
                 })
                 ->addColumn('action', function ($permission) {
                     return '
                         <div class="d-flex gap-2 justify-content-center">
-                            <button type="button" onclick="deletePermission(\'' . route('backend.permission.destroy', $permission->id) . '\')" class="btn btn-soft-danger btn-sm" data-bs-toggle="tooltip" title="Delete">
-                                <i class="mdi mdi-delete fs-14"></i>
+                            <button type="button" onclick="previewPermission(' . $permission->id . ')" class="btn btn-soft-success btn-sm px-2" data-bs-toggle="tooltip" title="View Users & Roles">
+                                <i class="ri-eye-line fs-14"></i>
+                            </button>
+                            <button type="button" onclick="editPermission(' . $permission->id . ', \'' . $permission->name . '\')" class="btn btn-soft-info btn-sm px-2" data-bs-toggle="tooltip" title="Edit Name">
+                                <i class="ri-pencil-line fs-14"></i>
+                            </button>
+                            <button type="button" onclick="deletePermission(\'' . route('backend.permission.destroy', $permission->id) . '\')" class="btn btn-soft-danger btn-sm px-2" data-bs-toggle="tooltip" title="Delete">
+                                <i class="ri-delete-bin-line fs-14"></i>
                             </button>
                         </div>
                     ';
                 })
-                ->rawColumns(['action'])
+                ->rawColumns(['name', 'group', 'action'])
                 ->make(true);
         }
         return redirect()->route('backend.role.index');
@@ -127,7 +151,7 @@ class RoleController extends Controller
     public function permissionStore(Request $request)
     {
         $request->validate([
-            'name' => 'required|unique:permissions,name|string|max:255',
+            'name' => 'required|string|max:255',
         ]);
 
         try {
@@ -139,7 +163,16 @@ class RoleController extends Controller
                 return response()->json(['success' => false, 'message' => 'Permission already exists.']);
             }
 
-            Permission::create(['name' => $name, 'guard_name' => 'web']);
+            $permission = Permission::create(['name' => $name, 'guard_name' => 'web']);
+
+            // Auto-assign to super_admin role if exists
+            $superAdmin = Role::where('name', 'super_admin')->first();
+            if ($superAdmin) {
+                $superAdmin->givePermissionTo($permission);
+            }
+
+            app()[PermissionRegistrar::class]->forgetCachedPermissions();
+
             return response()->json(['success' => true, 'message' => 'Permission created successfully.']);
         } catch (\Exception $e) {
             return response()->json(['success' => false, 'message' => 'Failed to create permission: ' . $e->getMessage()]);
@@ -151,6 +184,9 @@ class RoleController extends Controller
         try {
             $permission = Permission::findOrFail($id);
             $permission->delete();
+
+            app()[PermissionRegistrar::class]->forgetCachedPermissions();
+
             return response()->json(['success' => true, 'message' => 'Permission deleted successfully.']);
         } catch (\Exception $e) {
             return response()->json(['success' => false, 'message' => 'Failed to delete permission.']);
@@ -163,10 +199,13 @@ class RoleController extends Controller
             $permission = Permission::findOrFail($id);
             $roles = $permission->roles()->pluck('name')->toArray();
             
-            $users = collect();
-            if (!empty($roles)) {
-                $users = \App\Models\User::role($roles)->get(['name', 'email', 'avatar']);
-            }
+            // Get all users who have this permission (either via role or direct permission)
+            $users = \App\Models\User::permission($permission->name)->get(['id', 'name', 'email', 'avatar']);
+
+            // If super_admin role exists, super_admin users also have all permissions
+            $superAdminUsers = \App\Models\User::role('super_admin')->get(['id', 'name', 'email', 'avatar']);
+
+            $allUsers = $users->concat($superAdminUsers)->unique('id')->values();
 
             return response()->json([
                 'success' => true,
@@ -174,11 +213,11 @@ class RoleController extends Controller
                     'id' => $permission->id,
                     'name' => $permission->name,
                     'roles' => $roles,
-                    'users' => $users
+                    'users' => $allUsers
                 ]
             ]);
         } catch (\Exception $e) {
-            return response()->json(['success' => false, 'message' => 'Permission not found.']);
+            return response()->json(['success' => false, 'message' => 'Permission not found: ' . $e->getMessage()]);
         }
     }
 
@@ -197,6 +236,9 @@ class RoleController extends Controller
             }
 
             $permission->update(['name' => $name]);
+
+            app()[PermissionRegistrar::class]->forgetCachedPermissions();
+
             return response()->json(['success' => true, 'message' => 'Permission updated successfully.']);
         } catch (\Exception $e) {
             return response()->json(['success' => false, 'message' => 'Failed to update permission: ' . $e->getMessage()]);

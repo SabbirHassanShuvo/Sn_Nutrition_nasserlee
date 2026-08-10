@@ -15,8 +15,8 @@ class Product extends Model
         'in_stock' => 'boolean',
         'category_id' => 'integer',
         'brand_id' => 'integer',
+        'batch_id' => 'integer',
         'quantity' => 'integer',
-        'is_popular' => 'boolean',
     ];
 
     protected $appends = [

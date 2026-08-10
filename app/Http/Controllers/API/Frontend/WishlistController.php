@@ -17,7 +17,7 @@ class WishlistController extends BaseController
     {
         try {
             $user = Auth::user();
-            $query = Wishlist::with(['product.category', 'product.brandData'])
+            $query = Wishlist::with(['product.category', 'product.brandData', 'product.batch'])
                 ->where('user_id', $user->id)
                 ->latest();
 
@@ -40,8 +40,8 @@ class WishlistController extends BaseController
                         'price' => (float) $product->price,
                         'old_price' => $product->old_price ? (float) $product->old_price : null,
                         'image' => $product->main_image ? asset($product->main_image) : null,
-                        'is_popular' => (bool) $product->is_popular,
                         'in_stock' => (bool) $product->in_stock,
+                        'is_wishlist' => true,
                         'quantity' => (int) $product->quantity,
                         'rating' => (float) $product->rating,
                         'category' => $product->category ? $product->category->name : null,
@@ -49,6 +49,11 @@ class WishlistController extends BaseController
                             'name' => $product->brandData->name,
                             'specialty' => $product->brandData->specialty,
                             'rating' => (float) $product->brandData->rating,
+                        ] : null,
+                        'batch' => $product->batch ? [
+                            'id' => (int) $product->batch->id,
+                            'name' => $product->batch->name,
+                            'color' => $product->batch->color,
                         ] : null,
                     ];
                 });
@@ -67,8 +72,8 @@ class WishlistController extends BaseController
                     'price' => (float) $product->price,
                     'old_price' => $product->old_price ? (float) $product->old_price : null,
                     'image' => $product->main_image ? asset($product->main_image) : null,
-                    'is_popular' => (bool) $product->is_popular,
                     'in_stock' => (bool) $product->in_stock,
+                    'is_wishlist' => true,
                     'quantity' => (int) $product->quantity,
                     'rating' => (float) $product->rating,
                     'category' => $product->category ? $product->category->name : null,
@@ -76,6 +81,11 @@ class WishlistController extends BaseController
                         'name' => $product->brandData->name,
                         'specialty' => $product->brandData->specialty,
                         'rating' => (float) $product->brandData->rating,
+                    ] : null,
+                    'batch' => $product->batch ? [
+                        'id' => (int) $product->batch->id,
+                        'name' => $product->batch->name,
+                        'color' => $product->batch->color,
                     ] : null,
                 ];
             });
@@ -105,13 +115,13 @@ class WishlistController extends BaseController
 
             if ($exists) {
                 $exists->delete();
-                return $this->sendResponse(null, 'Product removed from wishlist.');
+                return $this->sendResponse(['is_wishlist' => false], 'Product removed from wishlist.');
             } else {
                 Wishlist::create([
                     'user_id' => $user->id,
                     'product_id' => $productId,
                 ]);
-                return $this->sendResponse(null, 'Product added to wishlist.');
+                return $this->sendResponse(['is_wishlist' => true], 'Product added to wishlist.');
             }
         } catch (\Exception $e) {
             return $this->sendError('Failed to update wishlist.', $e->getMessage());
@@ -132,7 +142,7 @@ class WishlistController extends BaseController
             }
 
             $wishlist->delete();
-            return $this->sendResponse(null, 'Product removed from wishlist.');
+            return $this->sendResponse(['is_wishlist' => false], 'Product removed from wishlist.');
         } catch (\Exception $e) {
             return $this->sendError('Failed to remove from wishlist.', $e->getMessage());
         }
