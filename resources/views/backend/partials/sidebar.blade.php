@@ -42,7 +42,7 @@
                     </a>
                 </li>
 
-                <!-- @role('super_admin')
+               @role('super_admin')
                     <li class="nav-item">
                         <a class="nav-link menu-link {{ getPageStatus(['backend.role.*', 'backend.system-user.*'], 'collapsed active') }}"
                             href="#sidebarLanding" data-bs-toggle="collapse" role="button" aria-expanded="false"
@@ -65,7 +65,7 @@
                             </ul>
                         </div>
                     </li>
-                @endrole -->
+                @endrole
 
                 @can('user_management')
                 <li class="nav-item">
@@ -76,7 +76,7 @@
                 </li>
                 @endcan
 
-                {{-- <li class="nav-item">
+                <li class="nav-item">
                     <a class="nav-link menu-link  {{getPageStatus('backend.dashboard.*', 'collapsed active')}}" href="#sidebarDashboards" data-bs-toggle="collapse" role="button" aria-expanded="false" aria-controls="sidebarDashboards">
                         <i class="ri-dashboard-2-line"></i> <span data-key="t-dashboards">Dashboards</span>
                     </a>
@@ -87,7 +87,7 @@
                             </li>
                         </ul>
                     </div>
-                </li>  --}}
+                </li>
                 <!-- end Dashboard Menu -->
 
                 @canany(['categories_manage', 'category_manage'])
@@ -189,7 +189,7 @@
                     </a>
                 </li>
 
-                <!-- @canany(['onboarding_options_manage', 'onboarding_manage'])
+                @canany(['onboarding_options_manage', 'onboarding_manage'])
                 <li class="nav-item">
                     <a class="nav-link menu-link {{ request()->routeIs('backend.onboarding-option.*') ? 'active' : '' }}"
                         href="{{ route('backend.onboarding-option.index') }}">
@@ -204,7 +204,7 @@
                 </li>
                 @endcanany
 
-                <!-- @canany(['setting_profile', 'setting_system', 'setting_mail'])
+                @canany(['setting_profile', 'setting_system', 'setting_mail'])
                 <li class="nav-item">
                     <a class="nav-link menu-link {{ getPageStatus('backend.settings.*') }}" href="#sidebarMultilevel"
                         data-bs-toggle="collapse" role="button" aria-expanded="false"
@@ -245,8 +245,7 @@
                         </ul>
                     </div>
                 </li>
-                @endcanany -->
-
+                @endcanany
 
                 {{-- Cms --}}
                 @canany(['cms_banner', 'cms_pages', 'cms_faq', 'cms_home_page', 'cms_about_page', 'cms_contact_page', 'cms_how_it_works'])
