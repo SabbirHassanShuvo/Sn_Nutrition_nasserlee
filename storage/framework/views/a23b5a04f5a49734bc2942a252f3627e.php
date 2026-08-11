@@ -41,7 +41,7 @@
                     </a>
                 </li>
 
-                <!-- <?php if (\Illuminate\Support\Facades\Blade::check('role', 'super_admin')): ?>
+               <?php if (\Illuminate\Support\Facades\Blade::check('role', 'super_admin')): ?>
                     <li class="nav-item">
                         <a class="nav-link menu-link <?php echo e(getPageStatus(['backend.role.*', 'backend.system-user.*'], 'collapsed active')); ?>"
                             href="#sidebarLanding" data-bs-toggle="collapse" role="button" aria-expanded="false"
@@ -64,7 +64,7 @@
                             </ul>
                         </div>
                     </li>
-                <?php endif; ?> -->
+                <?php endif; ?>
 
                 <?php if (app(\Illuminate\Contracts\Auth\Access\Gate::class)->check('user_management')): ?>
                 <li class="nav-item">
@@ -75,8 +75,6 @@
                 </li>
                 <?php endif; ?>
 
-                
-                <!-- end Dashboard Menu -->
 
                 <?php if (app(\Illuminate\Contracts\Auth\Access\Gate::class)->any(['categories_manage', 'category_manage'])): ?>
                 <li class="nav-item">
