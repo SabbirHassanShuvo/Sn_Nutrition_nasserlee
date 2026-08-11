@@ -18,6 +18,7 @@ use App\Http\Controllers\Web\Backend\Cms\AboutPageController;
 use App\Http\Controllers\Web\Backend\Cms\HowItWorksController;
 use App\Http\Controllers\Web\Backend\OnboardingQuestionController;
 use App\Http\Controllers\Web\Backend\OnboardingOptionController;
+use App\Http\Controllers\Web\Backend\AffiliateTierSettingController;
 
 
 use Illuminate\Support\Facades\Mail;
@@ -25,10 +26,17 @@ use App\Mail\TestMail;
 
 Route::group([ 'as'=>'backend.'], function () {
 
-    require_once __DIR__.'/queue.php';
+    Route::group(['middleware' => 'role:super_admin'], function () {
+        require_once __DIR__.'/queue.php';
+    });
 
     Route::get('/', [SiteController::class,'index'])->name('dashboard.index');
-    Route::resource('project', ProjectController::class)->except(['show']);
+
+    // Project Management
+    Route::group(['middleware' => 'permission:projects_manage|project_manage'], function () {
+        Route::resource('project', ProjectController::class)->except(['show']);
+    });
+    
 
 
 
@@ -231,6 +239,17 @@ Route::group([ 'as'=>'backend.'], function () {
         Route::delete('subscribers/bulk-destroy', [SubscriberController::class, 'bulkDestroy'])->name('subscribers.bulk-destroy');
         Route::post('subscribers/read/{id}', [SubscriberController::class, 'markAsRead'])->name('subscribers.read');
         Route::resource('subscribers', SubscriberController::class)->only(['index', 'destroy']);
+    });
+
+    // Affiliate Tier Settings & Payouts
+    Route::group(['middleware' => 'permission:approve_payouts|affiliate_features'], function () {
+        Route::get('affiliate-settings', [AffiliateTierSettingController::class, 'index'])->name('affiliate-setting.index');
+        Route::put('affiliate-settings', [AffiliateTierSettingController::class, 'update'])->name('affiliate-setting.update');
+
+        Route::get('affiliate-payouts', [\App\Http\Controllers\Web\Backend\AffiliatePayoutController::class, 'index'])->name('affiliate-payout.index');
+        Route::put('affiliate-payouts/{id}/process', [\App\Http\Controllers\Web\Backend\AffiliatePayoutController::class, 'process'])->name('affiliate-payout.process');
+        Route::delete('affiliate-payouts/bulk-destroy', [\App\Http\Controllers\Web\Backend\AffiliatePayoutController::class, 'bulkDestroy'])->name('affiliate-payout.bulk-destroy');
+        Route::delete('affiliate-payouts/{id}', [\App\Http\Controllers\Web\Backend\AffiliatePayoutController::class, 'destroy'])->name('affiliate-payout.destroy');
     });
 
     require_once __DIR__ .'/settings.php';

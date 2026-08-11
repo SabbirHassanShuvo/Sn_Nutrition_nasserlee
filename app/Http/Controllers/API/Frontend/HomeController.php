@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\Frontend;
 
 use App\Http\Controllers\Api\BaseController;
 use App\Http\Controllers\Controller;
+use App\Models\Batch;
 use App\Models\Brand;
 use App\Models\Category;
 use App\Models\Product;
@@ -11,8 +12,10 @@ use App\Models\Wishlist;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
+
 class HomeController extends BaseController
 {
+
     /**
      * Helper to get wishlisted product IDs for current user.
      */
@@ -35,8 +38,13 @@ class HomeController extends BaseController
     /**
      * Get all active products for the home page.
      */
-    public function getAllProducts(Request $request)
+   public function getAllProducts(Request $request)
     {
+        // If filter query parameters are present, delegate to filterProducts
+        if ($request->hasAny(['search', 'category_id', 'categories', 'category', 'brand_id', 'brands', 'brand', 'batch_id', 'batches', 'batch', 'min_price', 'max_price', 'price', 'sort'])) {
+            return $this->filterProducts($request);
+        }
+
         try {
             $limit = (int) $request->input('limit', $request->input('per_page', 12));
             if ($limit <= 0) {
@@ -84,7 +92,7 @@ class HomeController extends BaseController
     }
 
     /**
-     * Filter products based on search query, category, brand, and price.
+     * Filter products based on global search query, batch, category, brand, and price.
      */
     public function filterProducts(Request $request)
     {
@@ -93,33 +101,186 @@ class HomeController extends BaseController
 
             $query = Product::with(['category', 'brandData', 'batch'])->where('status', 'active');
 
-            // Search by name or description
+            // Global search across product name, short description, full description, category name, brand name, and batch name
             if ($request->filled('search')) {
                 $search = $request->search;
                 $query->where(function ($q) use ($search) {
                     $q->where('name', 'like', "%$search%")
-                      ->orWhere('short_description', 'like', "%$search%");
+                      ->orWhere('short_description', 'like', "%$search%")
+                      ->orWhere('full_description', 'like', "%$search%")
+                      ->orWhereHas('category', function ($cq) use ($search) {
+                          $cq->where('name', 'like', "%$search%");
+                      })
+                      ->orWhereHas('brandData', function ($bq) use ($search) {
+                          $bq->where('name', 'like', "%$search%");
+                      })
+                      ->orWhereHas('batch', function ($btq) use ($search) {
+                          $btq->where('name', 'like', "%$search%");
+                      });
                 });
             }
 
-            // Filter by category (single or multiple)
-            $catParam = $request->input('category_id', $request->input('categories'));
+            // Filter by batch (batch_id, batches, batch)
+            $batchParam = null;
+            foreach (['batch_id', 'batches', 'batch'] as $key) {
+                if ($request->filled($key)) {
+                    $val = $request->input($key);
+                    if (is_array($val) || (strtolower((string)$val) !== 'all')) {
+                        $batchParam = $val;
+                        break;
+                    }
+                }
+            }
+
+            if ($batchParam !== null && $batchParam !== '') {
+                if (is_string($batchParam) && str_starts_with($batchParam, '[') && str_ends_with($batchParam, ']')) {
+                    $batchParam = json_decode($batchParam, true);
+                }
+                $batchValues = is_array($batchParam) ? $batchParam : array_map('trim', explode(',', (string) $batchParam));
+                $batchValues = array_filter($batchValues, function($v) {
+                    return $v !== null && $v !== '' && strtolower((string)$v) !== 'all';
+                });
+
+                if (!empty($batchValues)) {
+                    $batchIds = [];
+                    $batchNames = [];
+                    foreach ($batchValues as $val) {
+                        if (is_numeric($val)) {
+                            $batchIds[] = (int) $val;
+                        } else {
+                            $batchNames[] = (string) $val;
+                        }
+                    }
+
+                    if (!empty($batchNames)) {
+                        $matchedBatchIds = Batch::where(function ($bq) use ($batchNames) {
+                            foreach ($batchNames as $name) {
+                                $bq->orWhere('name', 'like', "%$name%")
+                                   ->orWhereRaw('LOWER(name) LIKE ?', ['%' . strtolower($name) . '%']);
+                                
+                                // Common typo handling (e.g. 'populer' -> 'popular')
+                                $altName = str_replace(['populer', 'populr'], 'popular', strtolower($name));
+                                if ($altName !== strtolower($name)) {
+                                    $bq->orWhereRaw('LOWER(name) LIKE ?', ['%' . $altName . '%']);
+                                }
+                            }
+                        })->pluck('id')->toArray();
+
+                        $batchIds = array_merge($batchIds, $matchedBatchIds);
+                    }
+
+                    $batchIds = array_unique($batchIds);
+                    if (!empty($batchIds)) {
+                        $query->whereIn('batch_id', $batchIds);
+                    } else {
+                        // Batch filter was supplied but no matching batch exists -> return 0 products
+                        $query->whereRaw('1 = 0');
+                    }
+                }
+            }
+
+            // Filter by category (category_id, categories, category)
+            $catParam = null;
+            foreach (['category_id', 'categories', 'category'] as $key) {
+                if ($request->filled($key)) {
+                    $val = $request->input($key);
+                    if (is_array($val) || (strtolower((string)$val) !== 'all')) {
+                        $catParam = $val;
+                        break;
+                    }
+                }
+            }
+
             if ($catParam !== null && $catParam !== '') {
                 if (is_string($catParam) && str_starts_with($catParam, '[') && str_ends_with($catParam, ']')) {
                     $catParam = json_decode($catParam, true);
                 }
-                $categoryIds = is_array($catParam) ? $catParam : array_map('trim', explode(',', $catParam));
-                $query->whereIn('category_id', $categoryIds);
+                $catValues = is_array($catParam) ? $catParam : array_map('trim', explode(',', (string) $catParam));
+                $catValues = array_filter($catValues, function($v) {
+                    return $v !== null && $v !== '' && strtolower((string)$v) !== 'all';
+                });
+
+                if (!empty($catValues)) {
+                    $catIds = [];
+                    $catNames = [];
+                    foreach ($catValues as $val) {
+                        if (is_numeric($val)) {
+                            $catIds[] = (int) $val;
+                        } else {
+                            $catNames[] = (string) $val;
+                        }
+                    }
+
+                    if (!empty($catNames)) {
+                        $matchedCatIds = Category::where(function ($cq) use ($catNames) {
+                            foreach ($catNames as $name) {
+                                $cq->orWhere('name', 'like', "%$name%")
+                                   ->orWhereRaw('LOWER(name) LIKE ?', ['%' . strtolower($name) . '%']);
+                            }
+                        })->pluck('id')->toArray();
+
+                        $catIds = array_merge($catIds, $matchedCatIds);
+                    }
+
+                    $catIds = array_unique($catIds);
+                    if (!empty($catIds)) {
+                        $query->whereIn('category_id', $catIds);
+                    } else {
+                        $query->whereRaw('1 = 0');
+                    }
+                }
             }
 
-            // Filter by brand (single or multiple)
-            $brandParam = $request->input('brand_id', $request->input('brands'));
+            // Filter by brand (brand_id, brands, brand)
+            $brandParam = null;
+            foreach (['brand_id', 'brands', 'brand'] as $key) {
+                if ($request->filled($key)) {
+                    $val = $request->input($key);
+                    if (is_array($val) || (strtolower((string)$val) !== 'all')) {
+                        $brandParam = $val;
+                        break;
+                    }
+                }
+            }
+
             if ($brandParam !== null && $brandParam !== '') {
                 if (is_string($brandParam) && str_starts_with($brandParam, '[') && str_ends_with($brandParam, ']')) {
                     $brandParam = json_decode($brandParam, true);
                 }
-                $brandIds = is_array($brandParam) ? $brandParam : array_map('trim', explode(',', $brandParam));
-                $query->whereIn('brand_id', $brandIds);
+                $brandValues = is_array($brandParam) ? $brandParam : array_map('trim', explode(',', (string) $brandParam));
+                $brandValues = array_filter($brandValues, function($v) {
+                    return $v !== null && $v !== '' && strtolower((string)$v) !== 'all';
+                });
+
+                if (!empty($brandValues)) {
+                    $brandIds = [];
+                    $brandNames = [];
+                    foreach ($brandValues as $val) {
+                        if (is_numeric($val)) {
+                            $brandIds[] = (int) $val;
+                        } else {
+                            $brandNames[] = (string) $val;
+                        }
+                    }
+
+                    if (!empty($brandNames)) {
+                        $matchedBrandIds = Brand::where(function ($bq) use ($brandNames) {
+                            foreach ($brandNames as $name) {
+                                $bq->orWhere('name', 'like', "%$name%")
+                                   ->orWhereRaw('LOWER(name) LIKE ?', ['%' . strtolower($name) . '%']);
+                            }
+                        })->pluck('id')->toArray();
+
+                        $brandIds = array_merge($brandIds, $matchedBrandIds);
+                    }
+
+                    $brandIds = array_unique($brandIds);
+                    if (!empty($brandIds)) {
+                        $query->whereIn('brand_id', $brandIds);
+                    } else {
+                        $query->whereRaw('1 = 0');
+                    }
+                }
             }
 
             // Filter by price range
@@ -163,6 +324,7 @@ class HomeController extends BaseController
             }
 
             $products = $query->paginate($limit);
+            $products->appends($request->all());
 
             $products->getCollection()->transform(function ($product) use ($wishlistProductIds) {
                 return [
@@ -198,17 +360,19 @@ class HomeController extends BaseController
     }
 
     /**
-     * Get available categories and brands for filtering.
+     * Get available categories, brands, and batches for filtering.
      */
     public function getFilters()
     {
         try {
             $categories = Category::select('id', 'name')->where('status', 'active')->get();
             $brands = Brand::select('id', 'name', 'specialty', 'rating')->where('status', 'active')->get();
+            $batches = Batch::select('id', 'name', 'color')->where('status', 'active')->get();
 
             return $this->sendResponse([
                 'categories' => $categories,
                 'brands' => $brands,
+                'batches' => $batches,
                 'price_range' => [
                     'min' => (float) Product::min('price'),
                     'max' => (float) Product::max('price'),

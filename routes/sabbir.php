@@ -60,11 +60,19 @@ Route::middleware('auth:api')->group(function () {
     Route::prefix('affiliate')->group(function () {
         Route::post('/generate-link', [AffiliateController::class, 'generateLink']);
         Route::get('/stats', [AffiliateController::class, 'getDashboardStats']);
+        Route::get('/dashboard-stats', [AffiliateController::class, 'getDashboardStats']);
+        Route::get('/commissions-overview', [AffiliateController::class, 'getCommissionsOverview']);
         Route::get('/links', [AffiliateController::class, 'getLinks']);
         Route::get('/orders', [AffiliateController::class, 'getOrders']);
+        Route::get('/recent-orders', [AffiliateController::class, 'getRecentOrders']);
+        Route::get('/top-commission-orders', [AffiliateController::class, 'getTopCommissionOrders']);
+        Route::get('/payout-methods', [AffiliateController::class, 'getPayoutMethods']);
+        Route::post('/payout-methods', [AffiliateController::class, 'storePayoutMethod']);
+        Route::post('/payout-requests', [AffiliateController::class, 'requestPayout']);
         Route::get('/payout-history', [AffiliateController::class, 'getPayoutHistory']);
         Route::get('/tiers', [AffiliateController::class, 'getTiersInfo']);
         Route::get('/earnings-chart', [AffiliateController::class, 'getEarningsChart']);
+        Route::get('/top-categories', [AffiliateController::class, 'getTopCategories']);
     });
 });
 

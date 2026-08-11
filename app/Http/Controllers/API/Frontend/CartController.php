@@ -40,6 +40,7 @@ class CartController extends BaseController
                 'name' => $product->name,
                 'short_description' => $product->short_description,
                 'price' => (float) $product->price,
+                'old_price' => $product->old_price ? (float) $product->old_price : null,
                 'image' => $product->main_image ? asset($product->main_image) : null,
                 'quantity' => (int) $item->quantity,
                 'total_price' => (float) ($product->price * $item->quantity),

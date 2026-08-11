@@ -105,7 +105,7 @@ class Product extends Model
 
     public function batch()
     {
-        return $this->belongsTo(Batch::class, 'batch_id');
+        return $this->belongsTo(Batch::class);
     }
 
     public function features()

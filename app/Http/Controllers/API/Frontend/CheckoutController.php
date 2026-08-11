@@ -261,6 +261,9 @@ class CheckoutController extends BaseController
                 // Clear cart after order
                 Cart::where('user_id', $user->id)->delete();
 
+                // Clear applied promo code from user profile after order
+                $user->update(['applied_promo_code' => null]);
+
                 return $this->sendResponse([
                     'order_number' => $order->order_number,
                     'total' => (float) $order->total,

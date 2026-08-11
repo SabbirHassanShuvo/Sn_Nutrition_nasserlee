@@ -110,14 +110,8 @@ class SystemUserController extends Controller
         ]);
     }
 
-    public function update(Request $request, User $system_user)
+    public function update(UserRequest $request, User $system_user)
     {
-        $request->validate([
-            'name' => 'required',
-            'email' => 'required|email|unique:users,email,' . $system_user->id,
-            'password' => ['nullable', new PasswordRule],
-        ]);
-
         try {
             if (!is_null($request['password'])) {
                 $system_user->password = bcrypt($request['password']);
