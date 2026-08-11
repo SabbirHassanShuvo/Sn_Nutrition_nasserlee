@@ -35,7 +35,6 @@ return new class extends Migration
             $table->string('main_image')->nullable();
             $table->json('gallery_images')->nullable();
             $table->string('status')->default('active');
-            $table->boolean('is_popular')->default(false);
             $table->timestamps();
             $table->softDeletes();
         });

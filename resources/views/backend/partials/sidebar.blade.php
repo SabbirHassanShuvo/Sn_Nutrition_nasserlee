@@ -204,49 +204,6 @@
                 </li>
                 @endcanany
 
-                @canany(['setting_profile', 'setting_system', 'setting_mail'])
-                <li class="nav-item">
-                    <a class="nav-link menu-link {{ getPageStatus('backend.settings.*') }}" href="#sidebarMultilevel"
-                        data-bs-toggle="collapse" role="button" aria-expanded="false"
-                        aria-controls="sidebarMultilevel">
-                        <i class="ri-share-line"></i> <span data-key="t-multi-level">Settings</span>
-                    </a>
-                    <div class="collapse menu-dropdown {{ getPageStatus('backend.settings.*', 'show') }}"
-                        id="sidebarMultilevel">
-                        <ul class="nav nav-sm flex-column">
-                            @can('setting_profile')
-                            <li class="nav-item">
-                                <a href="{{ route('backend.settings.profile.index') }}"
-                                    class="nav-link {{ getPageStatus('backend.settings.profile.*') }}"
-                                    data-key="t-level-1.1"> Profile Settings </a>
-                            </li>
-                            @endcan
-                            @can('setting_system')
-                            <li class="nav-item">
-                                <a href="{{ route('backend.settings.system.index') }}"
-                                    class="nav-link {{ getPageStatus('backend.settings.system.*') }}"
-                                    data-key="t-level-1.1"> System Settings </a>
-                            </li>
-                            @endcan
-                            @can('setting_system')
-                            <li class="nav-item">
-                                <a href="{{ route('backend.settings.web-setting.index') }}"
-                                    class="nav-link {{ getPageStatus('backend.settings.web-setting.*') }}"
-                                    data-key="t-level-1.2"> Web Settings </a>
-                            </li>
-                            @endcan
-                            @can('setting_mail')
-                            <li class="nav-item">
-                                <a href="{{ route('backend.settings.mail.index') }}"
-                                    class="nav-link {{ getPageStatus('backend.settings.mail.*') }}"
-                                    data-key="t-level-1.1"> Mail Settings</a>
-                            </li>
-                            @endcan
-                        </ul>
-                    </div>
-                </li>
-                @endcanany
-
                 {{-- Cms --}}
                 @canany(['cms_banner', 'cms_pages', 'cms_faq', 'cms_home_page', 'cms_about_page', 'cms_contact_page', 'cms_how_it_works'])
                 <li class="nav-item">
@@ -344,6 +301,50 @@
                                 <a href="{{ route('backend.feature.faq.index') }}"
                                     class="nav-link {{ getPageStatus('backend.feature.faq.*') }}"
                                     data-key="t-faqs"> FAQs </a>
+                            </li>
+                            @endcan
+                        </ul>
+                    </div>
+                </li>
+                @endcanany
+
+                {{-- Settings --}}
+                @canany(['setting_profile', 'setting_system', 'setting_mail'])
+                <li class="nav-item">
+                    <a class="nav-link menu-link {{ getPageStatus('backend.settings.*') }}" href="#sidebarMultilevel"
+                        data-bs-toggle="collapse" role="button" aria-expanded="false"
+                        aria-controls="sidebarMultilevel">
+                        <i class="ri-share-line"></i> <span data-key="t-multi-level">Settings</span>
+                    </a>
+                    <div class="collapse menu-dropdown {{ getPageStatus('backend.settings.*', 'show') }}"
+                        id="sidebarMultilevel">
+                        <ul class="nav nav-sm flex-column">
+                            @can('setting_profile')
+                            <li class="nav-item">
+                                <a href="{{ route('backend.settings.profile.index') }}"
+                                    class="nav-link {{ getPageStatus('backend.settings.profile.*') }}"
+                                    data-key="t-level-1.1"> Profile Settings </a>
+                            </li>
+                            @endcan
+                            @can('setting_system')
+                            <li class="nav-item">
+                                <a href="{{ route('backend.settings.system.index') }}"
+                                    class="nav-link {{ getPageStatus('backend.settings.system.*') }}"
+                                    data-key="t-level-1.1"> System Settings </a>
+                            </li>
+                            @endcan
+                            @can('setting_system')
+                            <li class="nav-item">
+                                <a href="{{ route('backend.settings.web-setting.index') }}"
+                                    class="nav-link {{ getPageStatus('backend.settings.web-setting.*') }}"
+                                    data-key="t-level-1.2"> Web Settings </a>
+                            </li>
+                            @endcan
+                            @can('setting_mail')
+                            <li class="nav-item">
+                                <a href="{{ route('backend.settings.mail.index') }}"
+                                    class="nav-link {{ getPageStatus('backend.settings.mail.*') }}"
+                                    data-key="t-level-1.1"> Mail Settings</a>
                             </li>
                             @endcan
                         </ul>

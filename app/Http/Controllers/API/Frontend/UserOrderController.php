@@ -183,7 +183,8 @@ class UserOrderController extends BaseController
                 return $this->sendError('Order not found.', [], 404);
             }
 
-            $pdfUrl = url("/api/user/orders/{$order->order_number}/invoice-view");
+            $token = $request->bearerToken();
+            $pdfUrl = url("/api/user/orders/{$order->order_number}/invoice-view") . ($token ? '?token=' . $token : '');
 
             return $this->sendResponse([
                 'order_number' => $order->order_number,

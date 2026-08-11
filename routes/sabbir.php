@@ -80,9 +80,7 @@ Route::middleware('auth:api')->group(function () {
 Route::get('/categories', [CategoryController::class, 'index']);
 
 // Partner Onboarding Flow
-Route::group([
-    'prefix' => 'partner/onboarding'
-], function ($router) {
+Route::group(['prefix' => 'partner/onboarding'], function ($router) {
     Route::get('/options/specialties', [PartnerOnboardingController::class, 'getSpecialties']);
     Route::get('/options/certifications', [PartnerOnboardingController::class, 'getCertifications']);
     Route::post('/step-1', [PartnerOnboardingController::class, 'step1']);

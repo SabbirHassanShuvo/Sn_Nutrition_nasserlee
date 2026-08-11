@@ -28,10 +28,8 @@ use App\Http\Controllers\Api\Frontend\BrandApiController;
 use App\Http\Controllers\Api\Frontend\ReviewApiController;
 
 
-Route::group([
-    'middleware' => 'api',
-    'prefix' => 'auth'
-], function ($router) {
+Route::group(['middleware' => 'api','prefix' => 'auth'], function ($router) {
+
     Route::post('/register', [AuthController::class, 'register']);
     Route::post('/login', [AuthController::class, 'login']);
     
@@ -53,7 +51,6 @@ Route::group([
 });
 
 
-// Sandip added
 Route::group(['middleware' => 'api'], function($router){
     // Cms
     Route::get('/cms/banners', [HomePageController::class, 'getBanners']);
@@ -79,8 +76,6 @@ Route::group(['middleware' => 'api'], function($router){
     // Onboarding Questions & CMS Card Text
     Route::get('/onboarding/questions', [OnboardingQuestionApiController::class, 'getQuestions']);
 
-
-
     Route::group(['middleware' => ['auth:api']], function () {
         Route::get('/health-professional/profile', [ProfileController::class, 'detailsProfile']);
         Route::post('/health-professional/profile/update', [ProfileController::class, 'updateProfile']);
@@ -98,10 +93,8 @@ Route::get('/consultations/nearby-gyms', [GymApiController::class, 'getNearbyGym
 Route::get('/consultations/nearby-pharmacies', [PharmacyApiController::class, 'getNearbyPharmacies']);
 
 // Authenticated User Information, Address & Orders & Consultation APIs
-Route::group([
-    'middleware' => ['api', 'auth:api'],
-    'prefix' => 'user'
-], function () {
+Route::group(['middleware' => ['api', 'auth:api'],'prefix' => 'user'], function () {
+    
     // My Information, Personal Profile & Fitness Profile
     Route::get('/my-information', [MyInformationController::class, 'index']);
     Route::post('/personal-info/update', [MyInformationController::class, 'updatePersonalInfo']);

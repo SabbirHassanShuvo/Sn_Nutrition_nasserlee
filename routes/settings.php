@@ -1,7 +1,6 @@
 <?php
 
 use App\Http\Controllers\Web\Backend\Settings\MailController;
-use PHPUnit\Event\Telemetry\System;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Web\Backend\Settings\SystemController;
 use App\Http\Controllers\Web\Backend\Settings\ProfileController;

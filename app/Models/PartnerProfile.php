@@ -32,6 +32,21 @@ class PartnerProfile extends Model
         'certifications' => 'array',
     ];
 
+    protected $appends = ['step_one', 'step_two', 'step_three', 'step_four'];
+
+    protected $hidden = [
+        'professional_role',
+        'years_of_experience',
+        'bio',
+        'location',
+        'phone',
+        'website',
+        'specialties',
+        'certifications',
+        'created_at',
+        'updated_at',
+    ];
+
     public function user()
     {
         return $this->belongsTo(User::class);
@@ -44,5 +59,36 @@ class PartnerProfile extends Model
         }
         return $value;
     }
-    
+
+    public function getStepOneAttribute()
+    {
+        return [
+            'professional_role' => $this->professional_role,
+            'years_of_experience' => $this->years_of_experience,
+            'bio' => $this->bio,
+        ];
+    }
+
+    public function getStepTwoAttribute()
+    {
+        return [
+            'location' => $this->location,
+            'phone' => $this->phone,
+            'website' => $this->website,
+        ];
+    }
+
+    public function getStepThreeAttribute()
+    {
+        return [
+            'specialties' => $this->specialties ?? [],
+        ];
+    }
+
+    public function getStepFourAttribute()
+    {
+        return [
+            'certifications' => $this->certifications ?? [],
+        ];
+    }
 }
