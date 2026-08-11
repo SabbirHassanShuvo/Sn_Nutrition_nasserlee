@@ -33,7 +33,12 @@ class UserRequest extends FormRequest
         if ($this->routeIs('backend.system-user.store')) {
             $rules['is_admin_user'] = ['required','in:1']; 
             $rules['email'] = ['required', 'email', 'unique:users,email'];
-
+        }
+        if ($this->routeIs('backend.system-user.update')) {
+            $systemUser = $this->route('system_user');
+            $userId = $systemUser instanceof \App\Models\User ? $systemUser->id : $systemUser;
+            $rules['email'] = ['required', 'email', 'unique:users,email,' . $userId];
+            $rules['password'] = ['nullable', 'string', 'min:4'];
         }
         // dd($rules);
         return $rules;

@@ -76,19 +76,6 @@
                 </li>
                 @endcan
 
-                <li class="nav-item">
-                    <a class="nav-link menu-link  {{getPageStatus('backend.dashboard.*', 'collapsed active')}}" href="#sidebarDashboards" data-bs-toggle="collapse" role="button" aria-expanded="false" aria-controls="sidebarDashboards">
-                        <i class="ri-dashboard-2-line"></i> <span data-key="t-dashboards">Dashboards</span>
-                    </a>
-                    <div class="collapse menu-dropdown {{getPageStatus('backend.dashboard.*', 'show')}}" id="sidebarDashboards">
-                        <ul class="nav nav-sm flex-column">
-                            <li class="nav-item">
-                                <a href="{{route('backend.dashboard.index')}}" class="nav-link {{getPageStatus('backend.dashboard.index')}}" data-key="t-ecommerce"> Home </a>
-                            </li>
-                        </ul>
-                    </div>
-                </li>
-                <!-- end Dashboard Menu -->
 
                 @canany(['categories_manage', 'category_manage'])
                 <li class="nav-item">
