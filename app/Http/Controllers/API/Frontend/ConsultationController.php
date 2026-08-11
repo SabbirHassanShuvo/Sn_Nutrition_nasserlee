@@ -47,11 +47,16 @@ class ConsultationController extends Controller
 
         $defaultTimeSlots = ["12:00 PM", "1:00 PM", "2:00 PM", "3:00 PM", "4:00 PM"];
 
+
+        $data = [
+            'specialists' => $specialists,
+            'time_slots' => $defaultTimeSlots,
+        ];
+        
         return response()->json([
             'status' => true,
             'message' => 'Active specialists retrieved successfully',
-            'specialists' => $specialists,
-            'time_slots' => $defaultTimeSlots,
+            'data' => $data,
         ]);
     }
 

@@ -4,18 +4,15 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\GoogleAuthController;
-
 use App\Http\Controllers\Api\Frontend\Cms\HomePageController;
 use App\Http\Controllers\Api\Frontend\Cms\CmsController;
 use App\Http\Controllers\Api\Frontend\Cms\FaqApiController;
 use App\Http\Controllers\Api\Frontend\Cms\WebSettingApiController;
 use App\Http\Controllers\Api\Frontend\Cms\OfferApiController;
 use App\Http\Controllers\Api\Frontend\BlogApiController;
-
 use App\Http\Controllers\Api\Frontend\MyInformationController;
 use App\Http\Controllers\Api\Frontend\UserAddressController;
 use App\Http\Controllers\Api\Frontend\UserOrderController;
-
 use App\Http\Controllers\Api\Frontend\ConsultationController;
 use App\Http\Controllers\Api\Frontend\GymApiController;
 use App\Http\Controllers\Api\Frontend\PharmacyApiController;
@@ -94,7 +91,7 @@ Route::get('/consultations/nearby-pharmacies', [PharmacyApiController::class, 'g
 
 // Authenticated User Information, Address & Orders & Consultation APIs
 Route::group(['middleware' => ['api', 'auth:api'],'prefix' => 'user'], function () {
-    
+
     // My Information, Personal Profile & Fitness Profile
     Route::get('/my-information', [MyInformationController::class, 'index']);
     Route::post('/personal-info/update', [MyInformationController::class, 'updatePersonalInfo']);
