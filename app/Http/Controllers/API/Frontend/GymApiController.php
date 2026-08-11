@@ -5,8 +5,6 @@ namespace App\Http\Controllers\Api\Frontend;
 use App\Http\Controllers\Controller;
 use App\Models\Gym;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Schema;
-use Illuminate\Database\Schema\Blueprint;
 use Exception;
 
 class GymApiController extends Controller
@@ -16,67 +14,6 @@ class GymApiController extends Controller
      */
     public function getNearbyGyms(Request $request)
     {
-        // Auto-create table & sample seed if table doesn't exist
-        if (!Schema::hasTable('gyms')) {
-            Schema::create('gyms', function (Blueprint $table) {
-                $table->id();
-                $table->string('name');
-                $table->string('address');
-                $table->decimal('latitude', 10, 7)->nullable();
-                $table->decimal('longitude', 10, 7)->nullable();
-                $table->decimal('rating', 2, 1)->default(4.5);
-                $table->string('opening_hours')->nullable()->default('06:00 - 22:00');
-                $table->json('facilities')->nullable();
-                $table->string('image')->nullable();
-                $table->boolean('is_active')->default(true);
-                $table->timestamps();
-            });
-
-            Gym::create([
-                'name' => 'FitZone Gym',
-                'address' => '12 Rue Mohammed V, Casablanca',
-                'latitude' => 33.5731104,
-                'longitude' => -7.5898434,
-                'rating' => 4.8,
-                'opening_hours' => '06:00 - 22:00',
-                'facilities' => ['Cardio', 'Weights', 'Classes'],
-                'is_active' => true,
-            ]);
-
-            Gym::create([
-                'name' => 'PowerHouse Fitness',
-                'address' => '34 Boulevard Anfa, Casablanca',
-                'latitude' => 33.5851104,
-                'longitude' => -7.6018434,
-                'rating' => 4.5,
-                'opening_hours' => '07:00 - 23:00',
-                'facilities' => ['CrossFit', 'Sauna', 'Pool'],
-                'is_active' => true,
-            ]);
-
-            Gym::create([
-                'name' => 'Elite Sports Club',
-                'address' => '7 Rue Ibnou Sina, Casablanca',
-                'latitude' => 33.5921104,
-                'longitude' => -7.6128434,
-                'rating' => 4.3,
-                'opening_hours' => '06:30 - 21:00',
-                'facilities' => ['Yoga', 'Boxing', 'Weights'],
-                'is_active' => true,
-            ]);
-
-            Gym::create([
-                'name' => 'Urban Athlete',
-                'address' => '88 Avenue Hassan II, Casablanca',
-                'latitude' => 33.5981104,
-                'longitude' => -7.6208434,
-                'rating' => 4.6,
-                'opening_hours' => '06:00 - 22:30',
-                'facilities' => ['HIIT', 'Cycling', 'Nutrition'],
-                'is_active' => true,
-            ]);
-        }
-
         // Default to user coordinates or Casablanca center
         $userLat = $request->filled('latitude') ? (float) $request->latitude : 33.5700000;
         $userLng = $request->filled('longitude') ? (float) $request->longitude : -7.5850000;
@@ -131,15 +68,20 @@ class GymApiController extends Controller
                     ];
                 });
 
-            return response()->json([
-                'status' => true,
-                'message' => 'Nearby gyms retrieved successfully',
+
+            $data = [
                 'total_found' => count($gyms),
                 'user_location' => [
                     'latitude' => $userLat,
                     'longitude' => $userLng,
                 ],
                 'gyms' => $gyms
+            ];
+
+            return response()->json([
+                'status' => true,
+                'message' => 'Nearby gyms retrieved successfully',
+                'data' => $data,
             ]);
         } catch (Exception $e) {
             return response()->json([
