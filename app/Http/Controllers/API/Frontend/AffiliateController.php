@@ -193,7 +193,11 @@ class AffiliateController extends Controller
         }
 
         $links = $query->get();
-        return response()->json($links);
+        return response()->json([
+            'status' => true,
+            'message' => 'Affiliate links retrieved successfully',
+            'data' => $links
+        ], 200);
     }
 
     public function getOrders(Request $request)

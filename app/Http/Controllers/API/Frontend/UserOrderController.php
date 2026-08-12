@@ -43,6 +43,11 @@ class UserOrderController extends BaseController
                 }
             }
 
+            // Calculate summary metrics before pagination
+            $totalOrdersCount = (clone $query)->count();
+            $totalRevenue = round((float) (clone $query)->sum('total'), 2);
+            $totalCommission = round((float) (clone $query)->sum('commission_amount'), 2);
+
             $perPage = (int) $request->input('per_page', 8);
             if ($perPage <= 0) {
                 $perPage = 8;
@@ -50,7 +55,7 @@ class UserOrderController extends BaseController
 
             $orders = $query->latest()->paginate($perPage);
 
-            $orders->getCollection()->transform(function ($order) {
+            $transformedOrders = $orders->getCollection()->map(function ($order) {
                 $itemsCount = $order->items->sum('quantity');
                 
                 // Get thumbnails for preview (up to 4 unique product images)
@@ -68,14 +73,16 @@ class UserOrderController extends BaseController
                     default => ucfirst($order->status),
                 };
 
+                $totalFloat = round((float) $order->total, 2);
+
                 return [
                     'id' => $order->id,
                     'order_number' => $order->order_number,
                     'status' => $order->status,
                     'status_label' => $statusLabel,
                     'date' => $order->created_at ? $order->created_at->format('M d, Y') : null,
-                    'total' => (float) $order->total,
-                    'total_formatted' => (float) $order->total . ' MAD',
+                    'total' => $totalFloat,
+                    'total_formatted' => number_format($totalFloat, 2, '.', '') . ' MAD',
                     'currency' => 'MAD',
                     'items_count' => $itemsCount,
                     'items_count_label' => $itemsCount === 1 ? '1 item' : "{$itemsCount} items",
@@ -85,9 +92,24 @@ class UserOrderController extends BaseController
                         'can_view_details' => true,
                     ],
                 ];
-            });
+            })->values();
 
-            return $this->sendResponse($orders, 'Orders fetched successfully.');
+            $data = [
+                'total_order' => $totalOrdersCount,
+                'total_revenue' => $totalRevenue,
+                'total_commission' => $totalCommission,
+                'orders' => $transformedOrders,
+                'pagination' => [
+                    'current_page' => $orders->currentPage(),
+                    'last_page' => $orders->lastPage(),
+                    'per_page' => $orders->perPage(),
+                    'total' => $orders->total(),
+                    'prev_page_url' => $orders->previousPageUrl(),
+                    'next_page_url' => $orders->nextPageUrl(),
+                ]
+            ];
+
+            return $this->sendResponse($data, 'Orders fetched successfully.');
         } catch (\Exception $e) {
             return $this->sendError('Failed to fetch orders.', $e->getMessage());
         }

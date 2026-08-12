@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Validator;
 use Exception;
+use Illuminate\Support\Facades\DB;
 
 class UserSettingsController extends BaseController
 {
@@ -43,7 +44,7 @@ class UserSettingsController extends BaseController
     public function index()
     {
         try {
-            $user = User::with('profile')->find(Auth::id());
+            $user = User::with('profile')->find(auth('api')->id());
 
             if (!$user) {
                 return $this->sendError('User not found.', [], 404);
@@ -93,67 +94,57 @@ class UserSettingsController extends BaseController
      * Update User Password.
      */
     public function updatePassword(Request $request)
-    {
-        // Support both naming conventions (current_password / old_password, password / new_password)
+    {  
+        // Support both naming conventions (current_password / old_password, password / new_password, password_confirmation / confirm_new_password)
         $currentPassword = $request->input('current_password') ?? $request->input('old_password');
-        $newPassword = $request->input('new_password') ?? $request->input('password');
+        $newPassword     = $request->input('new_password') ?? $request->input('password');
         $confirmPassword = $request->input('confirm_new_password') ?? $request->input('password_confirmation');
 
         $requestData = [
-            'current_password' => $currentPassword,
-            'password' => $newPassword,
+            'current_password'      => $currentPassword,
+            'password'              => $newPassword,
             'password_confirmation' => $confirmPassword,
         ];
 
         $validator = Validator::make($requestData, [
-            'current_password' => 'required|string',
-            'password' => 'required|string|min:8|confirmed',
-            'password_confirmation' => 'required|string',
+            'current_password' => 'required',
+            'password'         => 'required|min:6|confirmed',
         ], [
             'current_password.required' => 'Current password is required.',
-            'password.required' => 'New password is required.',
-            'password.min' => 'New password must be at least 8 characters.',
-            'password.confirmed' => 'New password and confirm password do not match.',
+            'password.required'         => 'New password is required.',
+            'password.min'              => 'New password must be at least 6 characters.',
+            'password.confirmed'        => 'New password and confirm password do not match.',
         ]);
 
         if ($validator->fails()) {
-            return response()->json([
-                'status' => false,
-                'message' => 'Validation failed',
-                'errors' => $validator->errors()
-            ], 422);
+            return $this->sendError('Validation failed', $validator->errors(), 422);
         }
 
         try {
-            $user = User::find(Auth::id());
+            DB::beginTransaction();
+
+            $user = auth('api')->user();
 
             if (!$user) {
-                return response()->json([
-                    'status' => false,
-                    'message' => 'User not found or unauthorized'
-                ], 401);
+                return $this->sendError('User not found or unauthorized', [], 401);
             }
 
-            if (!Hash::check($currentPassword, $user->password)) {
-                return response()->json([
-                    'status' => false,
-                    'message' => 'Current password is incorrect',
-                    'errors' => ['current_password' => ['Current password does not match our records.']]
-                ], 400);
+            $currentPasswordStr = (string) $currentPassword;
+            $newPasswordStr     = (string) $newPassword;
+
+            if (!Hash::check($currentPasswordStr, $user->password)) {
+                return $this->sendError('Current password is incorrect', [], 400);
             }
 
-            $user->password = Hash::make($newPassword);
+            $user->password = $newPasswordStr;
             $user->save();
 
-            return response()->json([
-                'status' => true,
-                'message' => 'Password updated successfully'
-            ], 200);
-        } catch (Exception $e) {
-            return response()->json([
-                'status' => false,
-                'message' => 'Failed to update password: ' . $e->getMessage()
-            ], 500);
+            DB::commit();
+
+            return $this->sendResponse([], "Password changed successfully");
+        } catch (Exception $exception) {
+            DB::rollBack();
+            return $this->sendError($exception->getMessage(), [], 500);
         }
     }
 
@@ -163,7 +154,7 @@ class UserSettingsController extends BaseController
     public function getNotifications()
     {
         try {
-            $user = User::with('profile')->find(Auth::id());
+            $user = User::with('profile')->find(auth('api')->id());
             if (!$user) {
                 return $this->sendError('User not found.', [], 404);
             }
@@ -271,7 +262,7 @@ class UserSettingsController extends BaseController
     public function deleteAccount(Request $request)
     {
         try {
-            $user = User::find(Auth::id());
+            $user = User::find(auth('api')->id());
 
             if (!$user) {
                 return response()->json([

@@ -41,7 +41,6 @@ class AuthController extends BaseController
         }
      
         $input = $request->all();
-        $input['password'] = bcrypt($input['password']);
         $user = User::create($input);
         
         $token = auth('api')->login($user);
