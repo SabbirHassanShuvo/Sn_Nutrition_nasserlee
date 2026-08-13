@@ -258,6 +258,18 @@ class CheckoutController extends BaseController
                     ]);
                 }
 
+                // Send shipment to Sendit
+                try {
+                    $senditService = app(\App\Services\SenditService::class);
+                    $result = $senditService->createDelivery($order->load('items.product'));
+                    if (!$result['success']) {
+                        throw new \Exception('Sendit API Error: ' . ($result['message'] ?? 'Unknown error'));
+                    }
+                } catch (\Exception $e) {
+                    \Illuminate\Support\Facades\Log::error('Sendit dispatch exception: ' . $e->getMessage());
+                    throw $e; // Re-throw to rollback DB transaction!
+                }
+
                 // Clear cart after order
                 Cart::where('user_id', $user->id)->delete();
 

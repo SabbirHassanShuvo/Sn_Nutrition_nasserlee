@@ -127,3 +127,6 @@ Route::group(['middleware' => ['api', 'auth:api'],'prefix' => 'user'], function 
     Route::post('/settings/change-password', [UserSettingsController::class, 'updatePassword']);
     Route::post('/settings/delete-account', [UserSettingsController::class, 'deleteAccount']);
 });
+
+// Sendit Webhook Route
+Route::post('/webhook/sendit', [App\Http\Controllers\Api\SenditWebhookController::class, 'handle']);

@@ -45,5 +45,12 @@ return [
         'client_secret' => env('ZOOM_CLIENT_SECRET'),
     ],
 
+    'sendit' => [
+        'base_url' => env('SENDIT_BASE_URL', 'https://app.sendit.ma/api/v1/'),
+        'public_key' => env('SENDIT_PUBLIC_KEY'),
+        'private_key' => env('SENDIT_PRIVATE_KEY'),
+        'default_pickup_district_id' => env('SENDIT_DEFAULT_PICKUP_DISTRICT_ID', 46),
+    ],
+
 ];
 
