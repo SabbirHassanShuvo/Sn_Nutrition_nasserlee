@@ -52,6 +52,9 @@ class OrderController extends Controller
                     }
                     return $html;
                 })
+                ->addColumn('sendit_shipment', function ($order) {
+                    return $order->sendit_delivery_code ?: '<span class="text-muted">Not Shipped</span>';
+                })
                 ->addColumn('status', function ($order) {
                     $colors = [
                         'pending' => 'bg-warning',
@@ -75,10 +78,104 @@ class OrderController extends Controller
                         </div>
                     ';
                 })
-                ->rawColumns(['checkbox', 'order_number', 'customer', 'referred_by', 'amount', 'payment', 'status', 'action'])
+                ->rawColumns(['checkbox', 'order_number', 'customer', 'referred_by', 'amount', 'payment', 'sendit_shipment', 'status', 'action'])
                 ->make(true);
         }
-        return view("backend.layout.orders.index");
+        $brands = \App\Models\Brand::where('status', 'active')->get();
+        $products = \App\Models\Product::where('status', 'active')->with('brandData')->get();
+        return view("backend.layout.orders.index", compact('brands', 'products'));
+    }
+
+    /**
+     * Get list of districts/villes from Sendit.
+     */
+    public function getDistricts(Request $request)
+    {
+        $senditService = app(\App\Services\SenditService::class);
+        $districts = $senditService->getDistricts($request->query('q'));
+        return response()->json($districts);
+    }
+
+    /**
+     * Store a manually created order.
+     */
+    public function store(Request $request)
+    {
+        $request->validate([
+            'first_name' => 'required|string',
+            'last_name' => 'nullable|string',
+            'email' => 'required|email',
+            'phone' => 'required|string',
+            'address' => 'required|string',
+            'city' => 'required|string',
+            'payment_method' => 'required|in:cod,bank_transfer',
+            'preferred_delivery_date' => 'nullable|date',
+            'delivery_fee' => 'required|numeric',
+            'discount' => 'required|numeric',
+            'items' => 'required|array|min:1',
+            'items.*.product_id' => 'required|exists:products,id',
+            'items.*.quantity' => 'required|integer|min:1',
+            'items.*.price' => 'required|numeric',
+        ]);
+
+        try {
+            return \DB::transaction(function () use ($request) {
+                $subtotal = 0;
+                foreach ($request->items as $item) {
+                    $subtotal += $item['price'] * $item['quantity'];
+                }
+
+                $total = $subtotal + $request->delivery_fee - $request->discount;
+
+                $fullName = trim($request->first_name . ' ' . $request->last_name);
+
+                // Generate order number
+                $orderNumber = 'SN-' . strtoupper(\Illuminate\Support\Str::random(6));
+
+                $order = Order::create([
+                    'user_id' => null, // Manual order
+                    'order_number' => $orderNumber,
+                    'subtotal' => $subtotal,
+                    'delivery_fee' => $request->delivery_fee,
+                    'discount' => $request->discount,
+                    'total' => $total,
+                    'status' => 'pending',
+                    'phone' => $request->phone,
+                    'full_name' => $fullName,
+                    'email' => $request->email,
+                    'city' => $request->city,
+                    'address' => $request->address,
+                    'payment_method' => $request->payment_method,
+                    'preferred_delivery_date' => $request->preferred_delivery_date,
+                ]);
+
+                foreach ($request->items as $item) {
+                    \App\Models\OrderItem::create([
+                        'order_id' => $order->id,
+                        'product_id' => $item['product_id'],
+                        'quantity' => $item['quantity'],
+                        'price' => $item['price'],
+                    ]);
+                }
+
+                // Send shipment to Sendit
+                $senditService = app(\App\Services\SenditService::class);
+                $result = $senditService->createDelivery($order->load('items.product'));
+                if (!$result['success']) {
+                    throw new \Exception('Sendit API Error: ' . ($result['message'] ?? 'Unknown error'));
+                }
+
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Order created successfully and sent to Sendit. Code: ' . $order->sendit_delivery_code
+                ]);
+            });
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to create order: ' . $e->getMessage()
+            ], 422);
+        }
     }
 
     public function show($id)

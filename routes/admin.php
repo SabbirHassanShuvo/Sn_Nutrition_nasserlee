@@ -121,6 +121,7 @@ Route::group([ 'as'=>'backend.'], function () {
 
     // Orders Management
     Route::group(['middleware' => 'permission:orders_manage|order_manage'], function () {
+        Route::get('order/districts', [OrderController::class, 'getDistricts'])->name('order.districts');
         Route::delete('order/bulk-destroy', [OrderController::class,'bulkDestroy'])->name('order.bulk-destroy');
         Route::post('order/status/{id}', [OrderController::class,'updateStatus'])->name('order.status');
         Route::post('order/verify-payment/{id}', [OrderController::class,'verifyPayment'])->name('order.verify-payment');

@@ -218,4 +218,28 @@ class SenditService
             ];
         }
     }
+
+    /**
+     * Get list of districts/villes from Sendit.
+     */
+    public function getDistricts(string $queryString = null): array
+    {
+        $token = $this->getAccessToken();
+        if (!$token) {
+            return [];
+        }
+
+        try {
+            $response = Http::withToken($token)
+                ->get($this->baseUrl . 'districts', $queryString ? ['querystring' => $queryString] : []);
+
+            if ($response->successful()) {
+                return $response->json('data') ?: [];
+            }
+        } catch (Exception $e) {
+            Log::error('Sendit getDistricts list error: ' . $e->getMessage());
+        }
+
+        return [];
+    }
 }
