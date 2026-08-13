@@ -133,6 +133,9 @@ class SenditService
         if (str_starts_with($phone, '212')) {
             $phone = '0' . substr($phone, 3);
         }
+        if (strlen($phone) === 9 && in_array(substr($phone, 0, 1), ['5', '6', '7'])) {
+            $phone = '0' . $phone;
+        }
 
         $payload = [
             'pickup_district_id' => $this->defaultPickupDistrictId,
@@ -162,37 +165,13 @@ class SenditService
                 $deliveryStatus = $data['data']['status'] ?? null;
 
                 if ($deliveryCode) {
-                    // Map Sendit status to Order status
-                    $mappedStatus = 'pending';
-                    switch (strtoupper($deliveryStatus)) {
-                        case 'DELIVERED':
-                            $mappedStatus = 'delivered';
-                            break;
-                        case 'CANCELED':
-                        case 'REJECTED':
-                            $mappedStatus = 'cancelled';
-                            break;
-                        case 'DELIVERING':
-                        case 'DISTRIBUTED':
-                        case 'TRANSIT':
-                            $mappedStatus = 'shipping';
-                            break;
-                        case 'PENDING':
-                            $mappedStatus = 'pending';
-                            break;
-                        case 'TO_PREPARE':
-                        case 'TO_PICKUP':
-                        case 'PICKEDUP':
-                        case 'WAREHOUSE':
-                            $mappedStatus = 'processing';
-                            break;
-                    }
+                    $statusUpper = strtoupper($deliveryStatus);
 
                     // Update order details
                     $order->update([
                         'sendit_delivery_code' => $deliveryCode,
-                        'sendit_delivery_status' => $deliveryStatus,
-                        'status' => $mappedStatus,
+                        'sendit_delivery_status' => $statusUpper,
+                        'status' => $statusUpper,
                     ]);
 
                     return [
@@ -241,5 +220,113 @@ class SenditService
         }
 
         return [];
+    }
+
+    /**
+     * Cancel a delivery on Sendit.
+     */
+    public function cancelDelivery(string $code): array
+    {
+        $token = $this->getAccessToken();
+        if (!$token) {
+            return ['success' => false, 'message' => 'Unauthorized'];
+        }
+
+        try {
+            // Sendit cancellation endpoint is typically DELETE /deliveries/{code}
+            $response = Http::withToken($token)
+                ->delete($this->baseUrl . 'deliveries/' . $code);
+
+            if ($response->successful()) {
+                return [
+                    'success' => true,
+                    'message' => 'Delivery cancelled on Sendit successfully.'
+                ];
+            }
+
+            Log::error('Sendit Cancel Delivery Failed for ' . $code . ': ' . $response->body());
+            return [
+                'success' => false,
+                'message' => $response->json('message') ?: 'Failed to cancel delivery on Sendit.'
+            ];
+        } catch (Exception $e) {
+            Log::error('Sendit Cancel Delivery Exception for ' . $code . ': ' . $e->getMessage());
+            return [
+                'success' => false,
+                'message' => $e->getMessage()
+            ];
+        }
+    }
+
+    /**
+     * Update an existing delivery on Sendit.
+     */
+    public function updateDelivery(string $code, Order $order): array
+    {
+        $token = $this->getAccessToken();
+        if (!$token) {
+            return ['success' => false, 'message' => 'Unauthorized'];
+        }
+
+        // Get district ID based on the order's city
+        $districtId = $this->getDistrictIdByCityName($order->city);
+
+        // Format items string
+        $productsStr = $order->items->map(function ($item) {
+            $code = $item->product ? $item->product->sku : 'N/A';
+            $code = str_replace([':', ';'], '_', $code);
+            return $code . ':' . $item->quantity;
+        })->implode(';');
+
+        $amountToCollect = strtolower($order->payment_method) === 'cod' ? (float) $order->total : 0.0;
+
+        $phone = preg_replace('/\D/', '', $order->phone ?: '0600000000');
+        if (str_starts_with($phone, '212')) {
+            $phone = '0' . substr($phone, 3);
+        }
+        if (strlen($phone) === 9 && in_array(substr($phone, 0, 1), ['5', '6', '7'])) {
+            $phone = '0' . $phone;
+        }
+
+        $payload = [
+            'pickup_district_id' => $this->defaultPickupDistrictId,
+            'district_id'        => $districtId,
+            'name'               => $order->full_name,
+            'amount'             => $amountToCollect,
+            'address'            => $order->address,
+            'phone'              => $phone,
+            'comment'            => 'Updated Order ' . $order->order_number . '. Preferred delivery: ' . ($order->preferred_delivery_date ?: 'N/A'),
+            'reference'          => $order->order_number,
+            'allow_open'         => 1,
+            'allow_try'          => 1,
+            'products_from_stock'=> 0,
+            'products'           => $productsStr,
+            'option_exchange'    => 0,
+        ];
+
+        try {
+            // Sendit update endpoint is typically PUT /deliveries/{code}
+            $response = Http::withToken($token)
+                ->put($this->baseUrl . 'deliveries/' . $code, $payload);
+
+            if ($response->successful()) {
+                return [
+                    'success' => true,
+                    'message' => 'Delivery updated on Sendit successfully.'
+                ];
+            }
+
+            Log::error('Sendit Update Delivery Failed for ' . $code . ': ' . $response->body());
+            return [
+                'success' => false,
+                'message' => $response->json('message') ?: 'Failed to update delivery on Sendit.'
+            ];
+        } catch (Exception $e) {
+            Log::error('Sendit Update Delivery Exception for ' . $code . ': ' . $e->getMessage());
+            return [
+                'success' => false,
+                'message' => $e->getMessage()
+            ];
+        }
     }
 }

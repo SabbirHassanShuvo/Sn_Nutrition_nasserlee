@@ -57,20 +57,29 @@ class OrderController extends Controller
                 })
                 ->addColumn('status', function ($order) {
                     $colors = [
-                        'pending' => 'bg-warning',
-                        'processing' => 'bg-primary',
-                        'shipping' => 'bg-info',
-                        'delivered' => 'bg-success',
-                        'cancelled' => 'bg-danger'
+                        'PENDING' => 'bg-warning text-dark',
+                        'TO_PREPARE' => 'bg-secondary',
+                        'TO_PICKUP' => 'bg-secondary',
+                        'PICKEDUP' => 'bg-info text-dark',
+                        'WAREHOUSE' => 'bg-info text-dark',
+                        'DELIVERING' => 'bg-primary',
+                        'DISTRIBUTED' => 'bg-primary',
+                        'TRANSIT' => 'bg-primary',
+                        'DELIVERED' => 'bg-success',
+                        'CANCELED' => 'bg-danger',
+                        'REJECTED' => 'bg-danger'
                     ];
-                    $badge = $colors[$order->status] ?? 'bg-secondary';
-                    return '<span class="badge ' . $badge . '">' . ucfirst($order->status) . '</span>';
+                    $badge = $colors[$order->status] ?? 'bg-light text-dark border';
+                    return '<span class="badge ' . $badge . '">' . $order->status . '</span>';
                 })
                 ->addColumn('action', function ($order) {
                     return '
                         <div class="d-flex gap-2 justify-content-center">
                             <button type="button" onclick="viewOrder('.$order->id.')" class="btn btn-soft-primary btn-sm" title="View Details">
                                 <i class="ri-eye-line fs-14"></i>
+                            </button>
+                            <button type="button" onclick="editOrder('.$order->id.')" class="btn btn-soft-warning btn-sm" title="Edit Order">
+                                <i class="ri-edit-line fs-14"></i>
                             </button>
                             <button type="button" onclick="deleteData(\'' . route('backend.order.destroy', $order->id) . '\')" class="btn btn-soft-danger btn-sm" title="Delete">
                                 <i class="ri-delete-bin-line fs-14"></i>
@@ -83,6 +92,14 @@ class OrderController extends Controller
         }
         $brands = \App\Models\Brand::where('status', 'active')->get();
         $products = \App\Models\Product::where('status', 'active')->with('brandData')->get();
+
+        // Database column modification
+        try {
+            \Illuminate\Support\Facades\DB::statement("ALTER TABLE orders MODIFY COLUMN status ENUM('PENDING', 'TO_PREPARE', 'TO_PICKUP', 'PICKEDUP', 'WAREHOUSE', 'DELIVERING', 'DISTRIBUTED', 'TRANSIT', 'DELIVERED', 'CANCELED', 'REJECTED') DEFAULT 'PENDING'");
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('DB Alter Table Status Error: ' . $e->getMessage());
+        }
+
         return view("backend.layout.orders.index", compact('brands', 'products'));
     }
 
@@ -139,7 +156,7 @@ class OrderController extends Controller
                     'delivery_fee' => $request->delivery_fee,
                     'discount' => $request->discount,
                     'total' => $total,
-                    'status' => 'pending',
+                    'status' => 'PENDING',
                     'phone' => $request->phone,
                     'full_name' => $fullName,
                     'email' => $request->email,
@@ -178,6 +195,87 @@ class OrderController extends Controller
         }
     }
 
+    /**
+     * Update the specified order.
+     */
+    public function update(Request $request, $id)
+    {
+        $request->validate([
+            'first_name' => 'required|string',
+            'last_name' => 'nullable|string',
+            'email' => 'required|email',
+            'phone' => 'required|string',
+            'address' => 'required|string',
+            'city' => 'required|string',
+            'payment_method' => 'required|in:cod,bank_transfer',
+            'preferred_delivery_date' => 'nullable|date',
+            'delivery_fee' => 'required|numeric',
+            'discount' => 'required|numeric',
+            'items' => 'required|array|min:1',
+            'items.*.product_id' => 'required|exists:products,id',
+            'items.*.quantity' => 'required|integer|min:1',
+            'items.*.price' => 'required|numeric',
+        ]);
+
+        try {
+            return \DB::transaction(function () use ($request, $id) {
+                $order = Order::findOrFail($id);
+
+                $subtotal = 0;
+                foreach ($request->items as $item) {
+                    $subtotal += $item['price'] * $item['quantity'];
+                }
+
+                $total = $subtotal + $request->delivery_fee - $request->discount;
+                $fullName = trim($request->first_name . ' ' . $request->last_name);
+
+                $order->update([
+                    'subtotal' => $subtotal,
+                    'delivery_fee' => $request->delivery_fee,
+                    'discount' => $request->discount,
+                    'total' => $total,
+                    'phone' => $request->phone,
+                    'full_name' => $fullName,
+                    'email' => $request->email,
+                    'city' => $request->city,
+                    'address' => $request->address,
+                    'payment_method' => $request->payment_method,
+                    'preferred_delivery_date' => $request->preferred_delivery_date,
+                ]);
+
+                // Sync items
+                $order->items()->delete();
+                foreach ($request->items as $item) {
+                    \App\Models\OrderItem::create([
+                        'order_id' => $order->id,
+                        'product_id' => $item['product_id'],
+                        'quantity' => $item['quantity'],
+                        'price' => $item['price'],
+                    ]);
+                }
+
+                // If tracking code exists, update on Sendit
+                if ($order->sendit_delivery_code) {
+                    $senditService = app(\App\Services\SenditService::class);
+                    $result = $senditService->updateDelivery($order->sendit_delivery_code, $order->load('items.product'));
+                    if (!$result['success']) {
+                        throw new \Exception('Sendit API Update Error: ' . ($result['message'] ?? 'Unknown error'));
+                    }
+                }
+
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Order updated successfully' . ($order->sendit_delivery_code ? ' and synced to Sendit.' : '.')
+                ]);
+            });
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to update order: ' . $e->getMessage()
+            ], 422);
+        }
+    }
+
     public function show($id)
     {
         $order = Order::with(['items.product', 'user', 'bankTransfer', 'affiliateLink.user'])->find($id);
@@ -193,11 +291,17 @@ class OrderController extends Controller
     public function updateStatus(Request $request, $id)
     {
         $request->validate([
-            'status' => 'required|in:pending,processing,shipping,delivered,cancelled',
+            'status' => 'required|in:PENDING,TO_PREPARE,TO_PICKUP,PICKEDUP,WAREHOUSE,DELIVERING,DISTRIBUTED,TRANSIT,DELIVERED,CANCELED,REJECTED',
         ]);
 
         $order = Order::findOrFail($id);
         $order->update(['status' => $request->status]);
+
+        // If order status is set to cancelled/CANCELED/REJECTED, cancel it on Sendit
+        if (in_array(strtoupper($request->status), ['CANCELLED', 'CANCELED', 'REJECTED']) && $order->sendit_delivery_code) {
+            $senditService = app(\App\Services\SenditService::class);
+            $senditService->cancelDelivery($order->sendit_delivery_code);
+        }
 
         return response()->json([
             'success' => true,
@@ -232,6 +336,13 @@ class OrderController extends Controller
     public function destroy($id)
     {
         $order = Order::findOrFail($id);
+
+        // Cancel on Sendit if tracking code exists
+        if ($order->sendit_delivery_code) {
+            $senditService = app(\App\Services\SenditService::class);
+            $senditService->cancelDelivery($order->sendit_delivery_code);
+        }
+
         $order->delete();
         return response()->json([
             'success' => true,
@@ -247,6 +358,14 @@ class OrderController extends Controller
         }
 
         try {
+            $orders = Order::whereIn('id', $ids)->get();
+            $senditService = app(\App\Services\SenditService::class);
+            foreach ($orders as $order) {
+                if ($order->sendit_delivery_code) {
+                    $senditService->cancelDelivery($order->sendit_delivery_code);
+                }
+            }
+            
             Order::whereIn('id', $ids)->delete();
             return response()->json(['success' => true, 'message' => 'Selected items deleted successfully.']);
         } catch (\Exception $e) {

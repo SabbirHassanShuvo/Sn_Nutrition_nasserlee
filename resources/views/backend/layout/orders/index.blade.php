@@ -97,11 +97,17 @@
                         <div class="col-md-4">
                             <h6 class="text-muted text-uppercase fw-semibold mb-2 fs-11">Order Status</h6>
                             <select class="form-select form-select-sm" id="orderStatusUpdate">
-                                <option value="pending">Pending</option>
-                                <option value="processing">Processing</option>
-                                <option value="shipping">Shipping</option>
-                                <option value="delivered">Delivered</option>
-                                <option value="cancelled">Cancelled</option>
+                                <option value="PENDING">PENDING</option>
+                                <option value="TO_PREPARE">TO_PREPARE</option>
+                                <option value="TO_PICKUP">TO_PICKUP</option>
+                                <option value="PICKEDUP">PICKEDUP</option>
+                                <option value="WAREHOUSE">WAREHOUSE</option>
+                                <option value="DELIVERING">DELIVERING</option>
+                                <option value="DISTRIBUTED">DISTRIBUTED</option>
+                                <option value="TRANSIT">TRANSIT</option>
+                                <option value="DELIVERED">DELIVERED</option>
+                                <option value="CANCELED">CANCELED</option>
+                                <option value="REJECTED">REJECTED</option>
                             </select>
                         </div>
                 
@@ -340,6 +346,141 @@
             </div>
         </div>
     </div>
+
+    <!-- Edit Order Modal -->
+    <div class="modal fade" id="editOrderModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content border-0 shadow-lg">
+                <form id="editOrderForm" method="POST">
+                    @csrf
+                    @method('PUT')
+                    <input type="hidden" id="editOrderId" name="order_id">
+                    <div class="modal-header bg-primary py-3">
+                        <h5 class="modal-title text-white fw-bold">Edit Order</h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body p-4" style="max-height: 75vh; overflow-y: auto;">
+                        <!-- Customer Details -->
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">First Name *</label>
+                                <input type="text" name="first_name" id="editFirstName" class="form-control form-control-sm" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Last Name</label>
+                                <input type="text" name="last_name" id="editLastName" class="form-control form-control-sm">
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Email *</label>
+                                <input type="email" name="email" id="editEmail" class="form-control form-control-sm" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Phone *</label>
+                                <div class="input-group input-group-sm">
+                                    <span class="input-group-text">+212</span>
+                                    <input type="text" name="phone" id="editPhone" class="form-control form-control-sm" required>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Address *</label>
+                                <textarea name="address" id="editAddress" class="form-control form-control-sm" rows="2" required></textarea>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Secondary Phone</label>
+                                <div class="input-group input-group-sm">
+                                    <span class="input-group-text">+212</span>
+                                    <input type="text" name="secondary_phone" id="editSecondaryPhone" class="form-control form-control-sm">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row mb-4">
+                            <div class="col-md-4">
+                                <label class="form-label fw-semibold">Select City *</label>
+                                <select name="city" id="editSelectCityDropdown" class="form-select form-select-sm" required>
+                                    <option value="">Select City</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label fw-semibold">Payment Method *</label>
+                                <select name="payment_method" id="editPaymentMethod" class="form-select form-select-sm" required>
+                                    <option value="cod">Cash On Delivery</option>
+                                    <option value="bank_transfer">Bank Transfer</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label fw-semibold">Delivery Date *</label>
+                                <input type="date" name="preferred_delivery_date" id="editPreferredDeliveryDate" class="form-control form-control-sm" required>
+                            </div>
+                        </div>
+
+                        <!-- Product Selection Area -->
+                        <h6 class="text-primary text-uppercase fw-bold mb-3 fs-11 border-bottom pb-2">Products</h6>
+                        <div id="editProductRowsContainer">
+                            <!-- Template Row (will be dynamically appended/populated) -->
+                        </div>
+
+                        <div class="d-flex justify-content-between mb-4">
+                            <button type="button" id="editMoreProductsBtn" class="btn btn-soft-primary btn-sm">
+                                <i class="ri-add-line align-bottom me-1"></i> Add More
+                            </button>
+                        </div>
+
+                        <!-- Calculation details -->
+                        <div class="row align-items-center bg-light p-3 rounded">
+                            <div class="col-md-4">
+                                <label class="form-label fw-semibold">Shipping Fees *</label>
+                                <input type="number" id="editShippingFee" name="delivery_fee" class="form-control form-control-sm" value="0.00" step="0.01" min="0">
+                            </div>
+                            <div class="col-md-4" id="editDiscountInputWrapper" style="display: none;">
+                                <label class="form-label fw-semibold">Discount Amount</label>
+                                <input type="number" id="editDiscount" name="discount" class="form-control form-control-sm" value="0.00" step="0.01" min="0">
+                            </div>
+                            <div class="col-md-4 ms-auto">
+                                <label class="form-label fw-semibold">Total Price *</label>
+                                <input type="text" id="editTotalPriceDisplay" class="form-control form-control-sm fw-bold text-primary" readonly value="0.00 MAD">
+                            </div>
+                        </div>
+
+                        <!-- Options checkboxes -->
+                        <div class="row mt-3">
+                            <div class="col-md-12 d-flex flex-column gap-2">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="editFreeDeliveryCheckbox">
+                                    <label class="form-check-label fs-13 fw-semibold text-dark" for="editFreeDeliveryCheckbox">Free delivery</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="editDiscountedPriceCheckbox">
+                                    <label class="form-check-label fs-13 fw-semibold text-dark" for="editDiscountedPriceCheckbox">Discounted Price</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="editBuy4get1Checkbox">
+                                    <label class="form-check-label fs-13 fw-semibold text-dark" for="editBuy4get1Checkbox">Buy 4 Get 1 Free Discount</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="editBuy3get30Checkbox">
+                                    <label class="form-check-label fs-13 fw-semibold text-dark" for="editBuy3get30Checkbox">Buy 3 Get 30% Discount on Cheapest Product</label>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                    <div class="modal-footer bg-light border-0 py-2">
+                        <button type="button" class="btn btn-ghost-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-success btn-sm px-4">
+                            <i class="ri-save-line align-bottom me-1"></i> Update Order
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
 @endsection
 
 @push('styles-top')
@@ -347,8 +488,10 @@
         .custom-table thead th { font-size: 11px; text-transform: uppercase; font-weight: 700; padding: 12px 15px; letter-spacing: 0.5px; }
         .custom-table tbody td { padding: 10px 15px; font-size: 13.5px; }
         .btn-soft-primary { background-color: rgba(64, 81, 137, 0.1); color: #405189; border: none; }
+        .btn-soft-warning { background-color: rgba(243, 156, 18, 0.1); color: #f39c12; border: none; }
         .btn-soft-danger { background-color: rgba(240, 101, 72, 0.1); color: #f06548; border: none; }
         .btn-soft-primary:hover { background-color: #405189; color: #fff; }
+        .btn-soft-warning:hover { background-color: #f39c12; color: #fff; }
         .btn-soft-danger:hover { background-color: #f06548; color: #fff; }
     </style>
 @endpush
@@ -773,6 +916,356 @@
                 error: function(xhr) {
                     submitBtn.prop('disabled', false).html(originalHtml);
                     let msg = xhr.responseJSON?.message || 'Something went wrong. Please check fields.';
+                    Swal.fire('Error', msg, 'error');
+                }
+            });
+        });
+
+        // Edit Order JS
+        var editCityValue = null;
+
+        function editOrder(id) {
+            let url = "{{ route('backend.order.show', ':id') }}";
+            $.ajax({
+                type: "GET",
+                url: url.replace(':id', id),
+                success: function(response) {
+                    if (response.success) {
+                        let order = response.data;
+                        $('#editOrderId').val(order.id);
+                        
+                        let names = (order.full_name || '').split(' ');
+                        let firstName = names[0] || '';
+                        let lastName = names.slice(1).join(' ') || '';
+                        
+                        $('#editFirstName').val(firstName);
+                        $('#editLastName').val(lastName);
+                        $('#editEmail').val(order.email);
+                        
+                        let phoneNum = order.phone || '';
+                        if (phoneNum.startsWith('+212')) {
+                            phoneNum = phoneNum.substring(4);
+                        } else if (phoneNum.startsWith('212')) {
+                            phoneNum = phoneNum.substring(3);
+                        }
+                        $('#editPhone').val(phoneNum);
+
+                        $('#editAddress').val(order.address);
+
+                        let secondaryPhone = order.secondary_phone || '';
+                        if (secondaryPhone.startsWith('+212')) {
+                            secondaryPhone = secondaryPhone.substring(4);
+                        } else if (secondaryPhone.startsWith('212')) {
+                            secondaryPhone = secondaryPhone.substring(3);
+                        }
+                        $('#editSecondaryPhone').val(secondaryPhone);
+
+                        $('#editPaymentMethod').val(order.payment_method);
+                        
+                        if (order.preferred_delivery_date) {
+                            let d = new Date(order.preferred_delivery_date);
+                            let month = '' + (d.getMonth() + 1);
+                            let day = '' + d.getDate();
+                            let year = d.getFullYear();
+                            if (month.length < 2) month = '0' + month;
+                            if (day.length < 2) day = '0' + day;
+                            $('#editPreferredDeliveryDate').val([year, month, day].join('-'));
+                        } else {
+                            $('#editPreferredDeliveryDate').val('');
+                        }
+
+                        $('#editShippingFee').val(parseFloat(order.delivery_fee).toFixed(2));
+                        $('#editDiscount').val(parseFloat(order.discount).toFixed(2));
+
+                        $('#editFreeDeliveryCheckbox').prop('checked', parseFloat(order.delivery_fee) === 0);
+                        if (parseFloat(order.delivery_fee) === 0) {
+                            $('#editShippingFee').prop('readonly', true);
+                        } else {
+                            $('#editShippingFee').prop('readonly', false);
+                        }
+
+                        $('#editDiscountedPriceCheckbox').prop('checked', parseFloat(order.discount) > 0);
+                        if (parseFloat(order.discount) > 0) {
+                            $('#editDiscountInputWrapper').show();
+                        } else {
+                            $('#editDiscountInputWrapper').hide();
+                        }
+
+                        editCityValue = order.city;
+                        loadEditCities();
+
+                        let container = $('#editProductRowsContainer');
+                        container.empty();
+                        
+                        if (order.items && order.items.length > 0) {
+                            order.items.forEach(item => {
+                                let brandId = item.product ? item.product.brand_id : '';
+                                addEditProductRow(item.product_id, item.quantity, brandId);
+                            });
+                        } else {
+                            addEditProductRow();
+                        }
+
+                        calculateEditTotal();
+                        $('#editOrderModal').modal('show');
+                    }
+                }
+            });
+        }
+
+        function loadEditCities() {
+            $('#editSelectCityDropdown').html('<option value="">Loading Cities...</option>');
+            $.ajax({
+                type: "GET",
+                url: "{{ route('backend.order.districts') }}",
+                success: function(response) {
+                    let html = '<option value="">Select City</option>';
+                    if (response && response.length > 0) {
+                        response.forEach(city => {
+                            let selected = city.ville === editCityValue ? 'selected' : '';
+                            html += `<option value="${city.ville}" ${selected}>${city.ville} (${city.name})</option>`;
+                        });
+                    } else {
+                        html = '<option value="">No cities returned from Sendit</option>';
+                    }
+                    $('#editSelectCityDropdown').html(html);
+                },
+                error: function() {
+                    $('#editSelectCityDropdown').html('<option value="">Failed to load cities</option>');
+                }
+            });
+        }
+
+        function addEditProductRow(productId = '', quantity = 1, brandId = '') {
+            let container = $('#editProductRowsContainer');
+            
+            let brandOptions = '<option value="">Select Brand</option>';
+            @json($brands).forEach(b => {
+                brandOptions += `<option value="${b.id}" ${b.id == brandId ? 'selected' : ''}>${b.name}</option>`;
+            });
+            
+            let productOptions = '<option value="">Select Product</option>';
+            let filtered = allProducts;
+            if (brandId) {
+                filtered = allProducts.filter(p => p.brand_id == brandId);
+            }
+            let currentPrice = 0;
+            filtered.forEach(p => {
+                let isSelected = p.id == productId;
+                if (isSelected) currentPrice = p.price;
+                productOptions += `<option value="${p.id}" data-price="${p.price}" ${isSelected ? 'selected' : ''}>${p.name} (${parseFloat(p.price).toFixed(2)} MAD)</option>`;
+            });
+            
+            let isFirstRow = container.find('.product-row').length === 0;
+            let removeBtnStyle = isFirstRow ? 'display: none;' : '';
+            
+            let rowHtml = `
+            <div class="product-row border-bottom pb-3 mb-3">
+                <div class="row align-items-end">
+                    <div class="col-md-4">
+                        <label class="form-label fs-12 fw-semibold">Brand</label>
+                        <select class="form-select form-select-sm edit-brand-select">
+                            ${brandOptions}
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label fs-12 fw-semibold">Product *</label>
+                        <select class="form-select form-select-sm edit-product-select" required>
+                            ${productOptions}
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label fs-12 fw-semibold">Quantity *</label>
+                        <input type="number" class="form-control form-control-sm edit-qty-input" value="${quantity}" min="1" required>
+                    </div>
+                    <div class="col-md-2 d-flex align-items-center justify-content-between">
+                        <div>
+                            <label class="form-label fs-12 fw-semibold">Price</label>
+                            <div class="price-display fw-bold text-dark fs-13">${parseFloat(currentPrice).toFixed(2)} MAD</div>
+                        </div>
+                        <button type="button" class="btn btn-soft-danger btn-sm edit-remove-row-btn ms-2" style="${removeBtnStyle}">
+                            <i class="ri-delete-bin-line"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>`;
+            
+            container.append(rowHtml);
+        }
+
+        $(document).on('change', '.edit-brand-select', function() {
+            let brandId = $(this).val();
+            let row = $(this).closest('.product-row');
+            let productSelect = row.find('.edit-product-select');
+            
+            let html = '<option value="">Select Product</option>';
+            let filtered = allProducts;
+            if (brandId) {
+                filtered = allProducts.filter(p => p.brand_id == brandId);
+            }
+            
+            filtered.forEach(p => {
+                html += `<option value="${p.id}" data-price="${p.price}">${p.name} (${parseFloat(p.price).toFixed(2)} MAD)</option>`;
+            });
+            productSelect.html(html);
+            row.find('.price-display').text('0.00 MAD');
+            calculateEditTotal();
+        });
+
+        $(document).on('change', '.edit-product-select', function() {
+            let option = $(this).find('option:selected');
+            let price = parseFloat(option.data('price') || 0);
+            let row = $(this).closest('.product-row');
+            row.find('.price-display').text(price.toFixed(2) + ' MAD');
+            calculateEditTotal();
+        });
+
+        $(document).on('input change', '.edit-qty-input', function() {
+            calculateEditTotal();
+        });
+
+        $(document).on('input change', '#editShippingFee, #editDiscount', function() {
+            calculateEditTotal();
+        });
+
+        $(document).on('change', '#editFreeDeliveryCheckbox', function() {
+            if ($(this).is(':checked')) {
+                $('#editShippingFee').val('0.00').prop('readonly', true);
+            } else {
+                $('#editShippingFee').prop('readonly', false);
+            }
+            calculateEditTotal();
+        });
+
+        $(document).on('change', '#editDiscountedPriceCheckbox, #editBuy4get1Checkbox, #editBuy3get30Checkbox', function() {
+            calculateEditTotal();
+        });
+
+        $('#editMoreProductsBtn').on('click', function() {
+            addEditProductRow();
+            calculateEditTotal();
+        });
+
+        $(document).on('click', '.edit-remove-row-btn', function() {
+            $(this).closest('.product-row').remove();
+            calculateEditTotal();
+        });
+
+        function calculateEditTotal() {
+            let subtotal = 0;
+            let totalQty = 0;
+            let productPrices = [];
+
+            $('#editProductRowsContainer .product-row').each(function() {
+                let price = parseFloat($(this).find('.edit-product-select option:selected').data('price') || 0);
+                let qty = parseInt($(this).find('.edit-qty-input').val() || 0);
+                subtotal += price * qty;
+                totalQty += qty;
+                for (let i = 0; i < qty; i++) {
+                    productPrices.push(price);
+                }
+            });
+
+            productPrices.sort((a, b) => a - b);
+
+            let shippingFee = parseFloat($('#editShippingFee').val() || 0);
+            let discount = 0;
+
+            if ($('#editDiscountedPriceCheckbox').is(':checked')) {
+                $('#editDiscountInputWrapper').show();
+                discount = parseFloat($('#editDiscount').val() || 0);
+            } else {
+                $('#editDiscountInputWrapper').hide();
+                $('#editDiscount').val('0.00');
+            }
+
+            if ($('#editBuy4get1Checkbox').is(':checked')) {
+                if (totalQty >= 5 && productPrices.length > 0) {
+                    discount += productPrices[0];
+                }
+            }
+
+            if ($('#editBuy3get30Checkbox').is(':checked')) {
+                if (totalQty >= 3 && productPrices.length > 0) {
+                    discount += productPrices[0] * 0.3;
+                }
+            }
+
+            let total = subtotal + shippingFee - discount;
+            if (total < 0) total = 0;
+
+            $('#editTotalPriceDisplay').val(total.toFixed(2) + ' MAD');
+        }
+
+        $('#editOrderForm').on('submit', function(e) {
+            e.preventDefault();
+            
+            let items = [];
+            let valid = true;
+            
+            $('#editProductRowsContainer .product-row').each(function() {
+                let productId = $(this).find('.edit-product-select').val();
+                let qty = $(this).find('.edit-qty-input').val();
+                let price = $(this).find('.edit-product-select option:selected').data('price');
+                
+                if (!productId || !qty) {
+                    valid = false;
+                    return false;
+                }
+                
+                items.push({
+                    product_id: productId,
+                    quantity: qty,
+                    price: price
+                });
+            });
+            
+            if (!valid || items.length === 0) {
+                toastr.error('Please select at least one product.');
+                return;
+            }
+            
+            let orderId = $('#editOrderId').val();
+            let url = "{{ route('backend.order.update', ':id') }}".replace(':id', orderId);
+            
+            let data = {
+                _token: "{{ csrf_token() }}",
+                _method: "PUT",
+                first_name: $('#editFirstName').val(),
+                last_name: $('#editLastName').val(),
+                email: $('#editEmail').val(),
+                phone: $('#editPhone').val(),
+                secondary_phone: $('#editSecondaryPhone').val(),
+                address: $('#editAddress').val(),
+                city: $('#editSelectCityDropdown').val(),
+                payment_method: $('#editPaymentMethod').val(),
+                preferred_delivery_date: $('#editPreferredDeliveryDate').val(),
+                delivery_fee: $('#editShippingFee').val(),
+                discount: $('#editDiscount').val(),
+                items: items
+            };
+            
+            let submitBtn = $('#editOrderForm').find('button[type="submit"]');
+            let originalHtml = submitBtn.html();
+            submitBtn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm me-2"></span>Updating...');
+            
+            $.ajax({
+                type: "POST",
+                url: url,
+                data: data,
+                success: function(response) {
+                    submitBtn.prop('disabled', false).html(originalHtml);
+                    if (response.success) {
+                        $('#editOrderModal').modal('hide');
+                        $('.data-table').DataTable().ajax.reload();
+                        Swal.fire('Updated!', response.message, 'success');
+                    } else {
+                        toastr.error(response.message || 'Failed to update order.');
+                    }
+                },
+                error: function(xhr) {
+                    submitBtn.prop('disabled', false).html(originalHtml);
+                    let msg = xhr.responseJSON?.message || 'Something went wrong.';
                     Swal.fire('Error', msg, 'error');
                 }
             });

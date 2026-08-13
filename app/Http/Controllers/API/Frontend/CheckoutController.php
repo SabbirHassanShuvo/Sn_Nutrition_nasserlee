@@ -228,7 +228,7 @@ class CheckoutController extends BaseController
                     'total' => $total,
                     'affiliate_link_id' => $affiliateLinkId,
                     'commission_amount' => $totalCommission,
-                    'status' => 'pending',
+                    'status' => 'PENDING',
                     'bank_transfer_id' => $request->bank_transfer_id,
                     
                     'phone' => $request->phone,

@@ -33,42 +33,15 @@ class SenditWebhookController extends BaseController
             return $this->sendError('Order not found.', [], 404);
         }
 
-        // Update the shipment status columns
+        $statusUpper = strtoupper($status);
+
+        // Update the shipment status and order status columns
         $order->update([
-            'sendit_delivery_status' => $status
+            'sendit_delivery_status' => $statusUpper,
+            'status' => $statusUpper
         ]);
 
-        // Map Sendit status to Order status
-        $mappedStatus = null;
-        switch (strtoupper($status)) {
-            case 'DELIVERED':
-                $mappedStatus = 'delivered';
-                break;
-            case 'CANCELED':
-            case 'REJECTED':
-                $mappedStatus = 'cancelled';
-                break;
-            case 'DELIVERING':
-            case 'DISTRIBUTED':
-            case 'TRANSIT':
-                $mappedStatus = 'shipping';
-                break;
-            case 'PENDING':
-            case 'TO_PREPARE':
-            case 'TO_PICKUP':
-            case 'PICKEDUP':
-            case 'WAREHOUSE':
-                $mappedStatus = 'processing';
-                break;
-        }
-
-        if ($mappedStatus) {
-            $order->update([
-                'status' => $mappedStatus
-            ]);
-            
-            Log::info("Order #{$order->order_number} status updated to '{$mappedStatus}' via Sendit Webhook.");
-        }
+        Log::info("Order #{$order->order_number} status updated to '{$statusUpper}' via Sendit Webhook.");
 
         return $this->sendResponse([
             'order_number' => $order->order_number,

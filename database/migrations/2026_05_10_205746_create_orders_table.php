@@ -22,7 +22,10 @@ return new class extends Migration
             $table->decimal('discount', 10, 2)->default(0);
             $table->decimal('total', 10, 2);
             $table->decimal('commission_amount', 10, 2)->default(0);
-            $table->enum('status', ['pending', 'processing', 'shipping', 'delivered', 'cancelled'])->default('pending');
+            $table->enum('status', [
+                'PENDING', 'TO_PREPARE', 'TO_PICKUP', 'PICKEDUP', 'WAREHOUSE', 
+                'DELIVERING', 'DISTRIBUTED', 'TRANSIT', 'DELIVERED', 'CANCELED', 'REJECTED'
+            ])->default('PENDING');
             // Contact & Shipping
             $table->string('phone')->nullable();
             $table->string('full_name')->nullable();
