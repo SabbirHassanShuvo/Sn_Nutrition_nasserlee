@@ -14,9 +14,9 @@ class SystemSeeder extends Seeder
     public function run(): void
     {
         Setting::create([
-            'site_title'=> 'softv',
-            'app_name'=> 'venzor',
-            'admin_name'=> 'admin panel',
+            'site_title'=> 'SN Nutrition',
+            'app_name'=> 'SN Nutrition',
+            'admin_name'=> 'SN Nutrition Panel',
         ]);
     }
 }

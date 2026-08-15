@@ -214,7 +214,7 @@
                                 <label class="form-label fw-semibold">Phone *</label>
                                 <div class="input-group input-group-sm">
                                     <span class="input-group-text">+212</span>
-                                    <input type="text" name="phone" class="form-control form-control-sm" required>
+                                    <input type="text" name="phone" class="form-control form-control-sm" placeholder="612345678" required>
                                 </div>
                             </div>
                         </div>
@@ -228,7 +228,7 @@
                                 <label class="form-label fw-semibold">Secondary Phone</label>
                                 <div class="input-group input-group-sm">
                                     <span class="input-group-text">+212</span>
-                                    <input type="text" name="secondary_phone" class="form-control form-control-sm">
+                                    <input type="text" name="secondary_phone" class="form-control form-control-sm" placeholder="612345678">
                                 </div>
                             </div>
                         </div>
@@ -258,7 +258,7 @@
                         <div id="productRowsContainer">
                             <!-- Template Row -->
                             <div class="product-row border-bottom pb-3 mb-3">
-                                <div class="row align-items-end">
+                                <div class="row align-items-start">
                                     <div class="col-md-4">
                                         <label class="form-label fs-12 fw-semibold">Brand</label>
                                         <select class="form-select form-select-sm brand-select">
@@ -274,17 +274,18 @@
                                             <option value="">Select Product</option>
                                         </select>
                                     </div>
-                                    <div class="col-md-2">
+                                    <div class="col-md-4">
                                         <label class="form-label fs-12 fw-semibold">Quantity *</label>
                                         <input type="number" class="form-control form-control-sm qty-input" value="1" min="1" required>
-                                    </div>
-                                    <div class="col-md-2 d-flex align-items-center justify-content-between">
-                                        <div>
-                                            <label class="form-label fs-12 fw-semibold">Price</label>
-                                            <div class="price-display fw-bold text-dark fs-13">0.00 MAD</div>
+                                        <div class="mt-2 text-start">
+                                            <span class="badge bg-light text-dark border px-2 py-1 fs-11 fw-semibold">
+                                                Price: <span class="price-display text-primary ms-1">0.00 MAD</span>
+                                            </span>
                                         </div>
-                                        <button type="button" class="btn btn-soft-danger btn-sm remove-row-btn ms-2" style="display: none;">
-                                            <i class="ri-delete-bin-line"></i>
+                                    </div>
+                                    <div class="col-md-2 text-end" style="margin-top: 26px;">
+                                        <button type="button" class="btn btn-soft-danger btn-sm remove-row-btn" style="display: none;">
+                                            <i class="ri-delete-bin-line"></i> Remove
                                         </button>
                                     </div>
                                 </div>
@@ -493,6 +494,50 @@
         .btn-soft-primary:hover { background-color: #405189; color: #fff; }
         .btn-soft-warning:hover { background-color: #f39c12; color: #fff; }
         .btn-soft-danger:hover { background-color: #f06548; color: #fff; }
+        
+        /* Input group styling fix to seamlessly merge +212 badge and phone input */
+        .input-group {
+            border-radius: 8px !important;
+            overflow: hidden;
+            display: flex;
+            flex-wrap: nowrap;
+        }
+        .input-group .input-group-text {
+            border-radius: 0 !important;
+            border: 1px solid #ced4da;
+            border-right: 0;
+            background-color: #f1f3f5;
+        }
+        .input-group .form-control {
+            border-radius: 0 !important;
+            border: 1px solid #ced4da;
+        }
+        
+        /* Select2 Bootstrap styling compatibility */
+        .select2-container .select2-selection--single {
+            height: 38px !important;
+            border: 1px solid #ced4da !important;
+            border-radius: 8px !important;
+            display: flex;
+            align-items: center;
+            background-color: #fff !important;
+        }
+        .select2-container--default .select2-selection--single .select2-selection__rendered {
+            line-height: 38px !important;
+            color: #495057 !important;
+            padding-left: 10px !important;
+            font-size: 13px !important;
+        }
+        .select2-container--default .select2-selection--single .select2-selection__arrow {
+            height: 36px !important;
+            right: 6px !important;
+        }
+        .select2-dropdown {
+            border: 1px solid #ced4da !important;
+            box-shadow: 0 5px 10px rgba(0,0,0,0.1);
+            z-index: 99999 !important; /* Ensure select2 dropdown is above bootstrap modal */
+            border-radius: 8px !important;
+        }
     </style>
 @endpush
 
@@ -707,7 +752,11 @@
         const allProducts = @json($products);
 
         $('#addOrderModal').on('show.bs.modal', function() {
-            $('#selectCityDropdown').html('<option value="">Loading Cities...</option>');
+            $('#selectCityDropdown').select2({
+                dropdownParent: $('#addOrderModal'),
+                width: '100%'
+            });
+            $('#selectCityDropdown').html('<option value="">Loading Cities...</option>').trigger('change');
             $.ajax({
                 type: "GET",
                 url: "{{ route('backend.order.districts') }}",
@@ -715,17 +764,29 @@
                     let html = '<option value="">Select City</option>';
                     if (response && response.length > 0) {
                         response.forEach(city => {
-                            html += `<option value="${city.ville}">${city.ville} (${city.name})</option>`;
+                            html += `<option value="${city.ville}" data-price="${city.price || 0}">${city.ville} (${city.name})</option>`;
                         });
                     } else {
                         html = '<option value="">No cities returned from Sendit</option>';
                     }
-                    $('#selectCityDropdown').html(html);
+                    $('#selectCityDropdown').html(html).trigger('change');
                 },
                 error: function() {
-                    $('#selectCityDropdown').html('<option value="">Failed to load cities</option>');
+                    $('#selectCityDropdown').html('<option value="">Failed to load cities</option>').trigger('change');
                 }
             });
+        });
+
+        $(document).on('change', '#selectCityDropdown', function() {
+            let option = $(this).find('option:selected');
+            let price = parseFloat(option.data('price') || 0);
+            
+            if ($('#freeDeliveryCheckbox').is(':checked')) {
+                $('#addShippingFee').val('0.00');
+            } else {
+                $('#addShippingFee').val(price.toFixed(2));
+            }
+            calculateTotal();
         });
 
         $(document).on('change', '.brand-select', function() {
@@ -1014,7 +1075,11 @@
         }
 
         function loadEditCities() {
-            $('#editSelectCityDropdown').html('<option value="">Loading Cities...</option>');
+            $('#editSelectCityDropdown').select2({
+                dropdownParent: $('#editOrderModal'),
+                width: '100%'
+            });
+            $('#editSelectCityDropdown').html('<option value="">Loading Cities...</option>').trigger('change');
             $.ajax({
                 type: "GET",
                 url: "{{ route('backend.order.districts') }}",
@@ -1023,18 +1088,30 @@
                     if (response && response.length > 0) {
                         response.forEach(city => {
                             let selected = city.ville === editCityValue ? 'selected' : '';
-                            html += `<option value="${city.ville}" ${selected}>${city.ville} (${city.name})</option>`;
+                            html += `<option value="${city.ville}" data-price="${city.price || 0}" ${selected}>${city.ville} (${city.name})</option>`;
                         });
                     } else {
                         html = '<option value="">No cities returned from Sendit</option>';
                     }
-                    $('#editSelectCityDropdown').html(html);
+                    $('#editSelectCityDropdown').html(html).trigger('change');
                 },
                 error: function() {
-                    $('#editSelectCityDropdown').html('<option value="">Failed to load cities</option>');
+                    $('#editSelectCityDropdown').html('<option value="">Failed to load cities</option>').trigger('change');
                 }
             });
         }
+
+        $(document).on('change', '#editSelectCityDropdown', function() {
+            let option = $(this).find('option:selected');
+            let price = parseFloat(option.data('price') || 0);
+            
+            if ($('#editFreeDeliveryCheckbox').is(':checked')) {
+                $('#editShippingFee').val('0.00');
+            } else {
+                $('#editShippingFee').val(price.toFixed(2));
+            }
+            calculateEditTotal();
+        });
 
         function addEditProductRow(productId = '', quantity = 1, brandId = '') {
             let container = $('#editProductRowsContainer');
@@ -1061,7 +1138,7 @@
             
             let rowHtml = `
             <div class="product-row border-bottom pb-3 mb-3">
-                <div class="row align-items-end">
+                <div class="row align-items-start">
                     <div class="col-md-4">
                         <label class="form-label fs-12 fw-semibold">Brand</label>
                         <select class="form-select form-select-sm edit-brand-select">
@@ -1077,14 +1154,15 @@
                     <div class="col-md-2">
                         <label class="form-label fs-12 fw-semibold">Quantity *</label>
                         <input type="number" class="form-control form-control-sm edit-qty-input" value="${quantity}" min="1" required>
-                    </div>
-                    <div class="col-md-2 d-flex align-items-center justify-content-between">
-                        <div>
-                            <label class="form-label fs-12 fw-semibold">Price</label>
-                            <div class="price-display fw-bold text-dark fs-13">${parseFloat(currentPrice).toFixed(2)} MAD</div>
+                        <div class="mt-2 text-start">
+                            <span class="badge bg-light text-dark border px-2 py-1 fs-11 fw-semibold">
+                                Price: <span class="price-display text-primary ms-1">${parseFloat(currentPrice).toFixed(2)} MAD</span>
+                            </span>
                         </div>
-                        <button type="button" class="btn btn-soft-danger btn-sm edit-remove-row-btn ms-2" style="${removeBtnStyle}">
-                            <i class="ri-delete-bin-line"></i>
+                    </div>
+                    <div class="col-md-2 text-end" style="margin-top: 26px;">
+                        <button type="button" class="btn btn-soft-danger btn-sm edit-remove-row-btn" style="${removeBtnStyle}">
+                            <i class="ri-delete-bin-line"></i> Remove
                         </button>
                     </div>
                 </div>

@@ -122,7 +122,8 @@ class OrderController extends Controller
             'first_name' => 'required|string',
             'last_name' => 'nullable|string',
             'email' => 'required|email',
-            'phone' => 'required|string',
+            'phone' => ['required', 'regex:/^[0567]\d{9}$/'],
+            'secondary_phone' => ['nullable', 'regex:/^[0567]\d{9}$/'],
             'address' => 'required|string',
             'city' => 'required|string',
             'payment_method' => 'required|in:cod,bank_transfer',
@@ -133,8 +134,12 @@ class OrderController extends Controller
             'items.*.product_id' => 'required|exists:products,id',
             'items.*.quantity' => 'required|integer|min:1',
             'items.*.price' => 'required|numeric',
+        ], [
+            'phone.regex' => 'The phone number must start with 5, 6, or 7 and be exactly 9 digits.',
+            'secondary_phone.regex' => 'The secondary phone number must start with 5, 6, or 7 and be exactly 9 digits.',
         ]);
 
+    
         try {
             return \DB::transaction(function () use ($request) {
                 $subtotal = 0;
@@ -158,6 +163,7 @@ class OrderController extends Controller
                     'total' => $total,
                     'status' => 'PENDING',
                     'phone' => $request->phone,
+                    'secondary_phone' => $request->secondary_phone,
                     'full_name' => $fullName,
                     'email' => $request->email,
                     'city' => $request->city,
@@ -176,11 +182,11 @@ class OrderController extends Controller
                 }
 
                 // Send shipment to Sendit
-                $senditService = app(\App\Services\SenditService::class);
-                $result = $senditService->createDelivery($order->load('items.product'));
-                if (!$result['success']) {
-                    throw new \Exception('Sendit API Error: ' . ($result['message'] ?? 'Unknown error'));
-                }
+                // $senditService = app(\App\Services\SenditService::class);
+                // $result = $senditService->createDelivery($order->load('items.product'));
+                // if (!$result['success']) {
+                //     throw new \Exception('Sendit API Error: ' . ($result['message'] ?? 'Unknown error'));
+                // }
 
                 return response()->json([
                     'success' => true,
@@ -204,7 +210,8 @@ class OrderController extends Controller
             'first_name' => 'required|string',
             'last_name' => 'nullable|string',
             'email' => 'required|email',
-            'phone' => 'required|string',
+            'phone' => ['required', 'regex:/^[567]\d{8}$/'],
+            'secondary_phone' => ['nullable', 'regex:/^[567]\d{8}$/'],
             'address' => 'required|string',
             'city' => 'required|string',
             'payment_method' => 'required|in:cod,bank_transfer',
@@ -215,6 +222,9 @@ class OrderController extends Controller
             'items.*.product_id' => 'required|exists:products,id',
             'items.*.quantity' => 'required|integer|min:1',
             'items.*.price' => 'required|numeric',
+        ], [
+            'phone.regex' => 'The phone number must start with 5, 6, or 7 and be exactly 9 digits.',
+            'secondary_phone.regex' => 'The secondary phone number must start with 5, 6, or 7 and be exactly 9 digits.',
         ]);
 
         try {
@@ -235,6 +245,7 @@ class OrderController extends Controller
                     'discount' => $request->discount,
                     'total' => $total,
                     'phone' => $request->phone,
+                    'secondary_phone' => $request->secondary_phone,
                     'full_name' => $fullName,
                     'email' => $request->email,
                     'city' => $request->city,
