@@ -24,6 +24,28 @@ Route::get('session-forget', function(){
 Route::get('test-html', function() {
     return view('backend.layout.settings.system')->render();
 });
+Route::get('test-error-log', function() {
+    $logPath = ini_get('error_log');
+    $out = "<h2>PHP Error Log Path: " . htmlspecialchars($logPath) . "</h2>";
+    if ($logPath && file_exists($logPath)) {
+        $lines = file($logPath);
+        $lastLines = array_slice($lines, -50);
+        $out .= "<pre>" . htmlspecialchars(implode("", $lastLines)) . "</pre>";
+    } else {
+        $out .= "Log file not found or not readable.";
+    }
+    
+    $laravelLog = storage_path('logs/laravel.log');
+    $out .= "<h2>Laravel Log Path: " . htmlspecialchars($laravelLog) . "</h2>";
+    if (file_exists($laravelLog)) {
+        $lines = file($laravelLog);
+        $lastLines = array_slice($lines, -50);
+        $out .= "<pre>" . htmlspecialchars(implode("", $lastLines)) . "</pre>";
+    } else {
+        $out .= "Laravel log not found.";
+    }
+    return $out;
+});
 
 
 // test

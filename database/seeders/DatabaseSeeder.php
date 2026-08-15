@@ -31,6 +31,7 @@ class DatabaseSeeder extends Seeder
             HowItWorksSectionSeeder::class,
             BrandSeeder::class,
             CategorySeeder::class,
+            BatchSeeder::class,
             ProductSeeder::class,
             FaqCategorySeeder::class,
             FaqSeeder::class,

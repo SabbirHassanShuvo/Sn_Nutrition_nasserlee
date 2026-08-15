@@ -108,6 +108,13 @@ class Product extends Model
         return $this->belongsTo(Batch::class);
     }
 
+    public function batches()
+    {
+        return $this->belongsToMany(Batch::class, 'product_batches')
+            ->withPivot('quantity', 'expiry_date')
+            ->withTimestamps();
+    }
+
     public function features()
     {
         return $this->hasMany(ProductFeature::class);
@@ -136,5 +143,67 @@ class Product extends Model
     public function affiliateLinks()
     {
         return $this->hasMany(AffiliateLink::class);
+    }
+
+    /**
+     * Deduct quantity from the product's batches using the FEFO (First Expired, First Out) principle.
+     */
+    public function deductStock(int $amount)
+    {
+        if ($amount <= 0) return;
+
+        $productBatches = $this->batches()
+            ->orderByRaw('CASE WHEN expiry_date IS NULL THEN 1 ELSE 0 END, expiry_date ASC')
+            ->get();
+
+        $remainingToDeduct = $amount;
+
+        foreach ($productBatches as $batch) {
+            $currentQty = $batch->pivot->quantity;
+            if ($currentQty <= 0) continue;
+
+            if ($currentQty >= $remainingToDeduct) {
+                $this->batches()->updateExistingPivot($batch->id, [
+                    'quantity' => $currentQty - $remainingToDeduct
+                ]);
+                $remainingToDeduct = 0;
+                break;
+            } else {
+                $this->batches()->updateExistingPivot($batch->id, [
+                    'quantity' => 0
+                ]);
+                $remainingToDeduct -= $currentQty;
+            }
+        }
+
+        $newTotalQty = $this->batches()->sum('quantity');
+        $this->update([
+            'quantity' => $newTotalQty,
+            'in_stock' => $newTotalQty > 0
+        ]);
+    }
+
+    /**
+     * Restore quantity to the product's batches.
+     */
+    public function restoreStock(int $amount)
+    {
+        if ($amount <= 0) return;
+
+        $batch = $this->batches()
+            ->orderByRaw('CASE WHEN expiry_date IS NULL THEN 1 ELSE 0 END, expiry_date ASC')
+            ->first();
+
+        if ($batch) {
+            $this->batches()->updateExistingPivot($batch->id, [
+                'quantity' => $batch->pivot->quantity + $amount
+            ]);
+        }
+
+        $newTotalQty = $this->batches()->sum('quantity');
+        $this->update([
+            'quantity' => $newTotalQty,
+            'in_stock' => $newTotalQty > 0
+        ]);
     }
 }

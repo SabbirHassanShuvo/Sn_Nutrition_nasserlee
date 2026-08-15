@@ -98,9 +98,18 @@ class ProductController extends Controller
 
     public function store(Request $request)
     {
+      
         $request->validate([
             'name' => 'required|string|max:255',
-            'price' => 'required|numeric',
+            'price' => 'required|numeric|min:0',
+            'old_price' => 'nullable|numeric|min:0',
+            'discount_percent' => 'nullable|numeric|min:0|max:100',
+            'category_id' => 'nullable|exists:categories,id',
+            'brand_id' => 'nullable|exists:brands,id',
+            'batches' => 'nullable|array',
+            'batches.*.batch_id' => 'required|exists:batches,id',
+            'batches.*.quantity' => 'required|integer|min:0',
+            'batches.*.expiry_date' => 'nullable|date',
         ]);
 
         DB::beginTransaction();
@@ -109,6 +118,8 @@ class ProductController extends Controller
                 'name', 'short_description', 'full_description', 'price', 'old_price', 'discount_percent',
                 'brand_id', 'category_id', 'batch_id', 'form', 'servings', 'quantity'
             ]);
+
+            $data['discount_percent'] = $request->input('discount_percent') ?? 0;
 
             if ($request->filled('new_batch_name')) {
                 $newBatch = Batch::create([
@@ -142,7 +153,31 @@ class ProductController extends Controller
                 $data['gallery_images'] = $gallery;
             }
 
+            // Calculate total quantity from batches array before creating product
+            $totalQuantity = 0;
+            if ($request->has('batches')) {
+                foreach ($request->batches as $item) {
+                    $totalQuantity += (int) ($item['quantity'] ?? 0);
+                }
+            }
+            $data['quantity'] = $totalQuantity;
+
             $product = Product::create($data);
+
+            // Sync batches
+            $syncData = [];
+            if ($request->has('batches')) {
+                foreach ($request->batches as $item) {
+                    if (!empty($item['batch_id'])) {
+                        $qty = (int) ($item['quantity'] ?? 0);
+                        $syncData[$item['batch_id']] = [
+                            'quantity' => $qty,
+                            'expiry_date' => !empty($item['expiry_date']) ? $item['expiry_date'] : null
+                        ];
+                    }
+                }
+            }
+            $product->batches()->sync($syncData);
 
             if ($request->has('features')) {
                 foreach ($request->features as $feature) {
@@ -180,13 +215,17 @@ class ProductController extends Controller
             return redirect()->route('backend.product.index')->with('success', 'Product created successfully');
         } catch (\Exception $e) {
             DB::rollBack();
+            \Illuminate\Support\Facades\Log::error('Product Store Error: ' . $e->getMessage(), [
+                'exception' => $e,
+                'request_data' => $request->all()
+            ]);
             return back()->with('error', $e->getMessage())->withInput();
         }
     }
 
     public function edit(Product $product)
     {
-        $product->load(['features', 'ingredients', 'nutrition', 'usages', 'batch']);
+        $product->load(['features', 'ingredients', 'nutrition', 'usages', 'batches']);
         $categories = Category::where('status', 'active')->get();
         $brands = Brand::where('status', 'active')->get();
         $batches = Batch::where('status', 'active')->get();
@@ -197,7 +236,15 @@ class ProductController extends Controller
     {
         $request->validate([
             'name' => 'required|string|max:255',
-            'price' => 'required|numeric',
+            'price' => 'required|numeric|min:0',
+            'old_price' => 'nullable|numeric|min:0',
+            'discount_percent' => 'nullable|numeric|min:0|max:100',
+            'category_id' => 'nullable|exists:categories,id',
+            'brand_id' => 'nullable|exists:brands,id',
+            'batches' => 'nullable|array',
+            'batches.*.batch_id' => 'required|exists:batches,id',
+            'batches.*.quantity' => 'required|integer|min:0',
+            'batches.*.expiry_date' => 'nullable|date',
         ]);
 
         DB::beginTransaction();
@@ -206,6 +253,8 @@ class ProductController extends Controller
                 'name', 'short_description', 'full_description', 'price', 'old_price', 'discount_percent',
                 'brand_id', 'category_id', 'batch_id', 'form', 'servings', 'quantity'
             ]);
+
+            $data['discount_percent'] = $request->input('discount_percent') ?? 0;
 
             if ($request->filled('new_batch_name')) {
                 $newBatch = Batch::create([
@@ -241,7 +290,31 @@ class ProductController extends Controller
                 $data['gallery_images'] = $gallery;
             }
 
+            // Calculate total quantity from batches array before updating product
+            $totalQuantity = 0;
+            if ($request->has('batches')) {
+                foreach ($request->batches as $item) {
+                    $totalQuantity += (int) ($item['quantity'] ?? 0);
+                }
+            }
+            $data['quantity'] = $totalQuantity;
+
             $product->update($data);
+
+            // Sync batches
+            $syncData = [];
+            if ($request->has('batches')) {
+                foreach ($request->batches as $item) {
+                    if (!empty($item['batch_id'])) {
+                        $qty = (int) ($item['quantity'] ?? 0);
+                        $syncData[$item['batch_id']] = [
+                            'quantity' => $qty,
+                            'expiry_date' => !empty($item['expiry_date']) ? $item['expiry_date'] : null
+                        ];
+                    }
+                }
+            }
+            $product->batches()->sync($syncData);
 
             $product->features()->delete();
             if ($request->has('features')) {
@@ -283,6 +356,11 @@ class ProductController extends Controller
             return redirect()->route('backend.product.index')->with('success', 'Product updated successfully');
         } catch (\Exception $e) {
             DB::rollBack();
+            \Illuminate\Support\Facades\Log::error('Product Update Error: ' . $e->getMessage(), [
+                'product_id' => $product->id,
+                'exception' => $e,
+                'request_data' => $request->all()
+            ]);
             return back()->with('error', $e->getMessage())->withInput();
         }
     }

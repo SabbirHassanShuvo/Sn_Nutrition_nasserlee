@@ -20,6 +20,23 @@
             margin-bottom: -1px;
             border-bottom: 1px solid #e9ebec;
         }
+        
+
+        /* Batch Select - Choices.js */
+#batches_select + .choices {
+    width: 100%;
+    margin-bottom: 0;
+}
+
+#batches_select + .choices .choices__inner {
+    min-height: 38px;
+    padding: 4px 8px;
+    border: 1px solid #ced4da;
+    border-radius: 0.375rem;
+    background-color: #fff;
+    font-size: 14px;
+}
+
     </style>
 @endpush
 
@@ -129,39 +146,105 @@
                                             @endforeach
                                         </select>
                                     </div>
-                                    <div class="col-lg-6 mb-4">
+                                    {{-- <div class="col-lg-6 mb-4">
                                         <div class="d-flex justify-content-between align-items-center mb-1">
-                                            <label class="form-label fw-semibold mb-0">Batch</label>
+                                            <label class="form-label fw-semibold mb-0">Select Batches</label>
                                             <button type="button" class="btn btn-link btn-sm p-0 text-primary fw-medium text-decoration-none" data-bs-toggle="modal" data-bs-target="#addBatchModal">
                                                 <i class="ri-add-line align-middle"></i> Add / Manage Batches
                                             </button>
                                         </div>
-                                        <div class="input-group">
-                                            <select name="batch_id" id="batch_id" class="form-select bg-light border-0 shadow-none">
-                                                <option value="">Select Batch</option>
-                                                @foreach($batches as $batch)
-                                                    <option value="{{ $batch->id }}" {{ old('batch_id', @$product->batch_id) == $batch->id ? 'selected' : '' }}>
-                                                        {{ $batch->name }} ({{ $batch->color }})
-                                                    </option>
-                                                @endforeach
-                                            </select>
-                                            <button type="button" class="btn btn-soft-danger border-0" id="btnDeleteSelectedBatch" title="Delete Selected Batch" style="{{ old('batch_id', @$product->batch_id) ? '' : 'display: none;' }}">
-                                                <i class="ri-delete-bin-line"></i>
+                                        <select id="batches_select" class="form-control" multiple="multiple" data-placeholder="Select Batches">
+                                            @foreach($batches as $batch)
+                                                @php
+                                                    $isSelected = false;
+                                                    $pivotQty = 0;
+                                                    $pivotExpiry = '';
+                                                    if (isset($product)) {
+                                                        $associated = $product->batches->firstWhere('id', $batch->id);
+                                                        if ($associated) {
+                                                            $isSelected = true;
+                                                            $pivotQty = $associated->pivot->quantity;
+                                                            $pivotExpiry = $associated->pivot->expiry_date;
+                                                        }
+                                                    }
+                                                @endphp
+                                                <option value="{{ $batch->id }}" 
+                                                        data-name="{{ $batch->name }}" 
+                                                        data-qty="{{ $pivotQty }}" 
+                                                        data-expiry="{{ $pivotExpiry }}" 
+                                                        {{ $isSelected ? 'selected' : '' }}>
+                                                    {{ $batch->name }}
+                                                </option>
+                                            @endforeach
+                                        </select>
+                                    </div> --}}
+
+
+                                    <div class="col-lg-6 mb-4">
+                                        <div class="d-flex justify-content-between align-items-center mb-1">
+                                            <label class="form-label fw-semibold mb-0">
+                                                Select Batches
+                                            </label>
+
+                                            <button type="button"
+                                                    class="btn btn-link btn-sm p-0 text-primary fw-medium text-decoration-none"
+                                                    data-bs-toggle="modal"
+                                                    data-bs-target="#addBatchModal">
+                                                <i class="ri-add-line align-middle"></i>
+                                                Add / Manage Batches
                                             </button>
                                         </div>
+
+                                        <select id="batches_select"
+                                                class="form-control"
+                                                multiple>
+                                            @foreach($batches as $batch)
+                                                @php
+                                                    $isSelected = false;
+                                                    $pivotQty = 0;
+                                                    $pivotExpiry = '';
+
+                                                    if (isset($product)) {
+                                                        $associated = $product->batches->firstWhere('id', $batch->id);
+
+                                                        if ($associated) {
+                                                            $isSelected = true;
+                                                            $pivotQty = $associated->pivot->quantity;
+                                                            $pivotExpiry = $associated->pivot->expiry_date;
+                                                        }
+                                                    }
+                                                @endphp
+
+                                                <option value="{{ $batch->id }}"
+                                                        data-name="{{ $batch->name }}"
+                                                        data-qty="{{ $pivotQty }}"
+                                                        data-expiry="{{ $pivotExpiry }}"
+                                                        {{ $isSelected ? 'selected' : '' }}>
+                                                    {{ $batch->name }}
+                                                </option>
+                                            @endforeach
+                                        </select>
                                     </div>
+
                                     <div class="col-lg-6 mb-4">
                                         <label class="form-label fw-semibold">Form (e.g. Capsule)</label>
                                         <input type="text" name="form" value="{{old('form', @$product->form)}}" class="form-control bg-light border-0 shadow-none" placeholder="e.g. Capsule, Powder">
                                     </div>
+                                    <div class="col-lg-12 mb-4" id="batch_inputs_container" style="display: none;">
+                                         <label class="form-label fw-semibold mb-2">Batch Quantities & Expiry Dates</label>
+                                         <div id="batch_rows" class="border p-3 rounded bg-light">
+                                             <!-- Dynamically populated via JS -->
+                                         </div>
+                                     </div>
                                      <div class="col-lg-6 mb-4">
                                          <label class="form-label fw-semibold">Servings</label>
                                          <input type="number" name="servings" value="{{old('servings', @$product->servings)}}" class="form-control bg-light border-0 shadow-none" placeholder="Number of servings">
                                      </div>
                                      <div class="col-lg-6 mb-4">
                                          <label class="form-label fw-semibold">Quantity <span class="text-danger">*</span></label>
-                                         <input type="number" name="quantity" value="{{old('quantity', @$product->quantity ?? 0)}}" class="form-control bg-light border-0 shadow-none" placeholder="Total quantity in stock" required>
+                                         <input type="number" id="total_quantity" name="quantity" value="{{old('quantity', @$product->quantity ?? 0)}}" class="form-control bg-light border-0 shadow-none" placeholder="Total quantity in stock" readonly required style="background-color: #e9ecef !important; cursor: not-allowed;">
                                      </div>
+                                     
                                  </div>
 
                                 <div class="mb-4">
@@ -453,26 +536,97 @@
             $('#usages-container').append(html);
         }
 
+        let batchesChoices;
+
         $(document).ready(function() {
-            // Toggle delete button based on selection
-            $('#batch_id').on('change', function() {
-                if ($(this).val()) {
-                    $('#btnDeleteSelectedBatch').show();
+            // Initialize Choices.js manually for Batches selection to avoid style conflicts
+            const selectEl = document.getElementById('batches_select');
+            if (selectEl) {
+                batchesChoices = new Choices(selectEl, {
+                    removeItemButton: true,
+                    placeholder: true,
+                    placeholderValue: 'Select Batches',
+                    searchPlaceholderValue: 'Search batches...',
+                    itemSelectText: ''
+                });
+            }
+
+            // Handle changes on batches select to dynamically render quantity and expiry inputs
+            $('#batches_select').on('change', function() {
+                let selectedOptions = $(this).find('option:selected');
+                let container = $('#batch_rows');
+                let existingRows = container.find('.batch-input-row');
+                
+                // Track currently selected IDs to remove obsolete rows
+                let selectedIds = [];
+                
+                selectedOptions.each(function(index) {
+                    let batchId = $(this).val();
+                    let name = $(this).data('name');
+                    let initialQty = $(this).data('qty') || 0;
+                    let initialExpiry = $(this).data('expiry') || '';
+                    
+                    selectedIds.push(batchId.toString());
+                    
+                    // If row doesn't exist, create it
+                    if (container.find(`.batch-input-row[data-batch-id="${batchId}"]`).length === 0) {
+                        let rowHtml = `
+                        <div class="row align-items-center mb-3 batch-input-row anim-fade-in" data-batch-id="${batchId}">
+                            <div class="col-md-4">
+                                <span class="fw-semibold text-dark fs-13">${name}</span>
+                                <input type="hidden" name="batches[${index}][batch_id]" value="${batchId}">
+                            </div>
+                            <div class="col-md-4">
+                                <input type="number" name="batches[${index}][quantity]" value="${initialQty}" class="form-control form-control-sm batch-qty bg-light border-0 shadow-none" placeholder="Quantity" min="0" required>
+                            </div>
+                            <div class="col-md-4">
+                                <input type="date" name="batches[${index}][expiry_date]" value="${initialExpiry}" class="form-control form-control-sm bg-light border-0 shadow-none" placeholder="Expiry Date">
+                            </div>
+                        </div>`;
+                        container.append(rowHtml);
+                    }
+                });
+                
+                // Remove rows that are no longer selected
+                existingRows.each(function() {
+                    let rowBatchId = $(this).data('batch-id').toString();
+                    if (!selectedIds.includes(rowBatchId)) {
+                        $(this).remove();
+                    }
+                });
+                
+                // Re-index names to ensure serial array submit works properly in php
+                container.find('.batch-input-row').each(function(index) {
+                    $(this).find('input[type="hidden"]').attr('name', `batches[${index}][batch_id]`);
+                    $(this).find('input[type="number"]').attr('name', `batches[${index}][quantity]`);
+                    $(this).find('input[type="date"]').attr('name', `batches[${index}][expiry_date]`);
+                });
+
+                // Toggle container visibility
+                if (selectedIds.length > 0) {
+                    $('#batch_inputs_container').show();
                 } else {
-                    $('#btnDeleteSelectedBatch').hide();
+                    $('#batch_inputs_container').hide();
                 }
+                
+                calculateTotalQuantity();
             });
 
-            // Delete currently selected batch button click
-            $('#btnDeleteSelectedBatch').on('click', function() {
-                let batchId = $('#batch_id').val();
-                let batchName = $('#batch_id option:selected').text();
-                if (!batchId) return;
+            // Trigger change event to load initial editing values if any
+            $('#batches_select').trigger('change');
 
-                if (confirm('Are you sure you want to delete ' + batchName.trim() + '?')) {
-                    deleteBatch(batchId);
-                }
+            // Listen to dynamic quantity input changes
+            $(document).on('input change', '.batch-qty', function() {
+                calculateTotalQuantity();
             });
+
+            function calculateTotalQuantity() {
+                let total = 0;
+                $('.batch-qty').each(function() {
+                    total += parseInt($(this).val()) || 0;
+                });
+                $('#total_quantity').val(total);
+            }
 
             $('#quick_batch_color_picker').on('input change', function() {
                 $('#quick_batch_color').val($(this).val());
@@ -503,9 +657,22 @@
                         btn.prop('disabled', false).text('Save Batch');
                         if (response.success) {
                             let batch = response.data;
-                            let optionText = batch.name + (batch.color ? ' (' + batch.color + ')' : '');
-                            let newOption = new Option(optionText, batch.id, true, true);
-                            $('#batch_id').append(newOption).trigger('change');
+                            let newOption = new Option(batch.name, batch.id, true, true);
+                            $(newOption).attr('data-name', batch.name);
+                            $(newOption).attr('data-qty', 0);
+                            $(newOption).attr('data-expiry', '');
+                            $('#batches_select').append(newOption);
+                            if (typeof batchesChoices !== 'undefined' && batchesChoices) {
+                                batchesChoices.destroy();
+                                batchesChoices = new Choices(document.getElementById('batches_select'), {
+                                    removeItemButton: true,
+                                    placeholder: true,
+                                    placeholderValue: 'Select Batches',
+                                    searchPlaceholderValue: 'Search batches...',
+                                    itemSelectText: ''
+                                });
+                            }
+                            $('#batches_select').trigger('change');
                             
                             var modalEl = document.getElementById('addBatchModal');
                             var modal = bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl);
@@ -584,10 +751,18 @@
                 },
                 success: function(response) {
                     if (response.success) {
-                        $(`#batch_id option[value="${batchId}"]`).remove();
-                        if ($('#batch_id').val() == batchId || $('#batch_id').val() == null) {
-                            $('#batch_id').val('').trigger('change');
+                        $(`#batches_select option[value="${batchId}"]`).remove();
+                        if (typeof batchesChoices !== 'undefined' && batchesChoices) {
+                            batchesChoices.destroy();
+                            batchesChoices = new Choices(document.getElementById('batches_select'), {
+                                removeItemButton: true,
+                                placeholder: true,
+                                placeholderValue: 'Select Batches',
+                                searchPlaceholderValue: 'Search batches...',
+                                itemSelectText: ''
+                            });
                         }
+                        $('#batches_select').trigger('change');
                         loadBatchesList();
                         if (typeof Swal !== 'undefined') {
                             Swal.fire({

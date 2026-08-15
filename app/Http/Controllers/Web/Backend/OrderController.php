@@ -179,14 +179,18 @@ class OrderController extends Controller
                         'quantity' => $item['quantity'],
                         'price' => $item['price'],
                     ]);
+
+                    if ($product = \App\Models\Product::find($item['product_id'])) {
+                        $product->deductStock($item['quantity']);
+                    }
                 }
 
                 // Send shipment to Sendit
-                // $senditService = app(\App\Services\SenditService::class);
-                // $result = $senditService->createDelivery($order->load('items.product'));
-                // if (!$result['success']) {
-                //     throw new \Exception('Sendit API Error: ' . ($result['message'] ?? 'Unknown error'));
-                // }
+                $senditService = app(\App\Services\SenditService::class);
+                $result = $senditService->createDelivery($order->load('items.product'));
+                if (!$result['success']) {
+                    throw new \Exception('Sendit API Error: ' . ($result['message'] ?? 'Unknown error'));
+                }
 
                 return response()->json([
                     'success' => true,
@@ -254,6 +258,14 @@ class OrderController extends Controller
                     'preferred_delivery_date' => $request->preferred_delivery_date,
                 ]);
 
+                // Restore old items stock before deleting and syncing
+                $oldItems = $order->items;
+                foreach ($oldItems as $item) {
+                    if ($product = \App\Models\Product::find($item->product_id)) {
+                        $product->restoreStock($item->quantity);
+                    }
+                }
+
                 // Sync items
                 $order->items()->delete();
                 foreach ($request->items as $item) {
@@ -263,6 +275,10 @@ class OrderController extends Controller
                         'quantity' => $item['quantity'],
                         'price' => $item['price'],
                     ]);
+
+                    if ($product = \App\Models\Product::find($item['product_id'])) {
+                        $product->deductStock($item['quantity']);
+                    }
                 }
 
                 // If tracking code exists, update on Sendit
@@ -346,12 +362,19 @@ class OrderController extends Controller
 
     public function destroy($id)
     {
-        $order = Order::findOrFail($id);
+        $order = Order::with('items')->findOrFail($id);
 
         // Cancel on Sendit if tracking code exists
         if ($order->sendit_delivery_code) {
             $senditService = app(\App\Services\SenditService::class);
             $senditService->cancelDelivery($order->sendit_delivery_code);
+        }
+
+        // Restore stock
+        foreach ($order->items as $item) {
+            if ($product = \App\Models\Product::find($item->product_id)) {
+                $product->restoreStock($item->quantity);
+            }
         }
 
         $order->delete();
@@ -369,11 +392,18 @@ class OrderController extends Controller
         }
 
         try {
-            $orders = Order::whereIn('id', $ids)->get();
+            $orders = Order::with('items')->whereIn('id', $ids)->get();
             $senditService = app(\App\Services\SenditService::class);
             foreach ($orders as $order) {
                 if ($order->sendit_delivery_code) {
                     $senditService->cancelDelivery($order->sendit_delivery_code);
+                }
+
+                // Restore stock
+                foreach ($order->items as $item) {
+                    if ($product = \App\Models\Product::find($item->product_id)) {
+                        $product->restoreStock($item->quantity);
+                    }
                 }
             }
             
