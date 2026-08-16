@@ -78,9 +78,12 @@ Route::group(['middleware' => 'api'], function($router){
         Route::post('/health-professional/profile/update', [ProfileController::class, 'updateProfile']);
 
         Route::post('/submit-review', [ReviewApiController::class, 'submitReview']);
+        Route::post('/product/submit-review', [ReviewApiController::class, 'submitProductReview']);
         // Onboarding Submit
         Route::post('/onboarding/submit', [OnboardingQuestionApiController::class, 'submitAnswers']);
     });
+
+    Route::get('/product/reviews/{productId}', [ReviewApiController::class, 'getProductReviews']);
 });
 
 
