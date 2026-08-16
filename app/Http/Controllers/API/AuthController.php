@@ -55,6 +55,7 @@ class AuthController extends BaseController
      * @return \Illuminate\Http\JsonResponse */
     public function login()
     {
+
         $credentials = request(['email', 'password']);
   
         if (! $token = auth('api')->attempt($credentials)) {

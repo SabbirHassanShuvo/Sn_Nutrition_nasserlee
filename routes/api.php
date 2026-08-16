@@ -83,11 +83,6 @@ Route::group(['middleware' => 'api'], function($router){
     });
 });
 
-// Specialist & Consultation APIs
-Route::get('/consultations/specialists', [ConsultationController::class, 'getSpecialists']);
-Route::post('/consultations/book', [ConsultationController::class, 'book']);
-Route::get('/consultations/nearby-gyms', [GymApiController::class, 'getNearbyGyms']);
-Route::get('/consultations/nearby-pharmacies', [PharmacyApiController::class, 'getNearbyPharmacies']);
 
 // Authenticated User Information, Address & Orders & Consultation APIs
 Route::group(['middleware' => ['api', 'auth:api'],'prefix' => 'user'], function () {
@@ -115,9 +110,11 @@ Route::group(['middleware' => ['api', 'auth:api'],'prefix' => 'user'], function 
 
     // Consultation Bookings APIs
     Route::post('/consultations/book', [ConsultationController::class, 'book']);
+     Route::get('/consultations/specialists', [ConsultationController::class, 'getSpecialists']);
     Route::get('/consultations/my-bookings', [ConsultationController::class, 'myBookings']);
     Route::get('/consultations/nearby-gyms', [GymApiController::class, 'getNearbyGyms']);
-    Route::get('/consultations/nearby-pharmacies', [PharmacyApiController::class, 'getNearbyPharmacies']);
+    Route::get('/nearby-pharmacies', [PharmacyApiController::class, 'getNearbyPharmacies']);
+   
 
     // User Settings APIs (Password, Notifications, Account Deletion)
     Route::get('/settings', [UserSettingsController::class, 'index']);

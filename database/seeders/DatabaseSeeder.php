@@ -44,6 +44,8 @@ class DatabaseSeeder extends Seeder
             ReviewSeeder::class,
             AffiliateSeeder::class,
             GymSeeder::class,
+            PharmacySeeder::class,
+            SpecialistSeeder::class,
         ]);
     }
 }

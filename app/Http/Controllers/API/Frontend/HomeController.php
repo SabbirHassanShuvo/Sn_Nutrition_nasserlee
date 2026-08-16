@@ -53,7 +53,7 @@ class HomeController extends BaseController
 
             $wishlistProductIds = $this->getWishlistProductIds($request);
 
-            $products = Product::with(['category', 'brandData', 'batch'])
+            $products = Product::with(['category', 'brandData', 'batches'])
                 ->where('status', 'active')
                 ->latest()
                 ->paginate($limit);
@@ -64,8 +64,8 @@ class HomeController extends BaseController
                     'name' => $product->name,
                     'slug' => $product->slug,
                     'short_description' => $product->short_description,
-                    'price' => (float) $product->price,
-                    'old_price' => $product->old_price ? (float) $product->old_price : null,
+                    'price' => (float) $product->price . ' '. 'MAD',
+                    'old_price' => $product->old_price ? (float) $product->old_price  . ' '. 'MAD' : null,
                     'image' => $product->main_image ? asset($product->main_image) : null,
                     'in_stock' => (bool) $product->in_stock,
                     'is_wishlist' => in_array($product->id, $wishlistProductIds),
@@ -77,11 +77,13 @@ class HomeController extends BaseController
                         'specialty' => $product->brandData->specialty,
                         'rating' => (float) $product->brandData->rating,
                     ] : null,
-                    'batch' => $product->batch ? [
-                        'id' => (int) $product->batch->id,
-                        'name' => $product->batch->name,
-                        'color' => $product->batch->color,
-                    ] : null,
+                    'batches' => $product->batches->map(function ($b) {
+                        return [
+                            'id' => (int) $b->id,
+                            'name' => $b->name,
+                            'color' => $b->color,
+                        ];
+                    }),
                 ];
             });
 
@@ -99,7 +101,7 @@ class HomeController extends BaseController
         try {
             $wishlistProductIds = $this->getWishlistProductIds($request);
 
-            $query = Product::with(['category', 'brandData', 'batch'])->where('status', 'active');
+            $query = Product::with(['category', 'brandData', 'batches'])->where('status', 'active');
 
             // Global search across product name, short description, full description, category name, brand name, and batch name
             if ($request->filled('search')) {
@@ -114,7 +116,7 @@ class HomeController extends BaseController
                       ->orWhereHas('brandData', function ($bq) use ($search) {
                           $bq->where('name', 'like', "%$search%");
                       })
-                      ->orWhereHas('batch', function ($btq) use ($search) {
+                      ->orWhereHas('batches', function ($btq) use ($search) {
                           $btq->where('name', 'like', "%$search%");
                       });
                 });
@@ -171,7 +173,12 @@ class HomeController extends BaseController
 
                     $batchIds = array_unique($batchIds);
                     if (!empty($batchIds)) {
-                        $query->whereIn('batch_id', $batchIds);
+                        $query->where(function ($subQ) use ($batchIds) {
+                            $subQ->whereIn('batch_id', $batchIds)
+                                 ->orWhereHas('batches', function ($q) use ($batchIds) {
+                                     $q->whereIn('batches.id', $batchIds);
+                                 });
+                        });
                     } else {
                         // Batch filter was supplied but no matching batch exists -> return 0 products
                         $query->whereRaw('1 = 0');
@@ -345,11 +352,13 @@ class HomeController extends BaseController
                         'specialty' => $product->brandData->specialty,
                         'rating' => (float) $product->brandData->rating,
                     ] : null,
-                    'batch' => $product->batch ? [
-                        'id' => (int) $product->batch->id,
-                        'name' => $product->batch->name,
-                        'color' => $product->batch->color,
-                    ] : null,
+                    'batches' => $product->batches->map(function ($b) {
+                        return [
+                            'id' => (int) $b->id,
+                            'name' => $b->name,
+                            'color' => $b->color,
+                        ];
+                    }),
                 ];
             });
 
@@ -392,7 +401,7 @@ class HomeController extends BaseController
             $product = Product::with([
                 'category', 
                 'brandData', 
-                'batch',
+                'batches',
                 'features', 
                 'ingredients', 
                 'usages', 
@@ -440,11 +449,13 @@ class HomeController extends BaseController
                     'specialty' => $product->brandData->specialty,
                     'rating' => (float) $product->brandData->rating,
                 ] : null,
-                'batch' => $product->batch ? [
-                    'id' => (int) $product->batch->id,
-                    'name' => $product->batch->name,
-                    'color' => $product->batch->color,
-                ] : null,
+                'batches' => $product->batches->map(function ($b) {
+                        return [
+                            'id' => (int) $b->id,
+                            'name' => $b->name,
+                            'color' => $b->color,
+                        ];
+                    }),
                 'features' => $product->features->map(function ($feature) {
                     return [
                         'id' => $feature->id,
