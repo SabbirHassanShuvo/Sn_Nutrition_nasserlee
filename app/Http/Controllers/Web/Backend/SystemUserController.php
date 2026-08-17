@@ -246,6 +246,11 @@ class SystemUserController extends Controller
     {
         try {
             $user = User::findOrFail($id);
+
+            // Prevent modifying super_admin roles/permissions
+            if ($user->hasRole('super_admin')) {
+                return response()->json(['success' => false, 'message' => 'Super Admin roles and permissions are required and cannot be modified.']);
+            }
             
             // 1. Sync Roles
             $roles = $request->input('roles', []);

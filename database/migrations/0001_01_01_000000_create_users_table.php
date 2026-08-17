@@ -25,7 +25,7 @@ return new class extends Migration
             $table->string('applied_promo_code')->nullable();
             $table->text('suspension_reason')->nullable();
             $table->string('google_id')->nullable();
-            $table->enum('role', ['super_admin', 'normal_admin', 'fulfillment', 'health_professional', 'user'])->default('user');
+            $table->enum('role', ['super_admin', 'admin', 'fulfillment', 'health_professional', 'user'])->default('user');
             $table->rememberToken();
             $table->timestamps();
             $table->softDeletes();

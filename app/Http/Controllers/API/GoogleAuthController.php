@@ -18,7 +18,7 @@ class GoogleAuthController extends Controller
     {
         $request->validate([
             'token' => 'required|string',
-            'role' => 'nullable|string|in:health_professional,normal_admin', // allow requesting a specific role on registration, default normal user or health pro.
+            'role' => 'nullable|string|in:health_professional,admin', // allow requesting a specific role on registration, default normal user or health pro.
         ]);
 
         try {

@@ -42,7 +42,7 @@
                     </a>
                 </li>
 
-               @role('super_admin')
+               @if(auth()->user()->hasRole('super_admin') || auth()->user()->can('role_management') || auth()->user()->can('user_management'))
                     <li class="nav-item">
                         <a class="nav-link menu-link {{ getPageStatus(['backend.role.*', 'backend.system-user.*'], 'collapsed active') }}"
                             href="#sidebarLanding" data-bs-toggle="collapse" role="button" aria-expanded="false"
@@ -52,20 +52,24 @@
                         <div class="collapse menu-dropdown {{ getPageStatus(['backend.system-user.*', 'backend.role.*'], 'show') }}"
                             id="sidebarLanding">
                             <ul class="nav nav-sm flex-column">
+                                @if(auth()->user()->hasRole('super_admin') || auth()->user()->can('user_management'))
                                 <li class="nav-item">
                                     <a href="{{ route('backend.system-user.index') }}"
                                         class="nav-link {{ getPageStatus('backend.system-user.*') }}"
                                         data-key="t-starter"> System Admins </a>
                                 </li>
+                                @endif
+                                @if(auth()->user()->hasRole('super_admin') || auth()->user()->can('role_management'))
                                 <li class="nav-item">
                                     <a href="{{ route('backend.role.index') }}"
                                         class="nav-link {{ getPageStatus('backend.role.*') }}" data-key="t-profile">
                                         Permissions </a>
                                 </li>
+                                @endif
                             </ul>
                         </div>
                     </li>
-                @endrole
+                @endif
 
                 @can('user_management')
                 <li class="nav-item">

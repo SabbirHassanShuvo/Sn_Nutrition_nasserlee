@@ -31,33 +31,37 @@ Route::prefix('home')->middleware('affiliate.track')->group(function () {
 
 // Protected Routes
 Route::middleware('auth:api')->group(function () {
-    // Wishlist
-    Route::get('/wishlist', [WishlistController::class, 'index']);
-    Route::post('/wishlist/toggle', [WishlistController::class, 'toggle']);
-    Route::post('/wishlist/{id}', [WishlistController::class, 'remove']);
+    
+    // Normal User / Super Admin routes for cart and ordering
+    Route::middleware('role:user|super_admin')->group(function () {
+        // Wishlist
+        Route::get('/wishlist', [WishlistController::class, 'index']);
+        Route::post('/wishlist/toggle', [WishlistController::class, 'toggle']);
+        Route::post('/wishlist/{id}', [WishlistController::class, 'remove']);
 
-    // Cart
-    Route::get('/cart', [CartController::class, 'index']);
-    Route::post('/cart/add', [CartController::class, 'store']);
-    Route::post('/cart/update/{id}', [CartController::class, 'update']);
-    Route::post('/cart/delete/{id}', [CartController::class, 'destroy']);
+        // Cart
+        Route::get('/cart', [CartController::class, 'index']);
+        Route::post('/cart/add', [CartController::class, 'store']);
+        Route::post('/cart/update/{id}', [CartController::class, 'update']);
+        Route::post('/cart/delete/{id}', [CartController::class, 'destroy']);
 
-    // Coupon
-    Route::post('/coupon/apply', [CouponController::class, 'applyCoupon']);
+        // Coupon
+        Route::post('/coupon/apply', [CouponController::class, 'applyCoupon']);
 
-    // Checkout
-    Route::get('/checkout/summary', [CheckoutController::class, 'getCheckoutDetails']);
-    Route::post('/checkout/place-order', [CheckoutController::class, 'placeOrder']);
-    Route::post('/checkout/bank-transfer', [CheckoutController::class, 'submitBankTransfer']);
+        // Checkout
+        Route::get('/checkout/summary', [CheckoutController::class, 'getCheckoutDetails']);
+        Route::post('/checkout/place-order', [CheckoutController::class, 'placeOrder']);
+        Route::post('/checkout/bank-transfer', [CheckoutController::class, 'submitBankTransfer']);
 
-    // Comparison
-    Route::get('/compare', [ComparisonController::class, 'index']);
-    Route::post('/compare/add', [ComparisonController::class, 'store']);
-    Route::post('/compare/remove/{id}', [ComparisonController::class, 'destroy']);
-    Route::post('/compare/clear', [ComparisonController::class, 'clear']);
+        // Comparison
+        Route::get('/compare', [ComparisonController::class, 'index']);
+        Route::post('/compare/add', [ComparisonController::class, 'store']);
+        Route::post('/compare/remove/{id}', [ComparisonController::class, 'destroy']);
+        Route::post('/compare/clear', [ComparisonController::class, 'clear']);
+    });
 
-    // Affiliate System
-    Route::prefix('affiliate')->group(function () {
+    // Affiliate System restricted to Health Professionals & Super Admin
+    Route::prefix('affiliate')->middleware('role:health_professional|super_admin')->group(function () {
         Route::post('/generate-link', [AffiliateController::class, 'generateLink']);
         Route::get('/stats', [AffiliateController::class, 'getDashboardStats']);
         Route::get('/dashboard-stats', [AffiliateController::class, 'getDashboardStats']);
