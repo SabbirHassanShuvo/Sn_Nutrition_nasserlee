@@ -62,6 +62,7 @@ Route::middleware('auth:api')->group(function () {
 
     // Affiliate System restricted to Health Professionals & Super Admin
     Route::prefix('affiliate')->middleware('role:health_professional|super_admin')->group(function () {
+        
         Route::post('/generate-link', [AffiliateController::class, 'generateLink']);
         Route::get('/stats', [AffiliateController::class, 'getDashboardStats']);
         Route::get('/dashboard-stats', [AffiliateController::class, 'getDashboardStats']);

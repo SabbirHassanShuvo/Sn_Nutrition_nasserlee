@@ -56,15 +56,6 @@ class AuthController extends BaseController
     public function login(Request $request)
     {
 
-        $validator = Validator::make($request->all(), [
-            'email' => 'required|email',
-            'password' => 'required',
-            'role' => 'required|in:health_professional,user',
-        ]);
-  
-        if($validator->fails()){
-            return jsonErrorResponse('Validation Error.', $validator->errors()->toArray());
-        }
         $credentials = request(['email', 'password']);
   
         if (! $token = auth('api')->attempt($credentials)) {

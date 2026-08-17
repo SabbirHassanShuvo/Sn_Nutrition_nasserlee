@@ -58,6 +58,72 @@ class AffiliateController extends Controller
         ]);
     }
 
+    public function getFullDashboard(Request $request)
+    {
+        $user = auth()->user();
+        
+        // 1. Get stats
+        $stats = $this->getDashboardStats()->getData();
+        
+        // 2. Get recent orders
+        $recentOrders = $this->getRecentOrders($request)->getData();
+        
+        // 3. Get top categories
+        $topCategories = $this->getTopCategories($request)->getData();
+        
+        // 4. Get earnings chart
+        $chart = $this->getEarningsChart($request)->getData();
+        
+        // 5. Get partner profile
+        $partnerProfile = $user->partnerProfile ?: $user->partnerProfile()->create([
+            'current_tier' => 'bronze',
+            'lifetime_earnings' => 0,
+            'pending_payout' => 0,
+            'last_paid_amount' => 0,
+        ]);
+        
+        // 6. Get green banner info (Monthly Earnings & comparison)
+        $now = Carbon::now();
+        $startOfThisMonth = $now->copy()->startOfMonth();
+        $endOfThisMonth = $now->copy()->endOfMonth();
+        $thisMonthEarnings = (float) Order::whereHas('affiliateLink', function($q) use ($user) {
+                $q->where('user_id', $user->id);
+            })
+            ->whereBetween('created_at', [$startOfThisMonth, $endOfThisMonth])
+            ->sum('commission_amount');
+            
+        $startOfLastMonth = $now->copy()->subMonth()->startOfMonth();
+        $endOfLastMonth = $now->copy()->subMonth()->endOfMonth();
+        $lastMonthEarnings = (float) Order::whereHas('affiliateLink', function($q) use ($user) {
+                $q->where('user_id', $user->id);
+            })
+            ->whereBetween('created_at', [$startOfLastMonth, $endOfLastMonth])
+            ->sum('commission_amount');
+            
+        $earningsIncreasePercent = $lastMonthEarnings > 0 
+            ? round((($thisMonthEarnings - $lastMonthEarnings) / $lastMonthEarnings) * 100, 1) 
+            : ($thisMonthEarnings > 0 ? 100.0 : 0.0);
+
+        return response()->json([
+            'user' => [
+                'id' => $user->id,
+                'name' => $user->name,
+                'email' => $user->email,
+                'role' => $user->role,
+            ],
+            'partner_profile' => $partnerProfile,
+            'banner' => [
+                'monthly_earnings' => $thisMonthEarnings,
+                'increase_percent' => $earningsIncreasePercent,
+                'current_tier' => $partnerProfile->current_tier ?? 'bronze',
+            ],
+            'stats' => $stats,
+            'chart' => $chart,
+            'top_categories' => $topCategories,
+            'recent_orders' => $recentOrders,
+        ]);
+    }
+
     public function getDashboardStats()
     {
         $user = auth()->user();

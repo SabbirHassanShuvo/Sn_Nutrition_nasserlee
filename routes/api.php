@@ -23,6 +23,7 @@ use App\Http\Controllers\Api\Frontend\ContactSubmissionApiController;
 use App\Http\Controllers\Api\Frontend\SubscriberApiController;
 use App\Http\Controllers\Api\Frontend\BrandApiController;
 use App\Http\Controllers\Api\Frontend\ReviewApiController;
+use App\Http\Controllers\Api\Frontend\AffiliateController;
 
 
 Route::group(['middleware' => 'api'], function ($router) {
@@ -112,6 +113,7 @@ Route::group(['middleware' => 'auth:api'], function ($router) {
 
     Route::get('/health-professional/profile', [ProfileController::class, 'detailsProfile']);
     Route::post('/health-professional/profile/update', [ProfileController::class, 'updateProfile']);
+    Route::get('/health-professional/dashboard', [AffiliateController::class, 'getFullDashboard']);
 
     Route::post('/submit-review', [ReviewApiController::class, 'submitReview']);
     Route::post('/product/submit-review', [ReviewApiController::class, 'submitProductReview']);
