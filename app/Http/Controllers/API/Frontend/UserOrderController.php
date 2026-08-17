@@ -43,6 +43,57 @@ class UserOrderController extends BaseController
                 }
             }
 
+            // Export to CSV if requested
+            if ($request->boolean('export') || $request->input('export') === 'true') {
+                $headers = [
+                    "Content-type"        => "text/csv; charset=UTF-8",
+                    "Content-Disposition" => "attachment; filename=orders_" . date('Ymd_His') . ".csv",
+                    "Pragma"              => "no-cache",
+                    "Cache-Control"       => "must-revalidate, post-check=0, pre-check=0",
+                    "Expires"             => "0"
+                ];
+
+                $callback = function() use ($query) {
+                    $file = fopen('php://output', 'w');
+                    
+                    // Add UTF-8 BOM for Excel compatibility
+                    fprintf($file, chr(0xEF).chr(0xBB).chr(0xBF));
+                    
+                    // Header row matching the user's UI
+                    fputcsv($file, ['Order ID', 'Customer', 'Product', 'Date', 'Amount', 'Commission', 'Status']);
+
+                    $query->with(['items.product', 'user'])->latest()->chunk(100, function($orders) use ($file) {
+                        foreach ($orders as $order) {
+                            $productNames = $order->items->map(function ($item) {
+                                return $item->product ? $item->product->name : '';
+                            })->filter()->implode(', ');
+
+                            $statusLabel = match (strtolower($order->status)) {
+                                'pending', 'processing' => 'Processing',
+                                'shipping', 'shipped' => 'In Transit',
+                                'delivered' => 'Delivered',
+                                'cancelled', 'canceled' => 'Canceled',
+                                default => ucfirst($order->status),
+                            };
+
+                            fputcsv($file, [
+                                $order->order_number ? '#' . $order->order_number : '#NH-' . $order->id,
+                                $order->full_name ?: ($order->user->name ?? 'Customer'),
+                                $productNames ?: 'Nutrition Product',
+                                $order->created_at ? $order->created_at->format('Y-m-d') : date('Y-m-d'),
+                                number_format((float) $order->total, 2, '.', '') . ' MAD',
+                                number_format((float) $order->commission_amount, 2, '.', '') . ' MAD',
+                                $statusLabel
+                            ]);
+                        }
+                    });
+
+                    fclose($file);
+                };
+
+                return response()->stream($callback, 200, $headers);
+            }
+
             // Calculate summary metrics before pagination
             $totalOrdersCount = (clone $query)->count();
             $totalRevenue = round((float) (clone $query)->sum('total'), 2);

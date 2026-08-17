@@ -38,10 +38,10 @@ class HomeController extends BaseController
     /**
      * Get all active products for the home page.
      */
-   public function getAllProducts(Request $request)
+    public function getAllProducts(Request $request)
     {
-        // If filter query parameters are present, delegate to filterProducts
-        if ($request->hasAny(['search', 'category_id', 'categories', 'category', 'brand_id', 'brands', 'brand', 'batch_id', 'batches', 'batch', 'min_price', 'max_price', 'price', 'sort'])) {
+        // If filter query parameters are present, delegate to filterProducts (excluding search)
+        if ($request->hasAny(['category_id', 'categories', 'category', 'brand_id', 'brands', 'brand', 'batch_id', 'batches', 'batch', 'min_price', 'max_price', 'price', 'sort'])) {
             return $this->filterProducts($request);
         }
 
@@ -53,10 +53,28 @@ class HomeController extends BaseController
 
             $wishlistProductIds = $this->getWishlistProductIds($request);
 
-            $products = Product::with(['category', 'brandData', 'batches'])
-                ->where('status', 'active')
-                ->latest()
-                ->paginate($limit);
+            $query = Product::with(['category', 'brandData', 'batches'])
+                ->where('status', 'active');
+
+            if ($request->filled('search')) {
+                $search = $request->search;
+                $query->where(function ($q) use ($search) {
+                    $q->where('name', 'like', "%$search%")
+                      ->orWhere('short_description', 'like', "%$search%")
+                      ->orWhere('full_description', 'like', "%$search%")
+                      ->orWhereHas('category', function ($cq) use ($search) {
+                          $cq->where('name', 'like', "%$search%");
+                      })
+                      ->orWhereHas('brandData', function ($bq) use ($search) {
+                          $bq->where('name', 'like', "%$search%");
+                      })
+                      ->orWhereHas('batches', function ($btq) use ($search) {
+                          $btq->where('name', 'like', "%$search%");
+                      });
+                });
+            }
+
+            $products = $query->latest()->paginate($limit);
 
             $products->getCollection()->transform(function ($product) use ($wishlistProductIds) {
                 return [
