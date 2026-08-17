@@ -260,3 +260,15 @@ function isLinkedStorage(){
             'errors'  => $errors,
         ], 422); // 422 is HTTP status for Unprocessable Entity
     }
+
+
+    function success($result, $message)
+    {
+    	$response = [
+            'success' => true,
+            'data'    => $result,
+            'message' => $message,
+        ];
+ 
+        return response()->json($response, 200, [], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+    }

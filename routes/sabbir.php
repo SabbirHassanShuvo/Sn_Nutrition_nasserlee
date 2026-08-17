@@ -11,16 +11,7 @@ use App\Http\Controllers\Api\PartnerOnboardingController;
 use App\Http\Controllers\Api\CategoryController;
 use Illuminate\Support\Facades\Route;
 
-/*
-|--------------------------------------------------------------------------
-| Sabbir Routes
-|--------------------------------------------------------------------------
-|
-| Here is where you can register web routes for your application. These
-| routes are loaded by the RouteServiceProvider within a group which
-| contains the "web" middleware group. Now create something great!
-|
-*/
+
 
 Route::prefix('home')->middleware('affiliate.track')->group(function () {
     Route::get('/products', [HomeController::class, 'getAllProducts']);

@@ -16,8 +16,10 @@ use App\Models\AffiliateTierSetting;
 use App\Models\PayoutMethod;
 use App\Models\PayoutRequest;
 
+
 class AffiliateController extends Controller
 {
+    
     public function generateLink(Request $request)
     {
         $request->validate([
@@ -104,14 +106,14 @@ class AffiliateController extends Controller
             ? round((($thisMonthEarnings - $lastMonthEarnings) / $lastMonthEarnings) * 100, 1) 
             : ($thisMonthEarnings > 0 ? 100.0 : 0.0);
 
-        return response()->json([
-            'user' => [
-                'id' => $user->id,
-                'name' => $user->name,
-                'email' => $user->email,
-                'role' => $user->role,
-            ],
-            'partner_profile' => $partnerProfile,
+        $data = [
+             // 'user' => [
+            //     'id' => $user->id,
+            //     'name' => $user->name,
+            //     'email' => $user->email,
+            //     'role' => $user->role,
+            // ],
+            // 'partner_profile' => $partnerProfile,
             'banner' => [
                 'monthly_earnings' => $thisMonthEarnings,
                 'increase_percent' => $earningsIncreasePercent,
@@ -121,7 +123,13 @@ class AffiliateController extends Controller
             'chart' => $chart,
             'top_categories' => $topCategories,
             'recent_orders' => $recentOrders,
-        ]);
+        ];
+
+        return response()->json([
+            'success'=>true,
+            'data' => $data,
+            'message'=>'Dashboard stats fetched successfully'
+        ], 200);
     }
 
     public function getDashboardStats()
@@ -390,8 +398,9 @@ class AffiliateController extends Controller
         ]);
 
         return response()->json([
-            'message' => 'Payout method saved successfully.',
-            'data' => $method
+            'data' => $method,
+            'status'=>200,
+            'message'=>'Payout method saved successfully.',
         ]);
     }
 
@@ -464,69 +473,6 @@ class AffiliateController extends Controller
             ->latest()
             ->paginate($limit);
 
-        if ($history->isEmpty()) {
-            PayoutRequest::firstOrCreate([
-                'payout_number' => 'PO-9821-' . $user->id
-            ], [
-                'user_id' => $user->id,
-                'type' => 'bank_account',
-                'amount' => 3890.42,
-                'bank_name' => 'Chase Bank',
-                'account_name' => $user->name ?: 'Partner User',
-                'account_number' => '4827192837',
-                'routing_number' => '021000021',
-                'status' => 'paid',
-                'paid_at' => Carbon::parse('2025-11-02 10:30:00'),
-                'created_at' => Carbon::parse('2025-11-01 09:00:00'),
-            ]);
-            PayoutRequest::firstOrCreate([
-                'payout_number' => 'PO-9820-' . $user->id
-            ], [
-                'user_id' => $user->id,
-                'type' => 'bank_account',
-                'amount' => 3120.18,
-                'bank_name' => 'Chase Bank',
-                'account_name' => $user->name ?: 'Partner User',
-                'account_number' => '4827192837',
-                'routing_number' => '021000021',
-                'status' => 'paid',
-                'paid_at' => Carbon::parse('2025-10-02 14:15:00'),
-                'created_at' => Carbon::parse('2025-10-01 08:30:00'),
-            ]);
-            PayoutRequest::firstOrCreate([
-                'payout_number' => 'PO-9819-' . $user->id
-            ], [
-                'user_id' => $user->id,
-                'type' => 'debit_card',
-                'amount' => 2640.55,
-                'bank_name' => 'Visa Debit',
-                'account_name' => $user->name ?: 'Partner User',
-                'account_number' => '4111111111112917',
-                'card_last_four' => '2917',
-                'card_type' => 'Visa',
-                'status' => 'paid',
-                'paid_at' => Carbon::parse('2025-09-02 11:00:00'),
-                'created_at' => Carbon::parse('2025-09-01 10:00:00'),
-            ]);
-            PayoutRequest::firstOrCreate([
-                'payout_number' => 'PO-9822-' . $user->id
-            ], [
-                'user_id' => $user->id,
-                'type' => 'bank_account',
-                'amount' => 4520.90,
-                'bank_name' => 'Chase Bank',
-                'account_name' => $user->name ?: 'Partner User',
-                'account_number' => '4827192837',
-                'routing_number' => '021000021',
-                'status' => 'pending',
-                'created_at' => Carbon::parse('2025-12-02 16:20:00'),
-            ]);
-
-            $history = PayoutRequest::where('user_id', $user->id)
-                ->latest()
-                ->paginate($limit);
-        }
-
         return response()->json($history);
     }
 
@@ -565,18 +511,9 @@ class AffiliateController extends Controller
 
         return response()->json([
             'lifetime_earnings' => '$' . number_format($lifetimeEarnings, 2),
-            'lifetime_earnings_raw' => $lifetimeEarnings,
-            'lifetime_change' => $earningsChange,
-
             'this_month' => '$' . number_format($thisMonthEarnings, 2),
-            'this_month_raw' => $thisMonthEarnings,
-            'this_month_change' => $earningsChange,
-
             'pending_payout' => '$' . number_format((float) $partnerProfile->pending_payout, 2),
-            'pending_payout_raw' => (float) $partnerProfile->pending_payout,
-
             'last_paid' => '$' . number_format((float) $partnerProfile->last_paid_amount, 2),
-            'last_paid_raw' => (float) $partnerProfile->last_paid_amount,
         ]);
     }
 
@@ -699,7 +636,6 @@ class AffiliateController extends Controller
                 'customer' => $order->full_name ?: ($order->user ? $order->user->name : 'Customer'),
                 'date' => $order->created_at ? $order->created_at->format('Y-m-d') : date('Y-m-d'),
                 'commission' => '$' . number_format((float) $order->commission_amount, 2),
-                'commission_raw' => (float) $order->commission_amount,
                 'image' => $productImage
             ];
         });
@@ -807,5 +743,29 @@ class AffiliateController extends Controller
         });
 
         return response()->json($categories);
+    }
+    public function getCommissionsDashboard(Request $request)
+    {
+        $user = auth()->user();
+        
+        $stats = $this->getCommissionsOverview()->getData();
+        $tiers = $this->getTiersInfo()->getData();
+        $methods = $this->getPayoutMethods()->getData();
+        $chart = $this->getEarningsChart($request)->getData();
+        $topOrders = $this->getTopCommissionOrders($request)->getData();
+        $history = $this->getPayoutHistory($request)->getData();
+
+        return response()->json([ 
+            'success' => true,
+            'message' => 'Commissions dashboard data fetched successfully',
+            'data' => [
+                'stats' => $stats,
+                'tiers' => $tiers,
+                'payout_methods' => $methods,
+                'earnings_chart' => $chart,
+                'top_commission_orders' => $topOrders,
+                'payout_history' => $history,
+            ]
+        ], 200);
     }
 }

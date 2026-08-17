@@ -114,6 +114,11 @@ Route::group(['middleware' => 'auth:api'], function ($router) {
     Route::get('/health-professional/profile', [ProfileController::class, 'detailsProfile']);
     Route::post('/health-professional/profile/update', [ProfileController::class, 'updateProfile']);
     Route::get('/health-professional/dashboard', [AffiliateController::class, 'getFullDashboard']);
+    Route::get('/health-professional/commissions', [AffiliateController::class, 'getCommissionsDashboard']);
+    Route::get('/health-professional/payout-methods', [AffiliateController::class, 'getPayoutMethods']);
+    Route::post('/health-professional/payout-methods', [AffiliateController::class, 'storePayoutMethod']);
+    Route::post('/health-professional/payout-requests', [AffiliateController::class, 'requestPayout']);
+    Route::get('/health-professional/payout-history', [AffiliateController::class, 'getPayoutHistory']);
 
     Route::post('/submit-review', [ReviewApiController::class, 'submitReview']);
     Route::post('/product/submit-review', [ReviewApiController::class, 'submitProductReview']);
