@@ -74,12 +74,14 @@ class PharmacyApiController extends Controller
             return response()->json([
                 'status' => true,
                 'message' => 'Nearby pharmacies retrieved successfully',
-                'total_found' => count($pharmacies),
-                'user_location' => [
-                    'latitude' => $userLat,
-                    'longitude' => $userLng,
-                ],
-                'pharmacies' => $pharmacies
+                'data' => [
+                    'total_found' => count($pharmacies),
+                    'user_location' => [
+                        'latitude' => $userLat,
+                        'longitude' => $userLng,
+                    ],
+                    'pharmacies' => $pharmacies
+                ]
             ]);
         } catch (Exception $e) {
             return response()->json([

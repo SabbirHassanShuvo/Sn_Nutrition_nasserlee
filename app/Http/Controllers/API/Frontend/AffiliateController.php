@@ -328,35 +328,6 @@ class AffiliateController extends Controller
     {
         $user = auth()->user();
         $methods = PayoutMethod::where('user_id', $user->id)->latest()->get();
-
-        if ($methods->isEmpty()) {
-            PayoutMethod::create([
-                'user_id' => $user->id,
-                'type' => 'bank_account',
-                'bank_name' => 'Chase Bank',
-                'account_name' => $user->name ?: 'Partner User',
-                'account_number' => '4827192837',
-                'routing_number' => '021000021',
-                'fees_info' => 'Free',
-                'delivery_time' => '1-3 business days',
-                'is_default' => true,
-            ]);
-            PayoutMethod::create([
-                'user_id' => $user->id,
-                'type' => 'debit_card',
-                'bank_name' => 'Visa Debit',
-                'account_name' => $user->name ?: 'Partner User',
-                'account_number' => '4111111111112917',
-                'card_last_four' => '2917',
-                'card_type' => 'Visa',
-                'expiry_date' => '12/28',
-                'fees_info' => '0.25% + $0.25',
-                'delivery_time' => 'within 24 hours',
-                'is_default' => false,
-            ]);
-            $methods = PayoutMethod::where('user_id', $user->id)->latest()->get();
-        }
-
         return response()->json($methods);
     }
 
@@ -389,11 +360,6 @@ class AffiliateController extends Controller
             'account_name' => $request->account_name,
             'account_number' => $request->account_number,
             'routing_number' => $request->routing_number,
-            'card_last_four' => $cardLastFour,
-            'card_type' => $request->type === 'debit_card' ? ($request->card_type ?: 'Visa') : null,
-            'expiry_date' => $request->expiry_date,
-            'fees_info' => $request->type === 'debit_card' ? '0.25% + $0.25' : 'Free',
-            'delivery_time' => $request->type === 'debit_card' ? 'within 24 hours' : '1-3 business days',
             'is_default' => true,
         ]);
 

@@ -56,23 +56,45 @@
                     <input type="hidden" id="offer_id" name="id">
                     <div class="modal-body p-4">
 
-                        <div class="mb-3">
-                            <label for="products" class="form-label fw-semibold">
-                                Products
-                            </label>
-
-                            <select
-                                class="form-select"
-                                id="products"
-                                name="products[]"
-                                multiple>
-
+                        <div class="mb-3" style="position: relative; z-index: 1050;">
+                            <label class="form-label fw-semibold">Products</label>
+                            <div class="dropdown custom-product-dropdown">
+                                <!-- Selection Area (Clickable to toggle dropdown) -->
+                                <div class="form-control d-flex flex-wrap align-items-center gap-2 cursor-pointer bg-white" id="selected-products-container" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <span class="text-muted fs-13 placeholder-text">Select Products</span>
+                                </div>
+                                
+                                <!-- Dropdown Menu options list -->
+                                <div class="dropdown-menu p-3 shadow-lg border-0 w-100" aria-labelledby="selected-products-container" style="max-height: 350px; overflow-y: auto; border-radius: 8px;">
+                                    <!-- Search input inside dropdown -->
+                                    <div class="input-group input-group-sm mb-2">
+                                        {{-- <span class="input-group-text bg-light border-end-0"><i class="ri-search-line"></i></span> --}}
+                                        <input type="text" id="product-search" class="form-control bg-light border-start-0" placeholder="Search products...">
+                                    </div>
+                                    
+                                    <!-- Options List -->
+                                    <div class="product-options-list" style="max-height: 220px; overflow-y: auto;">
+                                        @foreach($products as $product)
+                                            <div class="dropdown-item d-flex align-items-center justify-content-between py-2 px-2 rounded product-option-item" data-id="{{ $product->id }}" data-name="{{ $product->name }}" data-price="{{ number_format($product->price,2) }}" data-image="{{ $product->main_image ? asset($product->main_image) : 'https://images.unsplash.com/photo-1593095948071-474c5cc2989d?w=100&q=80' }}" style="cursor: pointer;">
+                                                <div class="d-flex align-items-center gap-2">
+                                                    <img src="{{ $product->main_image ? asset($product->main_image) : 'https://images.unsplash.com/photo-1593095948071-474c5cc2989d?w=100&q=80' }}" class="rounded" style="width: 28px; height: 28px; object-fit: cover;" onerror="this.src='https://images.unsplash.com/photo-1593095948071-474c5cc2989d?w=100&q=80'">
+                                                    <div class="d-flex flex-column">
+                                                        <span class="fw-semibold text-dark fs-13 text-truncate" style="max-width: 220px;">{{ $product->name }}</span>
+                                                        <span class="text-muted fs-11">${{ number_format($product->price, 2) }}</span>
+                                                    </div>
+                                                </div>
+                                                <input type="checkbox" class="form-check-input product-checkbox" value="{{ $product->id }}" style="pointer-events: none;">
+                                            </div>
+                                        @endforeach
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Hidden real multiple select for native Laravel form data submissions -->
+                            <select name="products[]" id="products" class="d-none" multiple>
                                 @foreach($products as $product)
-                                    <option value="{{ $product->id }}" data-image="{{ $product->main_image ? asset($product->main_image) : asset('assets/images/no-image.png') }}">
-                                        {{ $product->name }} (${{ number_format($product->price,2) }})
-                                    </option>
+                                    <option value="{{ $product->id }}">{{ $product->name }}</option>
                                 @endforeach
-
                             </select>
                         </div>
 
@@ -150,160 +172,83 @@
         .custom-table thead th { font-size: 11px; text-transform: uppercase; font-weight: 700; padding: 12px 15px; letter-spacing: 0.5px; }
         .custom-table tbody td { padding: 10px 15px; font-size: 13.5px; }
 
-        /* ===== Select2 Multiple - Modern Design Fix ===== */
-        .select2-container {
+        /* ===== Custom Dropdown Checklist Design ===== */
+        .custom-product-dropdown {
+            position: relative !important;
+        }
+        .custom-product-dropdown .dropdown-menu {
+            position: absolute !important;
+            z-index: 9999 !important;
             width: 100% !important;
-            display: block !important;
-        }
-
-        .select2-container--default .select2-selection--multiple {
-            width: 100%;
-            min-height: 42px;
-            max-height: 140px;
-            overflow-y: auto;
+            background-color: #fff !important;
             border: 1px solid #ced4da !important;
-            border-radius: 8px !important;
-            background: #fff !important;
-            padding: 6px 8px !important;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.15) !important;
+        }
+        #selected-products-container {
+            border: 1px solid #ced4da;
+            border-radius: 6px;
+            padding: 6px 12px;
+            min-height: 42px;
+            background-color: #fff;
+            cursor: pointer;
             display: flex;
-            align-items: flex-start;
-            flex-wrap: wrap;
-            box-shadow: none;
-            transition: border-color .15s ease, box-shadow .15s ease;
-        }
-
-        .select2-container--default.select2-container--focus .select2-selection--multiple,
-        .select2-container--default.select2-container--open .select2-selection--multiple {
-            border-color: #86b7fe !important;
-            box-shadow: 0 0 0 .25rem rgba(13,110,253,.15) !important;
-        }
-
-        .select2-container--default .select2-selection--multiple .select2-selection__rendered {
-            display: flex !important;
             flex-wrap: wrap;
             gap: 6px;
-            padding: 0 !important;
-            margin: 0 !important;
-            width: 100%;
-        }
-
-        /* Chip / tag design */
-        .select2-container--default .select2-selection--multiple .select2-selection__choice {
-            display: flex;
             align-items: center;
-            margin: 0 !important;
-            padding: 5px 8px 5px 12px !important;
-            background: linear-gradient(135deg, #0d6efd, #3b82f6) !important;
-            color: #fff !important;
-            border: none !important;
-            border-radius: 20px !important;
-            font-size: 12.5px;
+            transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+        }
+        #selected-products-container:focus,
+        #selected-products-container.show {
+            border-color: #86b7fe;
+            outline: 0;
+            box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.15);
+        }
+        .product-chip {
+            display: inline-flex;
+            align-items: center;
+            background: #e6f7ed;
+            color: #0d8a43;
+            border: 1px solid #b7ebd0;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 12px;
             font-weight: 500;
-            line-height: 1.3;
-            box-shadow: 0 1px 3px rgba(13,110,253,.35);
-            max-width: 100%;
         }
-
-        .select2-container--default .select2-selection--multiple .select2-selection__choice__display {
-            padding: 0 4px 0 0;
-            white-space: normal;
-            word-break: break-word;
-        }
-
-        .select2-container--default .select2-selection--multiple .select2-selection__choice__remove {
-            color: #fff !important;
-            opacity: .85;
+        .product-chip img {
+            width: 20px;
+            height: 20px;
+            object-fit: cover;
+            border-radius: 3px;
             margin-right: 6px;
-            margin-left: 2px;
-            order: -1;
-            border-right: none !important;
-            font-weight: 700;
         }
-
-        .select2-container--default .select2-selection--multiple .select2-selection__choice__remove:hover {
-            color: #ffc107 !important;
-            background: transparent !important;
+        .product-chip .remove-chip {
+            margin-left: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            color: #0d8a43;
+            opacity: 0.7;
+            transition: opacity 0.15s;
+            font-size: 14px;
+        }
+        .product-chip .remove-chip:hover {
             opacity: 1;
+            color: #dc3545;
+        }
+        .product-option-item {
+            transition: background-color 0.15s;
+        }
+        .product-option-item:hover {
+            background-color: #f1f5f9;
+        }
+        .product-option-item.selected {
+            background-color: #e2e8f0;
         }
 
-        /* Search input inside the box */
-        .select2-container--default .select2-search--inline {
-            margin: 0 !important;
-            flex: 1 1 auto;
-        }
-
-        .select2-container--default .select2-search--inline .select2-search__field {
-            margin: 4px 0 0 0 !important;
-            padding: 2px 4px !important;
-            font-size: 13.5px;
-            min-height: 26px;
-        }
-
-        /* Placeholder text when empty */
-        .select2-container--default .select2-selection--multiple .select2-selection__placeholder {
-            color: #98a2b3;
-            font-size: 13.5px;
-            padding: 4px 2px;
-        }
-
-        /* Dropdown panel */
-        .select2-dropdown {
-            border: 1px solid #dee2e6 !important;
-            border-radius: 10px !important;
-            box-shadow: 0 10px 30px rgba(0,0,0,.12);
-            overflow: hidden;
-            margin-top: 4px;
-        }
-
-        .select2-search--dropdown {
-            padding: 10px !important;
-            background: #f8f9fa;
-        }
-
-        .select2-search--dropdown .select2-search__field {
-            border: 1px solid #ced4da !important;
-            border-radius: 6px !important;
-            padding: 6px 10px !important;
-            font-size: 13.5px;
-        }
-
-        .select2-search--dropdown .select2-search__field:focus {
-            outline: none;
-            border-color: #86b7fe !important;
-            box-shadow: 0 0 0 .2rem rgba(13,110,253,.15);
-        }
-
-        .select2-results__options {
-            max-height: 260px;
-            overflow-y: auto;
-            padding: 6px;
-        }
-
-        .select2-results__option {
-            padding: 9px 12px !important;
-            border-radius: 6px;
-            font-size: 13.5px;
-            margin-bottom: 2px;
-        }
-
-        .select2-results__option--highlighted {
-            background: #0d6efd !important;
-            color: #fff !important;
-        }
-
-        .select2-results__option[aria-selected="true"] {
-            background: #e7f1ff;
-            color: #0d6efd;
-            font-weight: 500;
-        }
-
-        /* Scrollbar styling for chip box + dropdown */
-        .select2-container--default .select2-selection--multiple::-webkit-scrollbar,
-        .select2-results__options::-webkit-scrollbar {
+        /* Scrollbar styling */
+        .product-options-list::-webkit-scrollbar {
             width: 6px;
         }
-        .select2-container--default .select2-selection--multiple::-webkit-scrollbar-thumb,
-        .select2-results__options::-webkit-scrollbar-thumb {
+        .product-options-list::-webkit-scrollbar-thumb {
             background: #cbd5e1;
             border-radius: 10px;
         }
@@ -314,30 +259,86 @@
     <script>
         (function ($) {
             $(function () {
-                function formatProduct(product) {
-                    if (!product.id) {
-                        return product.text;
-                    }
-                    let imageAttr = $(product.element).attr('data-image');
-                    let $product = $(
-                        '<span class="d-flex align-items-center"><img src="' + imageAttr + '" class="rounded me-2" style="width: 24px; height: 24px; object-fit: cover;" /> ' + product.text + '</span>'
-                    );
-                    return $product;
-                }
-
-                $('#offerModal').on('show.bs.modal', function () {
-                    if (!$('#products').hasClass('select2-hidden-accessible')) {
-                        $('#products').select2({
-                            dropdownParent: $('#offerModal'),
-                            width: '100%',
-                            placeholder: 'Select Products',
-                            allowClear: true,
-                            closeOnSelect: false,
-                            templateResult: formatProduct,
-                            templateSelection: formatProduct
+                // Custom Multiselect Helper
+                function updateSelectedChips() {
+                    let container = $('#selected-products-container');
+                    container.find('.product-chip').remove();
+                    let selectedOptions = $('#products option:selected');
+                    
+                    if (selectedOptions.length === 0) {
+                        container.find('.placeholder-text').show();
+                    } else {
+                        container.find('.placeholder-text').hide();
+                        selectedOptions.each(function() {
+                            let option = $(this);
+                            let productId = option.val();
+                            let itemEl = $(`.product-option-item[data-id="${productId}"]`);
+                            let img = itemEl.attr('data-image');
+                            let name = itemEl.attr('data-name');
+                            let price = itemEl.attr('data-price');
+                            
+                            let chip = $(`
+                                <div class="product-chip" data-id="${productId}">
+                                    <img src="${img}" onerror="this.src='https://images.unsplash.com/photo-1593095948071-474c5cc2989d?w=100&q=80'">
+                                    <span>${name} ($${price})</span>
+                                    <span class="remove-chip">&times;</span>
+                                </div>
+                            `);
+                            
+                            container.append(chip);
                         });
                     }
+                }
+
+                // Click option item in dropdown
+                $(document).on('click', '.product-option-item', function(e) {
+                    e.stopPropagation(); // prevent dropdown from closing
+                    let item = $(this);
+                    let id = item.attr('data-id');
+                    let checkbox = item.find('.product-checkbox');
+                    let isChecked = checkbox.prop('checked');
+                    
+                    checkbox.prop('checked', !isChecked);
+                    item.toggleClass('selected', !isChecked);
+                    
+                    $(`#products option[value="${id}"]`).prop('selected', !isChecked);
+                    $('#products').trigger('change');
+                    updateSelectedChips();
                 });
+
+                // Remove chip click
+                $(document).on('click', '.remove-chip', function(e) {
+                    e.stopPropagation(); // prevent dropdown from opening
+                    let chip = $(this).closest('.product-chip');
+                    let id = chip.attr('data-id');
+                    
+                    $(`.product-option-item[data-id="${id}"]`).find('.product-checkbox').prop('checked', false);
+                    $(`.product-option-item[data-id="${id}"]`).removeClass('selected');
+                    $(`#products option[value="${id}"]`).prop('selected', false);
+                    $('#products').trigger('change');
+                    updateSelectedChips();
+                });
+
+                // Prevent closing dropdown when clicking inside it
+                $(document).on('click', '.custom-product-dropdown .dropdown-menu', function (e) {
+                    e.stopPropagation();
+                });
+
+                // Product Search filtering
+                $(document).on('input', '#product-search', function() {
+                    let val = $(this).val().toLowerCase();
+                    $('.product-option-item').each(function() {
+                        let name = $(this).attr('data-name').toLowerCase();
+                        if (name.includes(val)) {
+                            $(this).removeClass('d-none').addClass('d-flex');
+                        } else {
+                            $(this).removeClass('d-flex').addClass('d-none');
+                        }
+                    });
+                });
+
+                // Expose function globally for modal triggers
+                window.updateSelectedChips = updateSelectedChips;
 
                 // Sync bg color picker and hex text input
                 $('#bg_color_picker').on('input', function() {
@@ -409,7 +410,14 @@
             $('#bg_color_picker').val('#10b981');
             $('#bg_color').val('#10b981');
             $('#banner_image_preview').hide();
+            
+            // Clear custom checklist state
+            $('.product-option-item').removeClass('selected').find('.product-checkbox').prop('checked', false);
             $('#products').val([]).trigger('change');
+            if (typeof window.updateSelectedChips === 'function') {
+                window.updateSelectedChips();
+            }
+
             $('#modalTitle').text('Create Offer Campaign');
             $('#offerModal').modal('show');
         }
@@ -448,9 +456,21 @@
                         $('#banner_image_preview').hide();
                     }
 
-                    // Populate select2 multiple
-                    let productIds = data.products.map(p => p.id);
+                    // Populate custom checklist
+                    let productIds = data.products.map(p => parseInt(p.id));
                     $('#products').val(productIds).trigger('change');
+                    
+                    $('.product-option-item').each(function() {
+                        let item = $(this);
+                        let id = parseInt(item.attr('data-id'));
+                        let isSelected = productIds.includes(id);
+                        item.find('.product-checkbox').prop('checked', isSelected);
+                        item.toggleClass('selected', isSelected);
+                    });
+
+                    if (typeof window.updateSelectedChips === 'function') {
+                        window.updateSelectedChips();
+                    }
 
                     $('#modalTitle').text('Edit Offer Campaign');
                     $('#offerModal').modal('show');

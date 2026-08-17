@@ -4,10 +4,6 @@
 @section('content')
 <!-- Begin page -->
 
-        
-
-     
-
     <!-- start page title -->
     <div class="row">
         <div class="col-12">
@@ -49,9 +45,7 @@
                                             </div>
                                         </div> -->
                                         <!--end col-->
-                                        <div class="col-auto">
-                                            <button type="button" class="btn btn-soft-success"><i class="ri-add-circle-line align-middle me-1"></i> Add Product</button>
-                                        </div>
+                        
                                         <!--end col-->
                                         <!-- <div class="col-auto">
                                             <button type="button" class="btn btn-soft-info btn-icon waves-effect waves-light layout-rightside-btn"><i class="ri-pulse-line"></i></button>
@@ -70,6 +64,9 @@
                 <!-- stat 1 -->
                 @include('backend.partials.stat-top')
                 <!-- end row-->
+
+                <!-- Daily Performance Breakdown -->
+                @include('backend.partials.daily-performance')
 
                 <!-- chart 2 : best & top sellers-->
                 {{-- @include('backend.partials.chart-2') --}}

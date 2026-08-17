@@ -1,97 +1,123 @@
+<!-- Analytics Period Filter Bar -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card border-0 shadow-sm">
+            <div class="card-body d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3 py-3">
+                <div class="d-flex flex-wrap align-items-center gap-2">
+                    <span class="text-muted fw-medium fs-13">Analytics Period:</span>
+                    <div class="d-flex align-items-center gap-2 w-100 w-sm-auto mt-1 mt-sm-0">
+                        <input type="date" class="form-control form-control-sm border shadow-sm px-2 py-1 bg-light text-dark rounded" style="width: 130px;" value="2026-08-01">
+                        <span class="text-muted">-</span>
+                        <input type="date" class="form-control form-control-sm border shadow-sm px-2 py-1 bg-light text-dark rounded" style="width: 130px;" value="2026-08-17">
+                    </div>
+                </div>
+                <div class="d-flex flex-wrap gap-1 gap-sm-2">
+                    <button class="btn btn-xs btn-sm btn-outline-success bg-white font-medium fs-12 px-2 px-sm-3 py-1 rounded" style="border-color: #10b981; color: #10b981;">Today</button>
+                    <button class="btn btn-xs btn-sm btn-outline-success bg-white font-medium fs-12 px-2 px-sm-3 py-1 rounded" style="border-color: #10b981; color: #10b981;">7 Days</button>
+                    <button class="btn btn-xs btn-sm btn-outline-success bg-white font-medium fs-12 px-2 px-sm-3 py-1 rounded" style="border-color: #10b981; color: #10b981;">This Month</button>
+                    <button class="btn btn-xs btn-sm btn-outline-success bg-white font-medium fs-12 px-2 px-sm-3 py-1 rounded" style="border-color: #10b981; color: #10b981;">Past Month</button>
+                    <button class="btn btn-xs btn-sm btn-outline-success bg-white font-medium fs-12 px-2 px-sm-3 py-1 rounded" style="border-color: #10b981; color: #10b981;">This Year</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Stats Overview Cards -->
 <div class="row">
-    <div class="col-xl-3 col-md-6">
-        <!-- card -->
-        <div class="card card-animate border-0 shadow-sm">
-            <div class="card-body">
-                <div class="d-flex align-items-center">
-                    <div class="flex-grow-1 overflow-hidden">
-                        <p class="text-uppercase fw-medium text-muted text-truncate mb-0">Total App Users</p>
-                    </div>
-                </div>
-                <div class="d-flex align-items-end justify-content-between mt-4">
+    <!-- Total Sales Card -->
+    <div class="col-xl-3 col-md-6 mb-3 mb-xl-0">
+        <div class="card card-animate border-0 shadow-sm mb-0 h-100" style="border-radius: 8px;">
+            <div class="card-body p-4">
+                <div class="d-flex align-items-center justify-content-between">
                     <div>
-                        <h4 class="fs-22 fw-semibold ff-secondary mb-4">{{ $total_users }}</h4>
-                        <a href="{{ route('backend.app-user.index') }}" class="text-decoration-underline fs-13 text-muted">View all users</a>
+                        <p class="text-muted fw-medium text-uppercase fs-12 mb-2">Total Sales</p>
+                        <h3 class="fw-bold fs-22 mb-1" style="color: #1e293b;">
+                            {{ number_format($total_sales, 0, '.', ' ') }} DH
+                        </h3>
+                        <p class="text-success fw-semibold fs-12 mb-0">
+                            <i class="ri-arrow-right-up-line align-middle"></i> {{ $total_orders }} orders
+                        </p>
                     </div>
-                    <div class="avatar-sm flex-shrink-0">
-                        <span class="avatar-title bg-soft-success rounded fs-3">
-                            <i class="ri-user-line text-success"></i>
+                    <div class="avatar-sm">
+                        <span class="avatar-title rounded-circle fs-4" style="background-color: #22c55e; color: #ffffff; width: 48px; height: 48px; display: flex; align-items: center; justify-content: center;">
+                            <i class="ri-money-dollar-circle-line"></i>
                         </span>
                     </div>
                 </div>
-            </div><!-- end card body -->
-        </div><!-- end card -->
-    </div><!-- end col -->
+            </div>
+        </div>
+    </div>
 
-    <div class="col-xl-3 col-md-6">
-        <!-- card -->
-        <div class="card card-animate border-0 shadow-sm">
-            <div class="card-body">
-                <div class="d-flex align-items-center">
-                    <div class="flex-grow-1 overflow-hidden">
-                        <p class="text-uppercase fw-medium text-muted text-truncate mb-0">Health Professionals</p>
-                    </div>
-                </div>
-                <div class="d-flex align-items-end justify-content-between mt-4">
+    <!-- Total Expenses Card -->
+    <div class="col-xl-3 col-md-6 mb-3 mb-xl-0">
+        <div class="card card-animate border-0 shadow-sm mb-0 h-100" style="border-radius: 8px;">
+            <div class="card-body p-4">
+                <div class="d-flex align-items-center justify-content-between">
                     <div>
-                        <h4 class="fs-22 fw-semibold ff-secondary mb-4">{{ $health_professionals }}</h4>
-                        <a href="{{ route('backend.app-user.index') }}" class="text-decoration-underline fs-13 text-muted">View details</a>
+                        <p class="text-muted fw-medium text-uppercase fs-12 mb-2">Total Expenses</p>
+                        <h3 class="fw-bold fs-22 mb-1" style="color: #1e293b;">
+                            {{ number_format($total_expenses, 0, '.', ' ') }} DH
+                        </h3>
+                        <p class="text-muted fs-12 mb-0">
+                            <i class="ri-time-line align-middle"></i> Various categories
+                        </p>
                     </div>
-                    <div class="avatar-sm flex-shrink-0">
-                        <span class="avatar-title bg-soft-info rounded fs-3">
-                            <i class="ri-heart-pulse-line text-info"></i>
+                    <div class="avatar-sm">
+                        <span class="avatar-title rounded-circle fs-4" style="background-color: #0d9488; color: #ffffff; width: 48px; height: 48px; display: flex; align-items: center; justify-content: center;">
+                            <i class="ri-file-list-3-line"></i>
                         </span>
                     </div>
                 </div>
-            </div><!-- end card body -->
-        </div><!-- end card -->
-    </div><!-- end col -->
+            </div>
+        </div>
+    </div>
 
-    <div class="col-xl-3 col-md-6">
-        <!-- card -->
-        <div class="card card-animate border-0 shadow-sm">
-            <div class="card-body">
-                <div class="d-flex align-items-center">
-                    <div class="flex-grow-1 overflow-hidden">
-                        <p class="text-uppercase fw-medium text-muted text-truncate mb-0">Admin Roles</p>
-                    </div>
-                </div>
-                <div class="d-flex align-items-end justify-content-between mt-4">
+    <!-- Net Profit Card -->
+    <div class="col-xl-3 col-md-6 mb-3 mb-xl-0">
+        <div class="card card-animate border-0 shadow-sm mb-0 h-100" style="border-radius: 8px;">
+            <div class="card-body p-4">
+                <div class="d-flex align-items-center justify-content-between">
                     <div>
-                        <h4 class="fs-22 fw-semibold ff-secondary mb-4">{{ $total_roles }}</h4>
-                        <a href="{{ route('backend.role.index') }}" class="text-decoration-underline fs-13 text-muted">Manage permissions</a>
+                        <p class="text-muted fw-medium text-uppercase fs-12 mb-2">Net Profit</p>
+                        <h3 class="fw-bold fs-22 mb-1 @if($net_profit < 0) text-danger @else text-success @endif">
+                            @if($net_profit < 0)-@endif{{ number_format(abs($net_profit), 0, '.', ' ') }} DH
+                        </h3>
+                        <p class="@if($profit_margin < 0) text-danger @else text-success @endif fw-semibold fs-12 mb-0">
+                            <i class="ri-line-chart-line align-middle"></i> {{ $profit_margin }}% margin
+                        </p>
                     </div>
-                    <div class="avatar-sm flex-shrink-0">
-                        <span class="avatar-title bg-soft-warning rounded fs-3">
-                            <i class="ri-shield-user-line text-warning"></i>
+                    <div class="avatar-sm">
+                        <span class="avatar-title rounded-circle fs-4" style="background-color: #10b981; color: #ffffff; width: 48px; height: 48px; display: flex; align-items: center; justify-content: center;">
+                            <i class="ri-presentation-line"></i>
                         </span>
                     </div>
                 </div>
-            </div><!-- end card body -->
-        </div><!-- end card -->
-    </div><!-- end col -->
+            </div>
+        </div>
+    </div>
 
-    <div class="col-xl-3 col-md-6">
-        <!-- card -->
-        <div class="card card-animate border-0 shadow-sm">
-            <div class="card-body">
-                <div class="d-flex align-items-center">
-                    <div class="flex-grow-1 overflow-hidden">
-                        <p class="text-uppercase fw-medium text-muted text-truncate mb-0">Total Products</p>
-                    </div>
-                </div>
-                <div class="d-flex align-items-end justify-content-between mt-4">
+    <!-- Low Stock Alert Card -->
+    <div class="col-xl-3 col-md-6 mb-3 mb-xl-0">
+        <div class="card card-animate border-0 shadow-sm mb-0 h-100" style="border-radius: 8px;">
+            <div class="card-body p-4">
+                <div class="d-flex align-items-center justify-content-between">
                     <div>
-                        <h4 class="fs-22 fw-semibold ff-secondary mb-4">{{ $total_products }}</h4>
-                        <a href="{{ route('backend.product.index') }}" class="text-decoration-underline fs-13 text-muted">Manage inventory</a>
+                        <p class="text-muted fw-medium text-uppercase fs-12 mb-2">Low Stock Alert</p>
+                        <h3 class="fw-bold fs-22 mb-1" style="color: #1e293b;">
+                            {{ $low_stock_count }} items
+                        </h3>
+                        <p class="text-danger fw-semibold fs-12 mb-0">
+                            <i class="ri-alert-line align-middle"></i> Need reorder
+                        </p>
                     </div>
-                    <div class="avatar-sm flex-shrink-0">
-                        <span class="avatar-title bg-soft-primary rounded fs-3">
-                            <i class="ri-shopping-basket-2-line text-primary"></i>
+                    <div class="avatar-sm">
+                        <span class="avatar-title rounded-circle fs-4" style="background-color: #ef4444; color: #ffffff; width: 48px; height: 48px; display: flex; align-items: center; justify-content: center;">
+                            <i class="ri-error-warning-line"></i>
                         </span>
                     </div>
                 </div>
-            </div><!-- end card body -->
-        </div><!-- end card -->
-    </div><!-- end col -->
+            </div>
+        </div>
+    </div>
 </div>

@@ -28,7 +28,7 @@ class OfferApiController extends BaseController
             $offers = Offer::active()
                 ->with(['products' => function ($query) {
                     $query->where('status', 'active');
-                }, 'products.category', 'products.brandData', 'products.batch'])
+                }, 'products.category', 'products.brandData', 'products.batches'])
                 ->get()
                 ->map(function ($offer) use ($wishlistProductIds) {
                     return [
@@ -48,20 +48,26 @@ class OfferApiController extends BaseController
                                 'name'              => $product->name,
                                 'slug'              => $product->slug,
                                 'short_description' => $product->short_description,
-                                'price'             => (float) $product->price,
-                                'old_price'         => (float) $product->old_price,
-                                'discount_percent'  => (float) $product->discount_percent,
-                                'offer_expiry'      => $product->offer_expiry,
+                                'price'             => (float) $product->price . ' '. 'MAD',
+                                'old_price'         => $product->old_price ? (float) $product->old_price  . ' '. 'MAD' : null,
                                 'image'             => $product->main_image ? asset($product->main_image) : null,
                                 'in_stock'          => (bool) $product->in_stock,
                                 'is_wishlist'       => in_array($product->id, $wishlistProductIds),
+                                'quantity'          => (int) $product->quantity,
+                                'rating'            => (float) $product->rating,
                                 'category'          => $product->category ? $product->category->name : null,
-                                'brand'             => $product->brandData ? $product->brandData->name : null,
-                                'batch'             => $product->batch ? [
-                                    'id' => (int) $product->batch->id,
-                                    'name' => $product->batch->name,
-                                    'color' => $product->batch->color,
+                                'brand'             => $product->brandData ? [
+                                    'name' => $product->brandData->name,
+                                    'specialty' => $product->brandData->specialty,
+                                    'rating' => (float) $product->brandData->rating,
                                 ] : null,
+                                'batches'           => $product->batches->map(function ($b) {
+                                    return [
+                                        'id' => (int) $b->id,
+                                        'name' => $b->name,
+                                        'color' => $b->color,
+                                    ];
+                                }),
                             ];
                         }),
                     ];
